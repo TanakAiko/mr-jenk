@@ -1,0 +1,151 @@
+services:
+  eureka-server:
+    image: discovery-service
+    build:
+      context: ./discovery-service
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+
+  config-service:
+    image: config-service
+    build:
+      context: ./config-service
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    environment:
+      - DOCKER_EUREKA_URL=http://eureka-server:8761/eureka
+      - CONFIG_REPO_URI=${CONFIG_REPO_URI}
+      - CONFIG_REPO_USERNAME=${CONFIG_REPO_USERNAME}
+      - CONFIG_REPO_PASSWORD=${CONFIG_REPO_PASSWORD}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+
+    depends_on:
+       eureka-server:
+        condition: service_healthy
+
+  api-gateway:
+    image: api-gateway
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      - DOCKER_EUREKA_URL=http://eureka-server:8761/eureka
+      - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
+    healthcheck:
+      test: ["CMD", "curl", "-k", "-f", "https://localhost:8090/actuator/health"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+
+  product-service:
+    image: product-service
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      - DOCKER_EUREKA_URL=http://eureka-server:8761/eureka
+      - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
+      - DOCKER_MEDIA_SERVICE_URL=http://media-service:8083/api/media
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      media-service:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+
+  user-service:
+    image: user-service
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - DOCKER_EUREKA_URL=http://eureka-server:8761/eureka
+      - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+
+
+  media-service:
+    image: media-service
+    build:
+      context: ./media-service
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      - DOCKER_EUREKA_URL=http://eureka-server:8761/eureka
+      - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+
+  frontend:
+    image: buy-01-frontend
+    build:
+      context: ./buy-01-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+      - "8443:443"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      media-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy

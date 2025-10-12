@@ -1,0 +1,14 @@
+<div class="container">
+    <div class="left-panel">
+        <div class="left-panel-content">
+            <h1>{{ !isSignIn ? 'Create your Account !' : 'Connect in your Account' }}</h1>
+            <p>Share your product<br>and sell it !</p>
+            <button class="btn login-btn" (click)="toggleSignIn()">{{ !isSignIn ? 'Sign In' : 'Sign Up' }}</button>
+        </div>
+    </div>
+  @if (!isSignIn) {
+    <app-sign-up class="right-panel" (isSignUp)="signUpDone($event)" ></app-sign-up>
+  } @else {
+    <app-sign-in class="right-panel"></app-sign-in>
+  }
+</div>

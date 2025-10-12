@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "lucide-angular": "^0.525.0"
+  },
+  "devDependencies": {
+    "karma-chrome-launcher": "^3.2.0"
+  }
+}

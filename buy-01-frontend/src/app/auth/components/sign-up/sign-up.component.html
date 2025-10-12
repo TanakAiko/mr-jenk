@@ -1,0 +1,52 @@
+
+    <h2 style="color: #333;">Sign Up</h2>
+    <form [formGroup]="registerForm" (ngSubmit)="handleSubmit()">
+      @if (errorOccured) {
+        <div class="badge-error">{{errorOccured}}</div>
+      }
+        <div class="form-group">
+            <label for="firstName" class="sr-only">First name</label>
+            <input type="text" formControlName="firstName" id="firstName" placeholder="First name">
+          @if (registerForm.get("firstName")?.invalid && registerForm.get("firstName")?.touched) {
+            <div class="error-message">First name incorrect</div>
+          }
+        </div>
+        <div class="form-group">
+            <label for="lastName" class="sr-only">Last name</label>
+            <input type="text" formControlName="lastName" id="lastName" placeholder="Last name">
+          @if (registerForm.get("lastName")?.invalid && registerForm.get("lastName")?.touched) {
+            <div class="error-message" >Last name incorrect</div>
+          }
+        </div>
+        <div class="form-group">
+            <label for="email" class="sr-only">Email address</label>
+            <input type="email" formControlName="email" id="email" placeholder="Email address">
+          @if (registerForm.get("email")?.invalid && registerForm.get("email")?.touched) {
+            <div class="error-message">Email incorrect</div>
+          }
+        </div>
+        <div class="form-group">
+            <label for="password" class="sr-only">Password</label>
+            <input type="password" formControlName="password" id="password" placeholder="Password">
+          @if (registerForm.get("password")?.invalid && registerForm.get("password")?.touched) {
+            <div class="error-message">Password incorrect</div>
+          }
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" formControlName="isSeller" id="newsletter">
+            <label for="newsletter">Are you a SELLER ?</label>
+        </div>
+
+      @if (isSeller) {
+        <div class="file-upload-container">
+          <input (change)="handleFileSelection($event)" type="file" id="myFileInput" class="file-upload-input">
+          <label for="myFileInput" class="file-upload-label">Choisir un avatar</label>
+          <div class="file-upload-filename" id="selectedFileName">
+            {{selectedFileName}}
+          </div>
+        </div>
+      }
+
+        <button type="submit" class="btn primary-btn">Join us <span class="arrow">&rarr;</span></button>
+    </form>
