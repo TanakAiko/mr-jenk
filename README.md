@@ -251,10 +251,6 @@ docker logs <service-name>
 docker logs -f <service-name>
 ```
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -265,7 +261,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Authors
 
-- **Your Name** - *Initial work*
+- **Cheikh Ahmed Tidiane Cherif MBAYE**
 
 ## 🙏 Acknowledgments
 
