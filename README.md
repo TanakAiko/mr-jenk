@@ -25,62 +25,66 @@ A modern, full-stack e-commerce application built with **Spring Boot** microserv
 </p>
 
 ```mermaid
-graph TB
-    subgraph "Client Layer"
-        WEB[🌐 Angular Frontend<br/>Port 4200/80/443]
-        MOBILE[📱 Mobile Apps<br/>(Future)]
+flowchart TB
+    subgraph Client["🖥️ Client Layer"]
+        WEB["🌐 Angular Frontend<br/>Port 4200/80/443"]
+        MOBILE["📱 Mobile Apps<br/>(Future)"]
     end
     
-    subgraph "API Gateway Layer"
-        GATEWAY[🚪 API Gateway<br/>Port 8090<br/>Spring Cloud Gateway]
+    subgraph Gateway["🚪 API Gateway Layer"]
+        APIGATE["API Gateway<br/>Port 8090<br/>Spring Cloud Gateway"]
     end
     
-    subgraph "Service Discovery"
-        EUREKA[🔍 Eureka Server<br/>Port 8761<br/>Netflix Eureka]
+    subgraph Discovery["🔍 Service Discovery"]
+        EUREKA["Eureka Server<br/>Port 8761<br/>Netflix Eureka"]
     end
     
-    subgraph "Configuration"
-        CONFIG[⚙️ Config Service<br/>Port 8888<br/>Spring Cloud Config]
+    subgraph Config["⚙️ Configuration"]
+        CONFIGSVC["Config Service<br/>Port 8888<br/>Spring Cloud Config"]
     end
     
-    subgraph "Microservices"
-        USER[👤 User Service<br/>Port 8081<br/>Authentication & Users]
-        PRODUCT[📦 Product Service<br/>Port 8082<br/>Product Catalog]
-        MEDIA[🖼️ Media Service<br/>Port 8083<br/>File Upload & Storage]
+    subgraph Services["🔧 Microservices"]
+        USER["👤 User Service<br/>Port 8081<br/>Authentication & Users"]
+        PRODUCT["📦 Product Service<br/>Port 8082<br/>Product Catalog"]
+        MEDIA["🖼️ Media Service<br/>Port 8083<br/>File Upload & Storage"]
     end
     
-    subgraph "Data Layer"
-        MONGO[(🍃 MongoDB Atlas<br/>Database)]
-        SUPABASE[(☁️ Supabase<br/>File Storage)]
+    subgraph Data["💾 Data Layer"]
+        MONGO[("🍃 MongoDB Atlas<br/>Database")]
+        SUPABASE[("☁️ Supabase<br/>File Storage")]
     end
     
-    WEB --> GATEWAY
-    MOBILE --> GATEWAY
-    GATEWAY --> USER
-    GATEWAY --> PRODUCT
-    GATEWAY --> MEDIA
+    WEB --> APIGATE
+    MOBILE --> APIGATE
+    APIGATE --> USER
+    APIGATE --> PRODUCT
+    APIGATE --> MEDIA
     
     USER -.-> EUREKA
     PRODUCT -.-> EUREKA
     MEDIA -.-> EUREKA
-    GATEWAY -.-> EUREKA
+    APIGATE -.-> EUREKA
     
-    USER -.-> CONFIG
-    PRODUCT -.-> CONFIG
-    MEDIA -.-> CONFIG
+    USER -.-> CONFIGSVC
+    PRODUCT -.-> CONFIGSVC
+    MEDIA -.-> CONFIGSVC
     
     USER --> MONGO
     PRODUCT --> MONGO
     MEDIA --> MONGO
     MEDIA --> SUPABASE
     
-    style WEB fill:#e1f5fe
-    style GATEWAY fill:#f3e5f5
-    style USER fill:#e8f5e8
-    style PRODUCT fill:#fff3e0
-    style MEDIA fill:#fce4ec
-    style MONGO fill:#e0f2f1
-    style SUPABASE fill:#e3f2fd
+    classDef clientStyle fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef gatewayStyle fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef serviceStyle fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef dataStyle fill:#e0f2f1,stroke:#004d40,stroke-width:2px
+    classDef configStyle fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    
+    class WEB,MOBILE clientStyle
+    class APIGATE gatewayStyle
+    class USER,PRODUCT,MEDIA serviceStyle
+    class MONGO,SUPABASE dataStyle
+    class EUREKA,CONFIGSVC configStyle
 ```
 
 This project implements a microservices architecture with the following components:
