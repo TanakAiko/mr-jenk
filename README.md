@@ -1,8 +1,87 @@
 # Buy-01 E-Commerce Platform
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" alt="Spring Boot" />
+  <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" />
+  <img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-21-orange?style=flat-square&logo=openjdk" alt="Java 21" />
+  <img src="https://img.shields.io/badge/Spring_Boot-3.5.6-green?style=flat-square&logo=spring-boot" alt="Spring Boot 3.5.6" />
+  <img src="https://img.shields.io/badge/Angular-18+-red?style=flat-square&logo=angular" alt="Angular 18+" />
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" />
+</p>
+
 A modern, full-stack e-commerce application built with **Spring Boot** microservices backend and **Angular** frontend, featuring a complete microservices architecture with service discovery, configuration management, and API gateway.
 
 ## 🏗️ Architecture Overview
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Microservices-Architecture-blue?style=for-the-badge&logo=microgenetics&logoColor=white" alt="Microservices" />
+  <img src="https://img.shields.io/badge/Cloud-Native-success?style=for-the-badge&logo=icloud&logoColor=white" alt="Cloud Native" />
+  <img src="https://img.shields.io/badge/Event-Driven-orange?style=for-the-badge&logo=apache-kafka&logoColor=white" alt="Event Driven" />
+</p>
+
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        WEB[🌐 Angular Frontend<br/>Port 4200/80/443]
+        MOBILE[📱 Mobile Apps<br/>(Future)]
+    end
+    
+    subgraph "API Gateway Layer"
+        GATEWAY[🚪 API Gateway<br/>Port 8090<br/>Spring Cloud Gateway]
+    end
+    
+    subgraph "Service Discovery"
+        EUREKA[🔍 Eureka Server<br/>Port 8761<br/>Netflix Eureka]
+    end
+    
+    subgraph "Configuration"
+        CONFIG[⚙️ Config Service<br/>Port 8888<br/>Spring Cloud Config]
+    end
+    
+    subgraph "Microservices"
+        USER[👤 User Service<br/>Port 8081<br/>Authentication & Users]
+        PRODUCT[📦 Product Service<br/>Port 8082<br/>Product Catalog]
+        MEDIA[🖼️ Media Service<br/>Port 8083<br/>File Upload & Storage]
+    end
+    
+    subgraph "Data Layer"
+        MONGO[(🍃 MongoDB Atlas<br/>Database)]
+        SUPABASE[(☁️ Supabase<br/>File Storage)]
+    end
+    
+    WEB --> GATEWAY
+    MOBILE --> GATEWAY
+    GATEWAY --> USER
+    GATEWAY --> PRODUCT
+    GATEWAY --> MEDIA
+    
+    USER -.-> EUREKA
+    PRODUCT -.-> EUREKA
+    MEDIA -.-> EUREKA
+    GATEWAY -.-> EUREKA
+    
+    USER -.-> CONFIG
+    PRODUCT -.-> CONFIG
+    MEDIA -.-> CONFIG
+    
+    USER --> MONGO
+    PRODUCT --> MONGO
+    MEDIA --> MONGO
+    MEDIA --> SUPABASE
+    
+    style WEB fill:#e1f5fe
+    style GATEWAY fill:#f3e5f5
+    style USER fill:#e8f5e8
+    style PRODUCT fill:#fff3e0
+    style MEDIA fill:#fce4ec
+    style MONGO fill:#e0f2f1
+    style SUPABASE fill:#e3f2fd
+```
 
 This project implements a microservices architecture with the following components:
 
@@ -45,6 +124,16 @@ This project implements a microservices architecture with the following componen
 ## 🛠️ Technology Stack
 
 ### Backend
+<p align="left">
+  <img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" alt="Spring Boot" />
+  <img src="https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=Spring-Security&logoColor=white" alt="Spring Security" />
+  <img src="https://img.shields.io/badge/Spring_Cloud-6DB33F?style=for-the-badge&logo=spring&logoColor=white" alt="Spring Cloud" />
+  <img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white" alt="JWT" />
+  <img src="https://img.shields.io/badge/Apache_Maven-C71A36?style=for-the-badge&logo=apache-maven&logoColor=white" alt="Maven" />
+  <img src="https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java" />
+</p>
+
 - **Spring Boot 3.5.6** - Main framework
 - **Spring Security** - Authentication & authorization
 - **Spring Cloud Config** - Configuration management
@@ -55,12 +144,30 @@ This project implements a microservices architecture with the following componen
 - **Maven** - Build tool
 
 ### Frontend
+<p align="left">
+  <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white" alt="Bootstrap" />
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3" />
+  <img src="https://img.shields.io/badge/RxJS-B7178C?style=for-the-badge&logo=reactivex&logoColor=white" alt="RxJS" />
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5" />
+</p>
+
 - **Angular 18+** - Frontend framework
 - **TypeScript** - Programming language
 - **Bootstrap/CSS3** - Styling
 - **RxJS** - Reactive programming
 
 ### DevOps & Infrastructure
+<p align="left">
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=Jenkins&logoColor=white" alt="Jenkins" />
+  <img src="https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white" alt="Nginx" />
+  <img src="https://img.shields.io/badge/MongoDB_Atlas-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB Atlas" />
+  <img src="https://img.shields.io/badge/Supabase-181818?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+  <img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux" />
+</p>
+
 - **Docker & Docker Compose** - Containerization
 - **Jenkins** - CI/CD pipeline
 - **Nginx** - Reverse proxy (frontend)
