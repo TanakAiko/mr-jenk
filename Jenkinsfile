@@ -1,4 +1,3 @@
-// Jenkinsfile that leverages Docker Compose for deployment
 pipeline {
     agent any
 
