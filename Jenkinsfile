@@ -124,7 +124,19 @@ pipeline {
                         services.each { service ->
                             def imageTag = "${DOCKERHUB_USERNAME}/${service}:local-${commitSha}"
                             sh "docker tag ${service}:latest ${imageTag}"
-                            sh "docker push ${imageTag}"
+                            
+                            // Retry push up to 3 times with exponential backoff
+                            retry(3) {
+                                try {
+                                    echo "Pushing ${imageTag}..."
+                                    sh "docker push ${imageTag}"
+                                    echo "✅ Successfully pushed ${imageTag}"
+                                } catch (Exception e) {
+                                    echo "⚠️ Failed to push ${imageTag}. Retrying..."
+                                    sleep(time: 10, unit: 'SECONDS')
+                                    throw e
+                                }
+                            }
                         }
                     }
                 }
