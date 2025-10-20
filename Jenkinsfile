@@ -212,10 +212,12 @@ pipeline {
         }
         
         success {
-            echo '✅ Build completed successfully!'
-            echo "📦 Current deployment: ${env.CURRENT_BUILD_TAG}"
-            if (env.LAST_SUCCESSFUL_TAG) {
-                echo "📜 Previous deployment: ${env.LAST_SUCCESSFUL_TAG}"
+            script {
+                echo '✅ Build completed successfully!'
+                echo "📦 Current deployment: ${env.CURRENT_BUILD_TAG}"
+                if (env.LAST_SUCCESSFUL_TAG) {
+                    echo "📜 Previous deployment: ${env.LAST_SUCCESSFUL_TAG}"
+                }
             }
             
             // Send success email notification
