@@ -11,7 +11,6 @@
   <img src="https://img.shields.io/badge/Java-21-orange?style=flat-square&logo=openjdk" alt="Java 21" />
   <img src="https://img.shields.io/badge/Spring_Boot-3.5.6-green?style=flat-square&logo=spring-boot" alt="Spring Boot 3.5.6" />
   <img src="https://img.shields.io/badge/Angular-18+-red?style=flat-square&logo=angular" alt="Angular 18+" />
-  <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" />
 </p>
 
 A modern, full-stack e-commerce application built with **Spring Boot** microservices backend and **Angular** frontend, featuring a complete microservices architecture with service discovery, configuration management, and API gateway.
@@ -290,12 +289,22 @@ The project includes a comprehensive Jenkins pipeline that:
 2. **Builds** Docker images
 3. **Pushes** images to Docker Hub
 4. **Deploys** the complete stack
+5. **Sends email notifications** on build status (success/failure/unstable)
 
 ### Pipeline Stages
 - Source code testing (Maven + npm)
 - Docker image building
 - Image pushing to registry
 - Application deployment
+- Email notification delivery
+
+### Email Notifications
+The pipeline automatically sends professional HTML email notifications:
+- ✅ **Success**: When build completes successfully with deployment links
+- ❌ **Failure**: When build fails with troubleshooting steps and logs
+- ⚠️ **Unstable**: When build has warnings or test failures
+
+**Setup Guide**: See [JENKINS_EMAIL_SETUP.md](./JENKINS_EMAIL_SETUP.md) for detailed configuration instructions.
 
 ## 🔐 Security
 

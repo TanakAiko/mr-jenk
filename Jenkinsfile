@@ -199,11 +199,201 @@ pipeline {
                 docker image prune -f
             """
         }
+        
+        success {
+            echo '✅ Build completed successfully!'
+            
+            // Send success email notification
+            emailext (
+                subject: "✅ Jenkins Build SUCCESS: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: """
+                    <html>
+                        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                            <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                                <div style="background-color: #4CAF50; color: white; padding: 15px; border-radius: 5px 5px 0 0;">
+                                    <h2 style="margin: 0;">✅ Build Successful</h2>
+                                </div>
+                                <div style="padding: 20px; background-color: #f9f9f9;">
+                                    <h3>Build Information</h3>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Project:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${env.JOB_NAME}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Build Number:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">#${env.BUILD_NUMBER}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Status:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd; color: #4CAF50;"><strong>SUCCESS</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Duration:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${currentBuild.durationString.replace(' and counting', '')}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Commit:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${env.GIT_COMMIT?.take(7) ?: 'N/A'}</td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <h3 style="margin-top: 20px;">Application Access</h3>
+                                    <ul style="list-style-type: none; padding: 0;">
+                                        <li style="padding: 5px 0;">🌐 <strong>Frontend:</strong> <a href="http://localhost:4200">http://localhost:4200</a></li>
+                                        <li style="padding: 5px 0;">🚪 <strong>API Gateway:</strong> <a href="http://localhost:8090">http://localhost:8090</a></li>
+                                        <li style="padding: 5px 0;">🔍 <strong>Eureka Dashboard:</strong> <a href="http://localhost:8761">http://localhost:8761</a></li>
+                                        <li style="padding: 5px 0;">⚙️ <strong>Config Service:</strong> <a href="http://localhost:8888">http://localhost:8888</a></li>
+                                    </ul>
+                                    
+                                    <div style="margin-top: 20px; padding: 15px; background-color: #e7f3e7; border-left: 4px solid #4CAF50; border-radius: 3px;">
+                                        <p style="margin: 0;"><strong>All services deployed successfully!</strong></p>
+                                        <p style="margin: 5px 0 0 0;">The application is now running and ready for testing.</p>
+                                    </div>
+                                    
+                                    <div style="margin-top: 20px; text-align: center;">
+                                        <a href="${env.BUILD_URL}" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">View Build Details</a>
+                                    </div>
+                                </div>
+                                <div style="padding: 15px; background-color: #f1f1f1; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 5px 5px;">
+                                    <p style="margin: 0;">Jenkins CI/CD Pipeline - Buy-01 E-Commerce Platform</p>
+                                </div>
+                            </div>
+                        </body>
+                    </html>
+                """,
+                to: '${DEFAULT_RECIPIENTS}',
+                mimeType: 'text/html',
+                attachLog: false
+            )
+        }
+        
         failure {
-            echo 'Pipeline failed. Cleaning up...'
+            echo '❌ Build failed. Cleaning up...'
             sh """
                 docker-compose down
             """
+            
+            // Send failure email notification
+            emailext (
+                subject: "❌ Jenkins Build FAILED: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: """
+                    <html>
+                        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                            <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                                <div style="background-color: #f44336; color: white; padding: 15px; border-radius: 5px 5px 0 0;">
+                                    <h2 style="margin: 0;">❌ Build Failed</h2>
+                                </div>
+                                <div style="padding: 20px; background-color: #f9f9f9;">
+                                    <h3>Build Information</h3>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Project:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${env.JOB_NAME}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Build Number:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">#${env.BUILD_NUMBER}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Status:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd; color: #f44336;"><strong>FAILURE</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Duration:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${currentBuild.durationString.replace(' and counting', '')}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Commit:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${env.GIT_COMMIT?.take(7) ?: 'N/A'}</td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <div style="margin-top: 20px; padding: 15px; background-color: #ffebee; border-left: 4px solid #f44336; border-radius: 3px;">
+                                        <p style="margin: 0;"><strong>⚠️ Action Required</strong></p>
+                                        <p style="margin: 5px 0 0 0;">The build has failed. Please check the console output for details.</p>
+                                    </div>
+                                    
+                                    <h3 style="margin-top: 20px;">Troubleshooting Steps</h3>
+                                    <ol style="padding-left: 20px;">
+                                        <li>Check the build console output for error messages</li>
+                                        <li>Review recent code changes</li>
+                                        <li>Verify all dependencies are available</li>
+                                        <li>Check Docker and container logs</li>
+                                        <li>Ensure MongoDB and Supabase connections are working</li>
+                                    </ol>
+                                    
+                                    <div style="margin-top: 20px; text-align: center;">
+                                        <a href="${env.BUILD_URL}console" style="display: inline-block; padding: 10px 20px; background-color: #f44336; color: white; text-decoration: none; border-radius: 5px;">View Console Output</a>
+                                    </div>
+                                </div>
+                                <div style="padding: 15px; background-color: #f1f1f1; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 5px 5px;">
+                                    <p style="margin: 0;">Jenkins CI/CD Pipeline - Buy-01 E-Commerce Platform</p>
+                                </div>
+                            </div>
+                        </body>
+                    </html>
+                """,
+                to: '${DEFAULT_RECIPIENTS}',
+                mimeType: 'text/html',
+                attachLog: true
+            )
+        }
+        
+        unstable {
+            echo '⚠️ Build unstable.'
+            
+            // Send unstable email notification
+            emailext (
+                subject: "⚠️ Jenkins Build UNSTABLE: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: """
+                    <html>
+                        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                            <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                                <div style="background-color: #ff9800; color: white; padding: 15px; border-radius: 5px 5px 0 0;">
+                                    <h2 style="margin: 0;">⚠️ Build Unstable</h2>
+                                </div>
+                                <div style="padding: 20px; background-color: #f9f9f9;">
+                                    <h3>Build Information</h3>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Project:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${env.JOB_NAME}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Build Number:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">#${env.BUILD_NUMBER}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Status:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd; color: #ff9800;"><strong>UNSTABLE</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Duration:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${currentBuild.durationString.replace(' and counting', '')}</td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <div style="margin-top: 20px; padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800; border-radius: 3px;">
+                                        <p style="margin: 0;"><strong>⚠️ Build completed with warnings</strong></p>
+                                        <p style="margin: 5px 0 0 0;">Some tests may have failed or there are quality issues to address.</p>
+                                    </div>
+                                    
+                                    <div style="margin-top: 20px; text-align: center;">
+                                        <a href="${env.BUILD_URL}" style="display: inline-block; padding: 10px 20px; background-color: #ff9800; color: white; text-decoration: none; border-radius: 5px;">View Build Details</a>
+                                    </div>
+                                </div>
+                                <div style="padding: 15px; background-color: #f1f1f1; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 5px 5px;">
+                                    <p style="margin: 0;">Jenkins CI/CD Pipeline - Buy-01 E-Commerce Platform</p>
+                                </div>
+                            </div>
+                        </body>
+                    </html>
+                """,
+                to: '${DEFAULT_RECIPIENTS}',
+                mimeType: 'text/html',
+                attachLog: true
+            )
         }
     }
 }
