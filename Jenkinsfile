@@ -6,57 +6,41 @@ pipeline {
     // Jenkins can inject credentials securely into these variables
     environment {
         CONFIG_REPO_URI = 'https://github.com/mamadbah2/config-buy-01.git'
+        
+        // Rollback environment variables
+        LAST_SUCCESSFUL_TAG = ''      // Will store the tag of the last successful deployment
+        CURRENT_BUILD_TAG = ''        // Will store the current build's tag
+        ROLLBACK_FILE = '.last_successful_build' // File to persist last successful build info
     }
 
     stages {
-        // Stage 1: Build all source code in parallel to create JARs and JS bundles 🏗️
-        // stage('Build Source Code') {
-        //     parallel {
-        //         stage('Build Frontend (Angular)') {
-        //             when {changeset "buy-01-frontend/**" }
-        //             steps {
-        //                 dir('buy-01-frontend') {
-        //                     sh 'echo "Building the Angular frontend..."'
-        //                     sh 'npm install'
-        //                     sh 'npm run build'
-        //                 }
-        //             }
-        //         }
+        // Stage 0: Load Last Successful Build Info
+        stage('Load Rollback Info') {
+            steps {
+                script {
+                    echo '📋 Loading last successful build information...'
+                    
+                    // Try to read the last successful build tag from file
+                    if (fileExists(env.ROLLBACK_FILE)) {
+                        def rollbackInfo = readFile(env.ROLLBACK_FILE).trim()
+                        if (rollbackInfo) {
+                            env.LAST_SUCCESSFUL_TAG = rollbackInfo
+                            echo "✅ Found last successful build: ${env.LAST_SUCCESSFUL_TAG}"
+                        } else {
+                            echo "⚠️ Rollback file exists but is empty. This might be the first build."
+                        }
+                    } else {
+                        echo "ℹ️ No rollback file found. This is the first deployment."
+                    }
+                    
+                    // Set current build tag
+                    env.CURRENT_BUILD_TAG = "build-${env.BUILD_NUMBER}-${GIT_COMMIT.take(7)}"
+                    echo "🏗️ Current build tag: ${env.CURRENT_BUILD_TAG}"
+                }
+            }
+        }
 
-        //         // This builds all backend services in a single parallel step
-        //         stage('API Gateway') { 
-        //             when { changeset "api-gateway/**" }
-        //             steps { dir('api-gateway') { sh 'mvn clean package -DskipTests' } } 
-        //         }
-
-        //         stage('Config Service') {
-        //             when { changeset "config-service/**" }
-        //             steps { dir('config-service') { sh 'mvn clean package -DskipTests' } } 
-        //         }
-
-        //         stage('Discovery Service') {
-        //             when { changeset "discovery-service/**" }
-        //             steps { dir('discovery-service') { sh 'mvn clean package -DskipTests' } }
-        //         }
-
-        //         stage('Media Service') {
-        //             when { changeset "media-service/**" }
-        //             steps { dir('media-service') { sh 'mvn clean package -DskipTests' } }
-        //         }
-
-        //         stage('Product Service') {
-        //             when { changeset "product-service/**" }
-        //             steps { dir('product-service') { sh 'mvn clean package -DskipTests' } }
-        //         }
-
-        //         stage('User Service') {
-        //             when { changeset "user-service/**" }
-        //             steps{ dir('user-service') { sh 'mvn clean package -DskipTests' } }
-        //         }
-        //     }
-        // }
-
-        // Stage 2: Run tests in parallel for maximum speed ⚡
+        // Stage 1: Run tests in parallel for maximum speed
         stage('Test') {
             parallel {
                 stage('Test Frontend (Angular)') {
@@ -92,7 +76,7 @@ pipeline {
             }
         }
 
-        // Stage 3: Build all the Docker images using docker-compose 🐳
+        // Stage 2: Build all the Docker images using docker-compose 🐳
         // This command builds the images but does not run them.
         stage('Build Docker Images') {
             steps {
@@ -109,19 +93,18 @@ pipeline {
             }
         }
 
-        // Stage 4: 
+        // Stage 3: Push Docker Images with Current Build Tag
         stage('Push Docker Images') {
             steps {
                 echo 'Pushing Docker images to Docker Hub...'
                 script {
-                    def commitSha = GIT_COMMIT.take(7) // Shorten the commit SHA for tagging
                     def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'buy-01-frontend']
 
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
                         sh "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin"
 
                         services.each { service ->
-                            def imageTag = "${DOCKERHUB_USERNAME}/${service}:local-${commitSha}"
+                            def imageTag = "${DOCKERHUB_USERNAME}/${service}:${env.CURRENT_BUILD_TAG}"
                             sh "docker tag ${service}:latest ${imageTag}"
                             
                             // Retry push up to 3 times with exponential backoff
@@ -144,12 +127,11 @@ pipeline {
 
         
 
-        // Stage 5: Deploy the entire application using Docker Compose 🚀
+        // Stage 4: Deploy the entire application using Docker Compose 🚀
         stage('Deploy Application') {
             steps {
                 echo 'Deploying the application stack from Docker Hub images...'
                 script {
-                    def commitSha = GIT_COMMIT.take(7) // Use the same commit SHA as the push stage
                     def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'buy-01-frontend']
 
                     withCredentials([
@@ -158,10 +140,10 @@ pipeline {
                     ]) {
                         sh "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin"
 
-                        // Pull all the images from Docker Hub
+                        // Pull all the images from Docker Hub using CURRENT_BUILD_TAG
                         echo 'Pulling Docker images from Docker Hub...'
                         services.each { service ->
-                            def imageTag = "${DOCKERHUB_USERNAME}/${service}:local-${commitSha}"
+                            def imageTag = "${DOCKERHUB_USERNAME}/${service}:${env.CURRENT_BUILD_TAG}"
                             sh "docker pull ${imageTag}"
                             // Re-tag the pulled image as latest for docker-compose to use
                             sh "docker tag ${imageTag} ${service}:latest"
@@ -193,6 +175,24 @@ pipeline {
                 }
             }
         }
+        
+        // Stage 5: Save Successful Build Reference
+        stage('Save Build Reference') {
+            steps {
+                script {
+                    echo '💾 Saving current build as last successful deployment...'
+                    
+                    // Save the current build tag to file for future rollbacks
+                    writeFile file: env.ROLLBACK_FILE, text: env.CURRENT_BUILD_TAG
+                    
+                    echo "✅ Build reference saved: ${env.CURRENT_BUILD_TAG}"
+                    echo "📌 This version will be used for rollback if next deployment fails"
+                    
+                    // Also archive the file as a build artifact
+                    archiveArtifacts artifacts: env.ROLLBACK_FILE, fingerprint: true
+                }
+            }
+        }
     }
 
     // The post block runs after all stages are completed
@@ -213,6 +213,10 @@ pipeline {
         
         success {
             echo '✅ Build completed successfully!'
+            echo "📦 Current deployment: ${env.CURRENT_BUILD_TAG}"
+            if (env.LAST_SUCCESSFUL_TAG) {
+                echo "📜 Previous deployment: ${env.LAST_SUCCESSFUL_TAG}"
+            }
             
             // Send success email notification
             emailext (
@@ -242,6 +246,10 @@ pipeline {
                                         <tr>
                                             <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Duration:</strong></td>
                                             <td style="padding: 8px; border-bottom: 1px solid #ddd;">${currentBuild.durationString.replace(' and counting', '')}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Deployment Tag:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><code>${env.CURRENT_BUILD_TAG}</code></td>
                                         </tr>
                                         <tr>
                                             <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Commit:</strong></td>
@@ -280,10 +288,55 @@ pipeline {
         }
         
         failure {
-            echo '❌ Build failed. Cleaning up...'
-            sh """
-                docker-compose down
-            """
+            echo '❌ Build failed. Initiating automatic rollback...'
+            
+            script {
+                // Attempt automatic rollback if we have a previous successful build
+                if (env.LAST_SUCCESSFUL_TAG && env.LAST_SUCCESSFUL_TAG != '') {
+                    echo "🔄 Rolling back to last successful build: ${env.LAST_SUCCESSFUL_TAG}"
+                    
+                    try {
+                        def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'buy-01-frontend']
+                        
+                        withCredentials([
+                            usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD'),
+                            usernamePassword(credentialsId: 'github', usernameVariable: 'CONFIG_REPO_USERNAME', passwordVariable: 'CONFIG_REPO_PASSWORD')
+                        ]) {
+                            sh "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin"
+                            
+                            echo "📥 Pulling last successful images: ${env.LAST_SUCCESSFUL_TAG}"
+                            services.each { service ->
+                                def imageTag = "${DOCKERHUB_USERNAME}/${service}:${env.LAST_SUCCESSFUL_TAG}"
+                                sh "docker pull ${imageTag} || true"
+                                sh "docker tag ${imageTag} ${service}:latest || true"
+                            }
+                            
+                            echo "🛑 Stopping failed deployment..."
+                            sh 'docker-compose down || true'
+                            
+                            echo "🚀 Redeploying last successful version..."
+                            withEnv([
+                                "CONFIG_REPO_URI=${env.CONFIG_REPO_URI}",
+                                "CONFIG_REPO_USERNAME=${CONFIG_REPO_USERNAME}",
+                                "CONFIG_REPO_PASSWORD=${CONFIG_REPO_PASSWORD}"
+                            ]) {
+                                sh 'docker-compose up -d --no-build --force-recreate --remove-orphans || true'
+                            }
+                            
+                            echo "✅ Rollback completed! Reverted to: ${env.LAST_SUCCESSFUL_TAG}"
+                            echo "⚠️ Current failed build: ${env.CURRENT_BUILD_TAG}"
+                        }
+                    } catch (Exception e) {
+                        echo "❌ Automatic rollback failed: ${e.message}"
+                        echo "⚠️ Manual intervention required!"
+                        sh 'docker-compose down || true'
+                    }
+                } else {
+                    echo '⚠️ No previous successful build found. Cannot rollback.'
+                    echo '🛑 Cleaning up failed deployment...'
+                    sh 'docker-compose down || true'
+                }
+            }
             
             // Send failure email notification
             emailext (
@@ -315,6 +368,14 @@ pipeline {
                                             <td style="padding: 8px; border-bottom: 1px solid #ddd;">${currentBuild.durationString.replace(' and counting', '')}</td>
                                         </tr>
                                         <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Failed Build Tag:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><code>${env.CURRENT_BUILD_TAG}</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Rolled Back To:</strong></td>
+                                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><code>${env.LAST_SUCCESSFUL_TAG ?: 'N/A - No previous build'}</code></td>
+                                        </tr>
+                                        <tr>
                                             <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Commit:</strong></td>
                                             <td style="padding: 8px; border-bottom: 1px solid #ddd;">${env.GIT_COMMIT?.take(7) ?: 'N/A'}</td>
                                         </tr>
@@ -322,7 +383,7 @@ pipeline {
                                     
                                     <div style="margin-top: 20px; padding: 15px; background-color: #ffebee; border-left: 4px solid #f44336; border-radius: 3px;">
                                         <p style="margin: 0;"><strong>⚠️ Action Required</strong></p>
-                                        <p style="margin: 5px 0 0 0;">The build has failed. Please check the console output for details.</p>
+                                        <p style="margin: 5px 0 0 0;">The build has failed. ${env.LAST_SUCCESSFUL_TAG ? 'System automatically rolled back to the previous successful version.' : 'No rollback available - this was the first deployment.'}</p>
                                     </div>
                                     
                                     <h3 style="margin-top: 20px;">Troubleshooting Steps</h3>
