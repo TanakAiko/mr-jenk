@@ -187,6 +187,7 @@ pipeline {
                         def gitCommit = env.GIT_COMMIT ?: sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
                         currentTag = "build-${env.BUILD_NUMBER}-${gitCommit.take(7)}"
                         env.CURRENT_BUILD_TAG = currentTag
+                        echo "DEBUG: env.CURRENT_BUILD_TAG=${env.CURRENT_BUILD_TAG ?: 'null'}"
                         echo "⚠️ CURRENT_BUILD_TAG was not set, generated: ${currentTag}"
                     }
                     
