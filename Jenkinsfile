@@ -189,6 +189,12 @@ pipeline {
                         echo "⚠️ CURRENT_BUILD_TAG was not set, generated: ${env.CURRENT_BUILD_TAG}"
                     }
                     
+                    // Create the rollback file if it doesn't exist
+                    if (!fileExists(env.ROLLBACK_FILE)) {
+                        echo "📝 Creating rollback file: ${env.ROLLBACK_FILE}"
+                        sh "touch ${env.ROLLBACK_FILE}"
+                    }
+                    
                     // Save the current build tag to file for future rollbacks
                     writeFile file: env.ROLLBACK_FILE, text: env.CURRENT_BUILD_TAG
                     
