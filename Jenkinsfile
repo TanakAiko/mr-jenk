@@ -5,7 +5,6 @@ pipeline {
     // Best practice: Define environment variables for the pipeline
     // Jenkins can inject credentials securely into these variables
     environment {
-        // The URL to your configuration repository
         CONFIG_REPO_URI = 'https://github.com/mamadbah2/config-buy-01.git'
     }
 
