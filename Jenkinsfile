@@ -185,8 +185,9 @@ pipeline {
                     // Ensure CURRENT_BUILD_TAG is set (safety check)
                     if (!env.CURRENT_BUILD_TAG || env.CURRENT_BUILD_TAG == '') {
                         def gitCommit = env.GIT_COMMIT ?: sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-                        env.CURRENT_BUILD_TAG = "build-${env.BUILD_NUMBER}-${gitCommit.take(7)}"
-                        echo "⚠️ CURRENT_BUILD_TAG was not set, generated: ${env.CURRENT_BUILD_TAG}"
+                        currentTag = "build-${env.BUILD_NUMBER}-${gitCommit.take(7)}"
+                        env.CURRENT_BUILD_TAG = currentTag
+                        echo "⚠️ CURRENT_BUILD_TAG was not set, generated: ${currentTag}"
                     }
                     
                     // Create the rollback file if it doesn't exist
@@ -196,7 +197,7 @@ pipeline {
                     }
                     
                     // Save the current build tag to file for future rollbacks
-                    writeFile file: env.ROLLBACK_FILE, text: env.CURRENT_BUILD_TAG
+                    writeFile file: env.ROLLBACK_FILE, text: currentTag
                     
                     echo "✅ Build reference saved: ${env.CURRENT_BUILD_TAG}"
                     echo "📌 This version will be used for rollback if next deployment fails"
