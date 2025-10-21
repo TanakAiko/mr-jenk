@@ -25,10 +25,10 @@ pipeline {
                     // Set current build tag FIRST with fallback for GIT_COMMIT
                     def gitCommit = env.GIT_COMMIT ?: sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
                     def currentTag = "build-${env.BUILD_NUMBER}-${gitCommit.take(7)}"
-                    env.CURRENT_BUILD_TAG = currentTag
                     echo "🏗️ CURRENT BUILD TAG: ${currentTag}"
                     
                     // Try to read the last successful build tag from file
+                    def lastSuccessfulTag = ''
                     if (fileExists(env.ROLLBACK_FILE)) {
                         echo "✅ Rollback file EXISTS!"
                         
@@ -44,9 +44,8 @@ pipeline {
                         echo "🔍 DEBUG: rollbackInfo variable = '${rollbackInfo}'"
                         
                         if (rollbackInfo && rollbackInfo != '' && rollbackInfo != 'null') {
-                            env.LAST_SUCCESSFUL_TAG = rollbackInfo
-                            echo "✅✅✅ LOADED LAST SUCCESSFUL BUILD TAG: ${rollbackInfo}"
-                            echo "🔍 DEBUG: env.LAST_SUCCESSFUL_TAG = '${env.LAST_SUCCESSFUL_TAG}'"
+                            lastSuccessfulTag = rollbackInfo
+                            echo "✅✅✅ LOADED LAST SUCCESSFUL BUILD TAG: ${lastSuccessfulTag}"
                             echo "🔄 This tag will be used for rollback if current build fails"
                         } else {
                             echo "⚠️ Rollback file exists but is empty or invalid."
@@ -56,10 +55,18 @@ pipeline {
                         echo "❌ No rollback file found at: ${env.ROLLBACK_FILE}"
                         echo "ℹ️ This is the first deployment - no rollback available yet."
                     }
+                    
+                    // NOW assign to environment variables AFTER all processing
+                    env.CURRENT_BUILD_TAG = currentTag
+                    env.LAST_SUCCESSFUL_TAG = lastSuccessfulTag
+                    
                     echo '================================================'
                     echo "📊 SUMMARY:"
-                    echo "   - Previous successful: ${env.LAST_SUCCESSFUL_TAG ?: 'NONE'}"
-                    echo "   - Current build: ${env.CURRENT_BUILD_TAG}"
+                    echo "   - Previous successful: ${lastSuccessfulTag ?: 'NONE'}"
+                    echo "   - Current build: ${currentTag}"
+                    echo "🔍 VERIFICATION:"
+                    echo "   - env.LAST_SUCCESSFUL_TAG = '${env.LAST_SUCCESSFUL_TAG}'"
+                    echo "   - env.CURRENT_BUILD_TAG = '${env.CURRENT_BUILD_TAG}'"
                     echo '================================================'
                 }
             }
