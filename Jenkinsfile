@@ -367,6 +367,11 @@ pipeline {
                 echo "   - Last successful tag: ${LAST_SUCCESSFUL_TAG ?: 'NONE'}"
                 echo '================================================'
                 
+                // ALWAYS stop any running containers first to avoid conflicts
+                echo '🛑 Stopping any running containers...'
+                sh 'docker-compose down || true'
+                echo '================================================'
+                
                 // Attempt automatic rollback if we have a previous successful build
                 if (LAST_SUCCESSFUL_TAG && LAST_SUCCESSFUL_TAG != '' && LAST_SUCCESSFUL_TAG != 'null') {
                     echo "✅ Previous successful build found!"
@@ -396,11 +401,6 @@ pipeline {
                             }
                             
                             echo '================================================'
-                            echo "🛑 STOPPING FAILED DEPLOYMENT..."
-                            echo '================================================'
-                            sh 'docker-compose down || true'
-                            
-                            echo '================================================'
                             echo "🚀 REDEPLOYING LAST SUCCESSFUL VERSION"
                             echo "   Version: ${LAST_SUCCESSFUL_TAG}"
                             echo '================================================'
@@ -416,6 +416,7 @@ pipeline {
                             echo "✅✅✅ ROLLBACK COMPLETED SUCCESSFULLY!"
                             echo "   Reverted to: ${LAST_SUCCESSFUL_TAG}"
                             echo "   Failed build: ${CURRENT_BUILD_TAG}"
+                            echo "   Status: Services are running with last known good version"
                             echo '================================================'
                         }
                     } catch (Exception e) {
@@ -423,17 +424,15 @@ pipeline {
                         echo "❌ AUTOMATIC ROLLBACK FAILED!"
                         echo "   Error: ${e.message}"
                         echo "⚠️⚠️⚠️ MANUAL INTERVENTION REQUIRED!"
+                        echo "   Status: All containers stopped - manual deployment needed"
                         echo '================================================'
-                        sh 'docker-compose down || true'
                     }
                 } else {
                     echo '================================================'
                     echo '⚠️⚠️⚠️ NO ROLLBACK AVAILABLE'
                     echo "   Reason: No previous successful build found"
                     echo "   LAST_SUCCESSFUL_TAG: '${LAST_SUCCESSFUL_TAG}'"
-                    echo '================================================'
-                    echo '🛑 Cleaning up failed deployment...'
-                    sh 'docker-compose down || true'
+                    echo "   Status: All containers stopped - this was the first deployment"
                     echo '================================================'
                 }
             }
