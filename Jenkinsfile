@@ -17,25 +17,47 @@ pipeline {
         stage('Load Rollback Info') {
             steps {
                 script {
-                    echo '📋 Loading last successful build information...'
+                    echo '================================================'
+                    echo '📋 STAGE 0: LOADING ROLLBACK INFORMATION'
+                    echo '================================================'
+                    echo "🔍 Looking for rollback file: ${env.ROLLBACK_FILE}"
                     
                     // Try to read the last successful build tag from file
                     if (fileExists(env.ROLLBACK_FILE)) {
+                        echo "✅ Rollback file EXISTS!"
+                        
+                        // Show file details
+                        sh """
+                            echo "📄 File details:"
+                            ls -lh ${env.ROLLBACK_FILE}
+                            echo "📄 File contents:"
+                            cat ${env.ROLLBACK_FILE}
+                        """
+                        
                         def rollbackInfo = readFile(env.ROLLBACK_FILE).trim()
                         if (rollbackInfo) {
                             env.LAST_SUCCESSFUL_TAG = rollbackInfo
-                            echo "✅ Found last successful build: ${env.LAST_SUCCESSFUL_TAG}"
+                            echo "✅✅✅ LOADED LAST SUCCESSFUL BUILD TAG: ${env.LAST_SUCCESSFUL_TAG}"
+                            echo "🔄 This tag will be used for rollback if current build fails"
                         } else {
                             echo "⚠️ Rollback file exists but is empty. This might be the first build."
+                            echo "⚠️ env.LAST_SUCCESSFUL_TAG = '${env.LAST_SUCCESSFUL_TAG}'"
                         }
                     } else {
-                        echo "ℹ️ No rollback file found. This is the first deployment."
+                        echo "❌ No rollback file found at: ${env.ROLLBACK_FILE}"
+                        echo "ℹ️ This is the first deployment - no rollback available yet."
+                        echo "ℹ️ env.LAST_SUCCESSFUL_TAG = '${env.LAST_SUCCESSFUL_TAG}'"
                     }
                     
                     // Set current build tag with fallback for GIT_COMMIT
                     def gitCommit = env.GIT_COMMIT ?: sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
                     env.CURRENT_BUILD_TAG = "build-${env.BUILD_NUMBER}-${gitCommit.take(7)}"
-                    echo "🏗️ Current build tag: ${env.CURRENT_BUILD_TAG}"
+                    echo "🏗️ CURRENT BUILD TAG: ${env.CURRENT_BUILD_TAG}"
+                    echo '================================================'
+                    echo "📊 SUMMARY:"
+                    echo "   - Previous successful: ${env.LAST_SUCCESSFUL_TAG ?: 'NONE'}"
+                    echo "   - Current build: ${env.CURRENT_BUILD_TAG}"
+                    echo '================================================'
                 }
             }
         }
@@ -180,31 +202,50 @@ pipeline {
         stage('Save Build Reference') {
             steps {
                 script {
-                    echo '💾 Saving current build as last successful deployment...'
+                    echo '================================================'
+                    echo '💾 STAGE 5: SAVING BUILD REFERENCE'
+                    echo '================================================'
                     
                     // Ensure CURRENT_BUILD_TAG is set (safety check)
                     if (!env.CURRENT_BUILD_TAG || env.CURRENT_BUILD_TAG == '') {
                         def gitCommit = env.GIT_COMMIT ?: sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-                        currentTag = "build-${env.BUILD_NUMBER}-${gitCommit.take(7)}"
+                        def currentTag = "build-${env.BUILD_NUMBER}-${gitCommit.take(7)}"
                         env.CURRENT_BUILD_TAG = currentTag
-                        echo "DEBUG: env.CURRENT_BUILD_TAG=${env.CURRENT_BUILD_TAG ?: 'null'}"
                         echo "⚠️ CURRENT_BUILD_TAG was not set, generated: ${currentTag}"
                     }
                     
+                    echo "📌 Build tag to save: ${env.CURRENT_BUILD_TAG}"
+                    
                     // Create the rollback file if it doesn't exist
                     if (!fileExists(env.ROLLBACK_FILE)) {
-                        echo "📝 Creating rollback file: ${env.ROLLBACK_FILE}"
+                        echo "📝 Creating NEW rollback file: ${env.ROLLBACK_FILE}"
                         sh "touch ${env.ROLLBACK_FILE}"
+                    } else {
+                        echo "📝 Updating EXISTING rollback file: ${env.ROLLBACK_FILE}"
                     }
                     
                     // Save the current build tag to file for future rollbacks
-                    writeFile file: env.ROLLBACK_FILE, text: currentTag
+                    writeFile file: env.ROLLBACK_FILE, text: env.CURRENT_BUILD_TAG
                     
-                    echo "✅ Build reference saved: ${env.CURRENT_BUILD_TAG}"
+                    echo "✅✅✅ BUILD REFERENCE SAVED SUCCESSFULLY!"
+                    echo "📌 Saved tag: ${env.CURRENT_BUILD_TAG}"
                     echo "📌 This version will be used for rollback if next deployment fails"
+                    
+                    // Verify the file was created and show its contents
+                    sh """
+                        echo "================================================"
+                        echo "🔍 VERIFICATION: Checking saved file..."
+                        echo "================================================"
+                        ls -lh ${env.ROLLBACK_FILE}
+                        echo "📄 File contents:"
+                        cat ${env.ROLLBACK_FILE}
+                        echo "================================================"
+                    """
                     
                     // Also archive the file as a build artifact
                     archiveArtifacts artifacts: env.ROLLBACK_FILE, fingerprint: true
+                    echo "📦 File archived as build artifact"
+                    echo '================================================'
                 }
             }
         }
@@ -228,11 +269,16 @@ pipeline {
         
         success {
             script {
-                echo '✅ Build completed successfully!'
+                echo '================================================'
+                echo '✅✅✅ BUILD COMPLETED SUCCESSFULLY!'
+                echo '================================================'
                 echo "📦 Current deployment: ${env.CURRENT_BUILD_TAG}"
                 if (env.LAST_SUCCESSFUL_TAG) {
                     echo "📜 Previous deployment: ${env.LAST_SUCCESSFUL_TAG}"
+                } else {
+                    echo "📜 Previous deployment: NONE (this is the first successful build)"
                 }
+                echo '================================================'
             }
             
             // Send success email notification
@@ -305,12 +351,21 @@ pipeline {
         }
 
         failure {
-            echo '❌ Build failed. Initiating automatic rollback...'
+            echo '================================================'
+            echo '❌❌❌ BUILD FAILED - INITIATING ROLLBACK ❌❌❌'
+            echo '================================================'
             
             script {
+                echo "📊 Current build information:"
+                echo "   - Failed build tag: ${env.CURRENT_BUILD_TAG}"
+                echo "   - Last successful tag: ${env.LAST_SUCCESSFUL_TAG ?: 'NONE'}"
+                echo '================================================'
+                
                 // Attempt automatic rollback if we have a previous successful build
                 if (env.LAST_SUCCESSFUL_TAG && env.LAST_SUCCESSFUL_TAG != '' && env.LAST_SUCCESSFUL_TAG != 'null') {
-                    echo "🔄 Rolling back to last successful build: ${env.LAST_SUCCESSFUL_TAG}"
+                    echo "✅ Previous successful build found!"
+                    echo "🔄🔄🔄 STARTING ROLLBACK TO: ${env.LAST_SUCCESSFUL_TAG}"
+                    echo '================================================'
                     
                     try {
                         def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'buy-01-frontend']
@@ -319,19 +374,30 @@ pipeline {
                             usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD'),
                             usernamePassword(credentialsId: 'github', usernameVariable: 'CONFIG_REPO_USERNAME', passwordVariable: 'CONFIG_REPO_PASSWORD')
                         ]) {
+                            echo "🔐 Logging into Docker Hub..."
                             sh "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin"
                             
-                            echo "📥 Pulling last successful images: ${env.LAST_SUCCESSFUL_TAG}"
+                            echo '================================================'
+                            echo "📥 PULLING LAST SUCCESSFUL IMAGES"
+                            echo "   Tag: ${env.LAST_SUCCESSFUL_TAG}"
+                            echo '================================================'
+                            
                             services.each { service ->
                                 def imageTag = "${DOCKERHUB_USERNAME}/${service}:${env.LAST_SUCCESSFUL_TAG}"
+                                echo "📦 Pulling: ${imageTag}"
                                 sh "docker pull ${imageTag} || true"
                                 sh "docker tag ${imageTag} ${service}:latest || true"
                             }
                             
-                            echo "🛑 Stopping failed deployment..."
+                            echo '================================================'
+                            echo "🛑 STOPPING FAILED DEPLOYMENT..."
+                            echo '================================================'
                             sh 'docker-compose down || true'
                             
-                            echo "🚀 Redeploying last successful version..."
+                            echo '================================================'
+                            echo "🚀 REDEPLOYING LAST SUCCESSFUL VERSION"
+                            echo "   Version: ${env.LAST_SUCCESSFUL_TAG}"
+                            echo '================================================'
                             withEnv([
                                 "CONFIG_REPO_URI=${env.CONFIG_REPO_URI}",
                                 "CONFIG_REPO_USERNAME=${CONFIG_REPO_USERNAME}",
@@ -340,18 +406,29 @@ pipeline {
                                 sh 'docker-compose up -d --no-build --force-recreate --remove-orphans || true'
                             }
                             
-                            echo "✅ Rollback completed! Reverted to: ${env.LAST_SUCCESSFUL_TAG}"
-                            echo "⚠️ Current failed build: ${env.CURRENT_BUILD_TAG}"
+                            echo '================================================'
+                            echo "✅✅✅ ROLLBACK COMPLETED SUCCESSFULLY!"
+                            echo "   Reverted to: ${env.LAST_SUCCESSFUL_TAG}"
+                            echo "   Failed build: ${env.CURRENT_BUILD_TAG}"
+                            echo '================================================'
                         }
                     } catch (Exception e) {
-                        echo "❌ Automatic rollback failed: ${e.message}"
-                        echo "⚠️ Manual intervention required!"
+                        echo '================================================'
+                        echo "❌ AUTOMATIC ROLLBACK FAILED!"
+                        echo "   Error: ${e.message}"
+                        echo "⚠️⚠️⚠️ MANUAL INTERVENTION REQUIRED!"
+                        echo '================================================'
                         sh 'docker-compose down || true'
                     }
                 } else {
-                    echo '⚠️ No previous successful build found. Cannot rollback.'
+                    echo '================================================'
+                    echo '⚠️⚠️⚠️ NO ROLLBACK AVAILABLE'
+                    echo "   Reason: No previous successful build found"
+                    echo "   LAST_SUCCESSFUL_TAG: '${env.LAST_SUCCESSFUL_TAG}'"
+                    echo '================================================'
                     echo '🛑 Cleaning up failed deployment...'
                     sh 'docker-compose down || true'
+                    echo '================================================'
                 }
             }
             
