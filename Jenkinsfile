@@ -1,3 +1,8 @@
+import groovy.transform.Field
+
+@Field String CURRENT_BUILD_TAG = ''
+@Field String LAST_SUCCESSFUL_TAG = ''
+
 pipeline {
     agent any
 
@@ -20,11 +25,11 @@ pipeline {
                     
                     // Set current build tag FIRST with fallback for GIT_COMMIT
                     def gitCommit = env.GIT_COMMIT ?: sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-                    def currentTag = "build-${env.BUILD_NUMBER}-${gitCommit.take(7)}"
-                    echo "🏗️ CURRENT BUILD TAG: ${currentTag}"
+                    CURRENT_BUILD_TAG = "build-${env.BUILD_NUMBER}-${gitCommit.take(7)}"
+                    echo "🏗️ CURRENT BUILD TAG: ${CURRENT_BUILD_TAG}"
                     
                     // Try to read the last successful build tag from file
-                    def lastSuccessfulTag = ''
+                    LAST_SUCCESSFUL_TAG = ''
                     if (fileExists(env.ROLLBACK_FILE)) {
                         echo "✅ Rollback file EXISTS!"
                         
@@ -40,8 +45,8 @@ pipeline {
                         echo "🔍 DEBUG: rollbackInfo variable = '${rollbackInfo}'"
                         
                         if (rollbackInfo && rollbackInfo != '' && rollbackInfo != 'null') {
-                            lastSuccessfulTag = rollbackInfo
-                            echo "✅✅✅ LOADED LAST SUCCESSFUL BUILD TAG: ${lastSuccessfulTag}"
+                            LAST_SUCCESSFUL_TAG = rollbackInfo
+                            echo "✅✅✅ LOADED LAST SUCCESSFUL BUILD TAG: ${LAST_SUCCESSFUL_TAG}"
                             echo "🔄 This tag will be used for rollback if current build fails"
                         } else {
                             echo "⚠️ Rollback file exists but is empty or invalid."
@@ -52,17 +57,13 @@ pipeline {
                         echo "ℹ️ This is the first deployment - no rollback available yet."
                     }
                     
-                    // Store in binding variables (accessible across stages)
-                    binding.setVariable('CURRENT_BUILD_TAG', currentTag)
-                    binding.setVariable('LAST_SUCCESSFUL_TAG', lastSuccessfulTag)
-                    
                     echo '================================================'
                     echo "📊 SUMMARY:"
-                    echo "   - Previous successful: ${lastSuccessfulTag ?: 'NONE'}"
-                    echo "   - Current build: ${currentTag}"
+                    echo "   - Previous successful: ${LAST_SUCCESSFUL_TAG ?: 'NONE'}"
+                    echo "   - Current build: ${CURRENT_BUILD_TAG}"
                     echo "🔍 VERIFICATION:"
-                    echo "   - LAST_SUCCESSFUL_TAG = '${lastSuccessfulTag}'"
-                    echo "   - CURRENT_BUILD_TAG = '${currentTag}'"
+                    echo "   - LAST_SUCCESSFUL_TAG = '${LAST_SUCCESSFUL_TAG}'"
+                    echo "   - CURRENT_BUILD_TAG = '${CURRENT_BUILD_TAG}'"
                     echo '================================================'
                 }
             }
@@ -132,7 +133,7 @@ pipeline {
                         sh "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin"
 
                         services.each { service ->
-                            def imageTag = "${DOCKERHUB_USERNAME}/${service}:${binding.getVariable('CURRENT_BUILD_TAG')}"
+                            def imageTag = "${DOCKERHUB_USERNAME}/${service}:${CURRENT_BUILD_TAG}"
                             sh "docker tag ${service}:latest ${imageTag}"
                             
                             // Retry push up to 3 times with exponential backoff
@@ -171,7 +172,7 @@ pipeline {
                         // Pull all the images from Docker Hub using CURRENT_BUILD_TAG
                         echo 'Pulling Docker images from Docker Hub...'
                         services.each { service ->
-                            def imageTag = "${DOCKERHUB_USERNAME}/${service}:${binding.getVariable('CURRENT_BUILD_TAG')}"
+                            def imageTag = "${DOCKERHUB_USERNAME}/${service}:${CURRENT_BUILD_TAG}"
                             sh "docker pull ${imageTag}"
                             // Re-tag the pulled image as latest for docker-compose to use
                             sh "docker tag ${imageTag} ${service}:latest"
@@ -212,17 +213,14 @@ pipeline {
                     echo '💾 STAGE 5: SAVING BUILD REFERENCE'
                     echo '================================================'
                     
-                    def currentTag = binding.getVariable('CURRENT_BUILD_TAG')
-                    
                     // Ensure CURRENT_BUILD_TAG is set (safety check)
-                    if (!currentTag || currentTag == '') {
+                    if (!CURRENT_BUILD_TAG || CURRENT_BUILD_TAG == '') {
                         def gitCommit = env.GIT_COMMIT ?: sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-                        currentTag = "build-${env.BUILD_NUMBER}-${gitCommit.take(7)}"
-                        binding.setVariable('CURRENT_BUILD_TAG', currentTag)
-                        echo "⚠️ CURRENT_BUILD_TAG was not set, generated: ${currentTag}"
+                        CURRENT_BUILD_TAG = "build-${env.BUILD_NUMBER}-${gitCommit.take(7)}"
+                        echo "⚠️ CURRENT_BUILD_TAG was not set, generated: ${CURRENT_BUILD_TAG}"
                     }
                     
-                    echo "📌 Build tag to save: ${currentTag}"
+                    echo "📌 Build tag to save: ${CURRENT_BUILD_TAG}"
                     
                     // Create the rollback file if it doesn't exist
                     if (!fileExists(env.ROLLBACK_FILE)) {
@@ -233,10 +231,10 @@ pipeline {
                     }
                     
                     // Save the current build tag to file for future rollbacks
-                    writeFile file: env.ROLLBACK_FILE, text: currentTag
+                    writeFile file: env.ROLLBACK_FILE, text: CURRENT_BUILD_TAG
                     
                     echo "✅✅✅ BUILD REFERENCE SAVED SUCCESSFULLY!"
-                    echo "📌 Saved tag: ${currentTag}"
+                    echo "📌 Saved tag: ${CURRENT_BUILD_TAG}"
                     echo "📌 This version will be used for rollback if next deployment fails"
                     
                     // Verify the file was created and show its contents
@@ -280,11 +278,9 @@ pipeline {
                 echo '================================================'
                 echo '✅✅✅ BUILD COMPLETED SUCCESSFULLY!'
                 echo '================================================'
-                def currentTag = binding.getVariable('CURRENT_BUILD_TAG')
-                def lastTag = binding.getVariable('LAST_SUCCESSFUL_TAG')
-                echo "📦 Current deployment: ${currentTag}"
-                if (lastTag) {
-                    echo "📜 Previous deployment: ${lastTag}"
+                echo "📦 Current deployment: ${CURRENT_BUILD_TAG}"
+                if (LAST_SUCCESSFUL_TAG) {
+                    echo "📜 Previous deployment: ${LAST_SUCCESSFUL_TAG}"
                 } else {
                     echo "📜 Previous deployment: NONE (this is the first successful build)"
                 }
@@ -366,18 +362,15 @@ pipeline {
             echo '================================================'
             
             script {
-                def currentTag = binding.getVariable('CURRENT_BUILD_TAG')
-                def lastTag = binding.getVariable('LAST_SUCCESSFUL_TAG')
-                
                 echo "📊 Current build information:"
-                echo "   - Failed build tag: ${currentTag}"
-                echo "   - Last successful tag: ${lastTag ?: 'NONE'}"
+                echo "   - Failed build tag: ${CURRENT_BUILD_TAG}"
+                echo "   - Last successful tag: ${LAST_SUCCESSFUL_TAG ?: 'NONE'}"
                 echo '================================================'
                 
                 // Attempt automatic rollback if we have a previous successful build
-                if (lastTag && lastTag != '' && lastTag != 'null') {
+                if (LAST_SUCCESSFUL_TAG && LAST_SUCCESSFUL_TAG != '' && LAST_SUCCESSFUL_TAG != 'null') {
                     echo "✅ Previous successful build found!"
-                    echo "🔄🔄🔄 STARTING ROLLBACK TO: ${lastTag}"
+                    echo "🔄🔄🔄 STARTING ROLLBACK TO: ${LAST_SUCCESSFUL_TAG}"
                     echo '================================================'
                     
                     try {
@@ -392,11 +385,11 @@ pipeline {
                             
                             echo '================================================'
                             echo "📥 PULLING LAST SUCCESSFUL IMAGES"
-                            echo "   Tag: ${lastTag}"
+                            echo "   Tag: ${LAST_SUCCESSFUL_TAG}"
                             echo '================================================'
                             
                             services.each { service ->
-                                def imageTag = "${DOCKERHUB_USERNAME}/${service}:${lastTag}"
+                                def imageTag = "${DOCKERHUB_USERNAME}/${service}:${LAST_SUCCESSFUL_TAG}"
                                 echo "📦 Pulling: ${imageTag}"
                                 sh "docker pull ${imageTag} || true"
                                 sh "docker tag ${imageTag} ${service}:latest || true"
@@ -409,7 +402,7 @@ pipeline {
                             
                             echo '================================================'
                             echo "🚀 REDEPLOYING LAST SUCCESSFUL VERSION"
-                            echo "   Version: ${lastTag}"
+                            echo "   Version: ${LAST_SUCCESSFUL_TAG}"
                             echo '================================================'
                             withEnv([
                                 "CONFIG_REPO_URI=${env.CONFIG_REPO_URI}",
@@ -421,8 +414,8 @@ pipeline {
                             
                             echo '================================================'
                             echo "✅✅✅ ROLLBACK COMPLETED SUCCESSFULLY!"
-                            echo "   Reverted to: ${lastTag}"
-                            echo "   Failed build: ${currentTag}"
+                            echo "   Reverted to: ${LAST_SUCCESSFUL_TAG}"
+                            echo "   Failed build: ${CURRENT_BUILD_TAG}"
                             echo '================================================'
                         }
                     } catch (Exception e) {
@@ -437,7 +430,7 @@ pipeline {
                     echo '================================================'
                     echo '⚠️⚠️⚠️ NO ROLLBACK AVAILABLE'
                     echo "   Reason: No previous successful build found"
-                    echo "   LAST_SUCCESSFUL_TAG: '${lastTag}'"
+                    echo "   LAST_SUCCESSFUL_TAG: '${LAST_SUCCESSFUL_TAG}'"
                     echo '================================================'
                     echo '🛑 Cleaning up failed deployment...'
                     sh 'docker-compose down || true'
