@@ -309,7 +309,7 @@ pipeline {
             
             script {
                 // Attempt automatic rollback if we have a previous successful build
-                if (env.LAST_SUCCESSFUL_TAG && env.LAST_SUCCESSFUL_TAG != '') {
+                if (env.LAST_SUCCESSFUL_TAG && env.LAST_SUCCESSFUL_TAG != '' && env.LAST_SUCCESSFUL_TAG != 'null') {
                     echo "🔄 Rolling back to last successful build: ${env.LAST_SUCCESSFUL_TAG}"
                     
                     try {
