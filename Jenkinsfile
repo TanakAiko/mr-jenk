@@ -303,7 +303,7 @@ pipeline {
                 attachLog: false
             )
         }
-        
+
         failure {
             echo '❌ Build failed. Initiating automatic rollback...'
             
