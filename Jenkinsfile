@@ -22,6 +22,12 @@ pipeline {
                     echo '================================================'
                     echo "🔍 Looking for rollback file: ${env.ROLLBACK_FILE}"
                     
+                    // Set current build tag FIRST with fallback for GIT_COMMIT
+                    def gitCommit = env.GIT_COMMIT ?: sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+                    def currentTag = "build-${env.BUILD_NUMBER}-${gitCommit.take(7)}"
+                    env.CURRENT_BUILD_TAG = currentTag
+                    echo "🏗️ CURRENT BUILD TAG: ${currentTag}"
+                    
                     // Try to read the last successful build tag from file
                     if (fileExists(env.ROLLBACK_FILE)) {
                         echo "✅ Rollback file EXISTS!"
@@ -35,24 +41,21 @@ pipeline {
                         """
                         
                         def rollbackInfo = readFile(env.ROLLBACK_FILE).trim()
-                        if (rollbackInfo) {
+                        echo "🔍 DEBUG: rollbackInfo variable = '${rollbackInfo}'"
+                        
+                        if (rollbackInfo && rollbackInfo != '' && rollbackInfo != 'null') {
                             env.LAST_SUCCESSFUL_TAG = rollbackInfo
-                            echo "✅✅✅ LOADED LAST SUCCESSFUL BUILD TAG: ${env.LAST_SUCCESSFUL_TAG}"
+                            echo "✅✅✅ LOADED LAST SUCCESSFUL BUILD TAG: ${rollbackInfo}"
+                            echo "🔍 DEBUG: env.LAST_SUCCESSFUL_TAG = '${env.LAST_SUCCESSFUL_TAG}'"
                             echo "🔄 This tag will be used for rollback if current build fails"
                         } else {
-                            echo "⚠️ Rollback file exists but is empty. This might be the first build."
-                            echo "⚠️ env.LAST_SUCCESSFUL_TAG = '${env.LAST_SUCCESSFUL_TAG}'"
+                            echo "⚠️ Rollback file exists but is empty or invalid."
+                            echo "⚠️ rollbackInfo = '${rollbackInfo}'"
                         }
                     } else {
                         echo "❌ No rollback file found at: ${env.ROLLBACK_FILE}"
                         echo "ℹ️ This is the first deployment - no rollback available yet."
-                        echo "ℹ️ env.LAST_SUCCESSFUL_TAG = '${env.LAST_SUCCESSFUL_TAG}'"
                     }
-                    
-                    // Set current build tag with fallback for GIT_COMMIT
-                    def gitCommit = env.GIT_COMMIT ?: sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-                    env.CURRENT_BUILD_TAG = "build-${env.BUILD_NUMBER}-${gitCommit.take(7)}"
-                    echo "🏗️ CURRENT BUILD TAG: ${env.CURRENT_BUILD_TAG}"
                     echo '================================================'
                     echo "📊 SUMMARY:"
                     echo "   - Previous successful: ${env.LAST_SUCCESSFUL_TAG ?: 'NONE'}"
