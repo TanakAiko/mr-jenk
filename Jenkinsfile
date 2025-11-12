@@ -116,42 +116,84 @@ pipeline {
                     echo '📊 STAGE 2: SONARQUBE CODE QUALITY ANALYSIS'
                     echo '================================================'
                     
+                    def services = [
+                        [name: "gateway", path: "api-gateway"],
+                        [name: "user", path: "user-service"],
+                        [name: "product", path: "product-service"],
+                        [name: "media", path: "media-service"],
+                        [name: "config", path: "config-service"],
+                        [name: "discovery", path: "discovery-service"],
+
+                    ]
+
+                    // Create a map of parallel jobs
+                    def parallelJobs = [:]
+
                     // Use SonarQube Scanner for the entire project
                     withSonarQubeEnv('q1') {
-                        echo '🔍 Running SonarQube Scanner...'
-                        sh """
-                            ${SCANNER_HOME}/bin/sonar-scanner \
-                                -Dsonar.projectKey=buy-01-ecommerce \
-                                -Dsonar.sources=. \
-                                -Dsonar.host.url=http://localhost:9000 \
-                                -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
-                        """
+                        def serviceName = svc.name 
+                        def servicePath = svc.path
+
+                        for (svc in services) {
+                            parallelJobs["SonarQube: ${serviceName}"] {
+                                dir ("${servicePath}") {
+                                    echo "🔍 Running SonarQube scan for ${serviceName}..."
+
+                                    sh """
+                                        ${SCANNER_HOME}/bin/sonar-scanner \
+                                            -Dsonar.projectKey=${serviceName} \
+                                            -Dsonar.projectName=${serviceName} \
+                                            -Dsonar.sources=scr \
+                                            -Dsonar.java.binaries=target/classes \
+                                            -Dsonar.host.url=http://localhost:9000 \
+                                            -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
+                                    """
+
+                                    echo "🚦 Waiting for Quality Gate result for ${serviceName}..."
+                                    timeout(time: 5, unit: 'MINUTES') {
+                                        def qg = waitForQualityGate()
+                                        if (qg.status != 'OK') {
+                                            echo "❌ ${serviceName} failed Quality Gate: ${qg.status}"
+                                            // Uncomment next line if you want to fail the pipeline
+                                            error "Pipeline aborted due to ${serviceName} Quality Gate failure"
+                                        } else {
+                                            echo "✅ ${serviceName} passed Quality Gate!"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        parallelJobs["SonarQube: frontend"] = {
+                            dir('frontend') {
+                                echo "🔍 Running SonarQube scan for frontend..."
+                                sh """
+                                    ${SCANNER_HOME}/bin/sonar-scanner \
+                                    -Dsonar.projectKey=frontend \
+                                    -Dsonar.projectName=frontend \
+                                    -Dsonar.sources=src \
+                                    -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts \
+                                    -Dsonar.host.url=http://localhost:9000
+                                """                        
+
+                                echo "🚦 Waiting for Quality Gate result for frontend..."
+                                timeout(time: 5, unit: 'MINUTES') {
+                                    def qg = waitForQualityGate()
+                                    if (qg.status != 'OK') {
+                                        echo "❌ frontend failed Quality Gate: ${qg.status}"
+                                        // Uncomment next line if you want to fail the pipeline
+                                        error "Pipeline aborted due to frontend Quality Gate failure"
+                                    } else {
+                                        echo "✅ frontend passed Quality Gate!"
+                                    }
+                                }
+                            }
+                        }
+                        // Run all scans in parallel
+                        parallel parallelJobs
                     }
                     
                     echo '✅ SonarQube analysis completed'
-                }
-            }
-        }
-
-        // Stage 2a: Quality Gate Check
-        stage('Quality Gate') {
-            steps {
-                script {
-                    echo '================================================'
-                    echo '🚦 CHECKING SONARQUBE QUALITY GATE'
-                    echo '================================================'
-                    
-                    timeout(time: 5, unit: 'MINUTES') {
-                        def qg = waitForQualityGate()
-                        if (qg.status != 'OK') {
-                            echo "⚠️ Quality Gate failed: ${qg.status}"
-                            echo "⚠️ This is a warning - pipeline will continue"
-                            // Uncomment the next line to fail the build on quality gate failure
-                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                        } else {
-                            echo '✅ Quality Gate passed!'
-                        }
-                    }
                 }
             }
         }
