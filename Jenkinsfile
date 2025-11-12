@@ -127,59 +127,60 @@ pipeline {
                     ]
 
                     // Use SonarQube Scanner for the entire project
-                    withSonarQubeEnv('q1') {
-                        services.each { svc ->
+                    services.each { svc ->
+                        withSonarQubeEnv('q1') {
                             def serviceName = svc.name 
                             def servicePath = svc.path
 
-                            dir ("${servicePath}") {
-                                echo "🔍 Running SonarQube scan for ${serviceName}..."
+                            
+                            echo "🔍 Running SonarQube scan for ${serviceName}..."
 
-                                sh """
-                                    ${SCANNER_HOME}/bin/sonar-scanner \
-                                        -Dsonar.projectKey=${serviceName} \
-                                        -Dsonar.projectName=${serviceName} \
-                                        -Dsonar.sources=src \
-                                        -Dsonar.java.binaries=target/classes \
-                                        -Dsonar.host.url=http://localhost:9000 \
-                                        -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
-                                """
-
-                                echo "🚦 Waiting for Quality Gate result for ${serviceName}..."
-                                timeout(time: 5, unit: 'MINUTES') {
-                                    def qg = waitForQualityGate()
-                                    if (qg.status != 'OK') {
-                                        echo "❌ ${serviceName} failed Quality Gate: ${qg.status}"
-                                        // Uncomment next line if you want to fail the pipeline
-                                        error "Pipeline aborted due to ${serviceName} Quality Gate failure"
-                                    } else {
-                                        echo "✅ ${serviceName} passed Quality Gate!"
-                                    }
-                                }
-                            }
-                        }
-
-                        dir('buy-01-frontend') {
-                            echo "🔍 Running SonarQube scan for frontend..."
                             sh """
                                 ${SCANNER_HOME}/bin/sonar-scanner \
-                                -Dsonar.projectKey=frontend \
-                                -Dsonar.projectName=frontend \
-                                -Dsonar.sources=src \
-                                -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts \
-                                -Dsonar.host.url=http://localhost:9000
-                            """                        
+                                    -Dsonar.projectBaseDir=${servicePath} \
+                                    -Dsonar.projectKey=${serviceName} \
+                                    -Dsonar.projectName=${serviceName} \
+                                    -Dsonar.sources=src \
+                                    -Dsonar.java.binaries=target/classes \
+                                    -Dsonar.host.url=http://localhost:9000 \
+                                    -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
+                            """
 
-                            echo "🚦 Waiting for Quality Gate result for frontend..."
+                            echo "🚦 Waiting for Quality Gate result for ${serviceName}..."
                             timeout(time: 5, unit: 'MINUTES') {
                                 def qg = waitForQualityGate()
                                 if (qg.status != 'OK') {
-                                    echo "❌ frontend failed Quality Gate: ${qg.status}"
+                                    echo "❌ ${serviceName} failed Quality Gate: ${qg.status}"
                                     // Uncomment next line if you want to fail the pipeline
-                                    error "Pipeline aborted due to frontend Quality Gate failure"
+                                    // error "Pipeline aborted due to ${serviceName} Quality Gate failure"
                                 } else {
-                                    echo "✅ frontend passed Quality Gate!"
+                                    echo "✅ ${serviceName} passed Quality Gate!"
                                 }
+                            }                        
+                        }
+                    }
+
+                    withSonarQubeEnv('q1') {
+                        echo "🔍 Running SonarQube scan for frontend..."
+                        sh """
+                            ${SCANNER_HOME}/bin/sonar-scanner \
+                            -Dsonar.projectKey=frontend \
+                            -Dsonar.projectName=frontend \
+                            -Dsonar.projectBaseDir=buy-01-frontend \
+                            -Dsonar.sources=src \
+                            -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts \
+                            -Dsonar.host.url=http://localhost:9000
+                        """                        
+
+                        echo "🚦 Waiting for Quality Gate result for frontend..."
+                        timeout(time: 5, unit: 'MINUTES') {
+                            def qg = waitForQualityGate()
+                            if (qg.status != 'OK') {
+                                echo "❌ frontend failed Quality Gate: ${qg.status}"
+                                // Uncomment next line if you want to fail the pipeline
+                                // error "Pipeline aborted due to frontend Quality Gate failure"
+                            } else {
+                                echo "✅ frontend passed Quality Gate!"
                             }
                         }        
                     }
