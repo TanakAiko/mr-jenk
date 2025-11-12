@@ -11,6 +11,7 @@
   <img src="https://img.shields.io/badge/Java-21-orange?style=flat-square&logo=openjdk" alt="Java 21" />
   <img src="https://img.shields.io/badge/Spring_Boot-3.5.6-green?style=flat-square&logo=spring-boot" alt="Spring Boot 3.5.6" />
   <img src="https://img.shields.io/badge/Angular-18+-red?style=flat-square&logo=angular" alt="Angular 18+" />
+  <img src="https://img.shields.io/badge/SonarQube-Integrated-4E9BCD?style=flat-square&logo=sonarqube" alt="SonarQube" />
 </p>
 
 A modern, full-stack e-commerce application built with **Spring Boot** microservices backend and **Angular** frontend, featuring a complete microservices architecture with service discovery, configuration management, and API gateway.
@@ -165,6 +166,7 @@ This project implements a microservices architecture with the following componen
 <p align="left">
   <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
   <img src="https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=Jenkins&logoColor=white" alt="Jenkins" />
+  <img src="https://img.shields.io/badge/SonarQube-4E9BCD?style=for-the-badge&logo=sonarqube&logoColor=white" alt="SonarQube" />
   <img src="https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white" alt="Nginx" />
   <img src="https://img.shields.io/badge/MongoDB_Atlas-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB Atlas" />
   <img src="https://img.shields.io/badge/Supabase-181818?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
@@ -172,7 +174,8 @@ This project implements a microservices architecture with the following componen
 </p>
 
 - **Docker & Docker Compose** - Containerization
-- **Jenkins** - CI/CD pipeline
+- **Jenkins** - CI/CD pipeline with automatic rollback
+- **SonarQube** - Code quality and security analysis
 - **Nginx** - Reverse proxy (frontend)
 - **MongoDB Atlas** - Cloud database
 - **Supabase** - File storage
@@ -283,25 +286,52 @@ The API follows RESTful principles. Key endpoints include:
 
 ## 🏃‍♂️ CI/CD Pipeline
 
-The project includes a comprehensive Jenkins pipeline that:
+The project includes a comprehensive Jenkins pipeline with automatic rollback and code quality analysis:
 
-1. **Tests** all services in parallel
-2. **Builds** Docker images
-3. **Pushes** images to Docker Hub
-4. **Deploys** the complete stack
-5. **Sends email notifications** on build status (success/failure/unstable)
+1. **Load Rollback Info** - Load previous successful build reference
+2. **Test** all services in parallel (Maven + npm)
+3. **SonarQube Analysis** - Code quality and security scanning
+4. **Quality Gate Check** - Verify code meets quality standards
+5. **Build Docker Images** - Build all microservices and frontend
+6. **Push** images to Docker Hub with version tags
+7. **Deploy** the complete stack using Docker Compose
+8. **Save Build Reference** - Store successful build tag for rollback
+9. **Automatic Rollback** - Roll back to last successful version on failure
+10. **Email Notifications** - Send detailed status reports
 
 ### Pipeline Stages
-- Source code testing (Maven + npm)
-- Docker image building
-- Image pushing to registry
-- Application deployment
-- Email notification delivery
+- **Stage 0**: Load rollback information
+- **Stage 1**: Parallel testing (Maven + npm)
+- **Stage 2**: SonarQube code quality analysis
+- **Stage 2a**: Quality gate validation
+- **Stage 3**: Docker image building
+- **Stage 4**: Image pushing to Docker Hub
+- **Stage 5**: Application deployment
+- **Stage 6**: Save build reference for future rollback
+
+### Code Quality & Security
+The pipeline includes **SonarQube** integration for continuous code quality monitoring:
+- 📊 **Code Coverage**: Track test coverage across all services
+- 🐛 **Bug Detection**: Identify potential bugs and code issues
+- 🔒 **Security Analysis**: Detect vulnerabilities and security hotspots
+- 📈 **Code Smells**: Identify maintainability issues
+- 🚦 **Quality Gates**: Enforce quality standards on every build
+
+**Setup Guide**: See [SONARQUBE_SETUP.md](./SONARQUBE_SETUP.md) for SonarQube configuration instructions.
+
+### Automatic Rollback
+The pipeline features automatic rollback on deployment failure:
+- 💾 **Build Tracking**: Saves successful build tags automatically
+- 🔄 **Smart Rollback**: Rolls back to last known good version on failure
+- 🛡️ **Zero Downtime**: Ensures service continuity during rollback
+- 📝 **Detailed Logging**: Complete audit trail of all deployments
+
+**Rollback Guide**: See [ROLLBACK_GUIDE.md](./ROLLBACK_GUIDE.md) for rollback documentation.
 
 ### Email Notifications
 The pipeline automatically sends professional HTML email notifications:
 - ✅ **Success**: When build completes successfully with deployment links
-- ❌ **Failure**: When build fails with troubleshooting steps and logs
+- ❌ **Failure**: When build fails with troubleshooting steps and automatic rollback status
 - ⚠️ **Unstable**: When build has warnings or test failures
 
 **Setup Guide**: See [JENKINS_EMAIL_SETUP.md](./JENKINS_EMAIL_SETUP.md) for detailed configuration instructions.

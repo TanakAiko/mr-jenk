@@ -105,10 +105,64 @@ pipeline {
             }
         }
 
-        // Stage 2: Build all the Docker images using docker-compose 🐳
+        // Stage 2: SonarQube Code Quality Analysis
+        stage('SonarQube Analysis') {
+            environment {
+                SCANNER_HOME = tool 'SonarScanner'
+            }
+            steps {
+                script {
+                    echo '================================================'
+                    echo '📊 STAGE 2: SONARQUBE CODE QUALITY ANALYSIS'
+                    echo '================================================'
+                    
+                    // Use SonarQube Scanner for the entire project
+                    withSonarQubeEnv('q1') {
+                        echo '🔍 Running SonarQube Scanner...'
+                        sh """
+                            ${SCANNER_HOME}/bin/sonar-scanner \
+                                -Dsonar.projectKey=buy-01-ecommerce \
+                                -Dsonar.sources=. \
+                                -Dsonar.host.url=http://localhost:9000 \
+                                -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
+                        """
+                    }
+                    
+                    echo '✅ SonarQube analysis completed'
+                }
+            }
+        }
+
+        // Stage 2a: Quality Gate Check
+        stage('Quality Gate') {
+            steps {
+                script {
+                    echo '================================================'
+                    echo '🚦 CHECKING SONARQUBE QUALITY GATE'
+                    echo '================================================'
+                    
+                    timeout(time: 5, unit: 'MINUTES') {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            echo "⚠️ Quality Gate failed: ${qg.status}"
+                            echo "⚠️ This is a warning - pipeline will continue"
+                            // Uncomment the next line to fail the build on quality gate failure
+                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                        } else {
+                            echo '✅ Quality Gate passed!'
+                        }
+                    }
+                }
+            }
+        }
+
+        // Stage 3: Build all the Docker images using docker-compose 🐳
         // This command builds the images but does not run them.
         stage('Build Docker Images') {
             steps {
+                echo '================================================'
+                echo '🐳 STAGE 3: BUILDING DOCKER IMAGES'
+                echo '================================================'
                 echo 'Building all Docker images from their Dockerfiles...'
                 // Pass the credentials to the docker-compose command
                 withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'CONFIG_REPO_USERNAME', passwordVariable: 'CONFIG_REPO_PASSWORD')]) {
@@ -122,9 +176,12 @@ pipeline {
             }
         }
 
-        // Stage 3: Push Docker Images with Current Build Tag
+        // Stage 4: Push Docker Images with Current Build Tag
         stage('Push Docker Images') {
             steps {
+                echo '================================================'
+                echo '📤 STAGE 4: PUSHING DOCKER IMAGES TO DOCKER HUB'
+                echo '================================================'
                 echo 'Pushing Docker images to Docker Hub...'
                 script {
                     def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'buy-01-frontend']
@@ -156,9 +213,12 @@ pipeline {
 
         
 
-        // Stage 4: Deploy the entire application using Docker Compose 🚀
+        // Stage 5: Deploy the entire application using Docker Compose 🚀
         stage('Deploy Application') {
             steps {
+                echo '================================================'
+                echo '🚀 STAGE 5: DEPLOYING APPLICATION'
+                echo '================================================'
                 echo 'Deploying the application stack from Docker Hub images...'
                 script {
                     def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'buy-01-frontend']
@@ -205,12 +265,12 @@ pipeline {
             }
         }
         
-        // Stage 5: Save Successful Build Reference
+        // Stage 6: Save Successful Build Reference
         stage('Save Build Reference') {
             steps {
                 script {
                     echo '================================================'
-                    echo '💾 STAGE 5: SAVING BUILD REFERENCE'
+                    echo '💾 STAGE 6: SAVING BUILD REFERENCE'
                     echo '================================================'
                     
                     // Ensure CURRENT_BUILD_TAG is set (safety check)
