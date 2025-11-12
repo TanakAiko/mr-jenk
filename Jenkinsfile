@@ -131,10 +131,10 @@ pipeline {
 
                     // Use SonarQube Scanner for the entire project
                     withSonarQubeEnv('q1') {
-                        def serviceName = svc.name 
-                        def servicePath = svc.path
+                        services.each { svc ->
+                            def serviceName = svc.name 
+                            def servicePath = svc.path
 
-                        for (svc in services) {
                             parallelJobs["SonarQube: ${serviceName}"] {
                                 dir ("${servicePath}") {
                                     echo "🔍 Running SonarQube scan for ${serviceName}..."
@@ -143,7 +143,7 @@ pipeline {
                                         ${SCANNER_HOME}/bin/sonar-scanner \
                                             -Dsonar.projectKey=${serviceName} \
                                             -Dsonar.projectName=${serviceName} \
-                                            -Dsonar.sources=scr \
+                                            -Dsonar.sources=src \
                                             -Dsonar.java.binaries=target/classes \
                                             -Dsonar.host.url=http://localhost:9000 \
                                             -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
@@ -165,7 +165,7 @@ pipeline {
                         }
 
                         parallelJobs["SonarQube: frontend"] = {
-                            dir('frontend') {
+                            dir('buy-01-frontend') {
                                 echo "🔍 Running SonarQube scan for frontend..."
                                 sh """
                                     ${SCANNER_HOME}/bin/sonar-scanner \
