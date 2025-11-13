@@ -28,6 +28,15 @@ import sn.dev.user_service.services.impl.UserServicesImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServicesImplTest {
+    // Test data constants
+    private static final String TEST_EMAIL = "a@example.com";
+    private static final String TEST_EMAIL_MISSING = "missing@example.com";
+    private static final String TEST_USER_ID_1 = "u1";
+    private static final String TEST_USER_ID_MISSING = "missing";
+    private static final String TEST_PASSWORD = "pass";
+    private static final String TEST_PASSWORD_BAD = "bad";
+    private static final String TEST_JWT_TOKEN = "JWT_TOKEN";
+
     @Mock
     private UserRepositories userRepositories;
 
@@ -53,22 +62,22 @@ public class UserServicesImplTest {
 
     @Test
     void login_success_returnsToken() {
-        User u = user("u1", "a@example.com", "pass");
+        User u = user(TEST_USER_ID_1, TEST_EMAIL, TEST_PASSWORD);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
             .thenReturn(authentication);
         when(authentication.isAuthenticated()).thenReturn(true);
-        when(jwtServices.generateToken(authentication, "u1")).thenReturn("JWT_TOKEN");
+        when(jwtServices.generateToken(authentication, TEST_USER_ID_1)).thenReturn(TEST_JWT_TOKEN);
 
         String token = userServices.login(u);
-        assertThat(token).isEqualTo("JWT_TOKEN");
+        assertThat(token).isEqualTo(TEST_JWT_TOKEN);
         verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtServices, times(1)).generateToken(authentication, "u1");
+        verify(jwtServices, times(1)).generateToken(authentication, TEST_USER_ID_1);
         System.out.println("✅ USER/SERVICE: login_success_returnsToken() passed successfully.");
     }
 
     @Test
     void login_authenticationFails_throwsCredentialsNotFound() {
-        User u = user("u1", "a@example.com", "bad");
+        User u = user(TEST_USER_ID_1, TEST_EMAIL, TEST_PASSWORD_BAD);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
             .thenThrow(new AuthenticationException("bad creds"){});
 
@@ -80,16 +89,16 @@ public class UserServicesImplTest {
 
     @Test
     void findByEmail_found_returnsUser() {
-        when(userRepositories.findByEmail("a@example.com")).thenReturn(Optional.of(user("u1", "a@example.com", "p")));
-        User result = userServices.findByEmail("a@example.com");
-        assertThat(result.getId()).isEqualTo("u1");
+        when(userRepositories.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user(TEST_USER_ID_1, TEST_EMAIL, "p")));
+        User result = userServices.findByEmail(TEST_EMAIL);
+        assertThat(result.getId()).isEqualTo(TEST_USER_ID_1);
         System.out.println("✅ USER/SERVICE: findByEmail_found_returnsUser() passed successfully.");
     }
 
     @Test
     void findByEmail_notFound_throws() {
-        when(userRepositories.findByEmail("missing@example.com")).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> userServices.findByEmail("missing@example.com"))
+        when(userRepositories.findByEmail(TEST_EMAIL_MISSING)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> userServices.findByEmail(TEST_EMAIL_MISSING))
             .isInstanceOf(AuthenticationCredentialsNotFoundException.class)
             .hasMessageContaining("User not found with email");
         System.out.println("✅ USER/SERVICE: findByEmail_notFound_throws() passed successfully.");
@@ -97,16 +106,16 @@ public class UserServicesImplTest {
 
     @Test
     void findById_found_returnsUser() {
-        when(userRepositories.findById("u1")).thenReturn(Optional.of(user("u1", "a@example.com", "p")));
-        User result = userServices.findById("u1");
-        assertThat(result.getEmail()).isEqualTo("a@example.com");
+        when(userRepositories.findById(TEST_USER_ID_1)).thenReturn(Optional.of(user(TEST_USER_ID_1, TEST_EMAIL, "p")));
+        User result = userServices.findById(TEST_USER_ID_1);
+        assertThat(result.getEmail()).isEqualTo(TEST_EMAIL);
         System.out.println("✅ USER/SERVICE: findById_found_returnsUser() passed successfully.");
     }
 
     @Test
     void findById_notFound_throws() {
-        when(userRepositories.findById("missing")).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> userServices.findById("missing"))
+        when(userRepositories.findById(TEST_USER_ID_MISSING)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> userServices.findById(TEST_USER_ID_MISSING))
             .isInstanceOf(AuthenticationCredentialsNotFoundException.class)
             .hasMessageContaining("User not found with id");
         System.out.println("✅ USER/SERVICE: findById_notFound_throws() passed successfully.");
@@ -114,7 +123,7 @@ public class UserServicesImplTest {
 
     @Test
     void findAllUsers_returnsList() {
-        when(userRepositories.findAll()).thenReturn(List.of(user("u1", "a@example.com", "p")));
+        when(userRepositories.findAll()).thenReturn(List.of(user(TEST_USER_ID_1, TEST_EMAIL, "p")));
         List<User> all = userServices.findAllUsers();
         assertThat(all).hasSize(1);
         verify(userRepositories, times(1)).findAll();

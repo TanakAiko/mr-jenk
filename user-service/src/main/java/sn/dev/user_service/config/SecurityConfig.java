@@ -35,7 +35,15 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 @AllArgsConstructor
 public class SecurityConfig {
-//    private final UserDetailsService userDetailsService;
+    // API endpoint constants
+    private static final String API_USERS_LOGIN = "/api/users/login";
+    private static final String API_USERS = "/api/users";
+    private static final String API_USERS_ID = "/api/users/{id}";
+    private static final String API_USERS_CUSTOM = "/api/users/custom";
+    private static final String API_USERS_USER_ID_CUSTOM = "/api/users/{userID}/custom";
+    private static final String API_PRODUCTS = "/api/products";
+
+    // Private final UserDetailsService userDetailsService;
     private final RSAKeysConfig rsaKeysConfig;
 
     @Bean
@@ -46,31 +54,31 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(
                                 HttpMethod.POST,
-                                "/api/users/login",
-                                "/api/users"
+                                API_USERS_LOGIN,
+                                API_USERS
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
-                                "/api/users",
-                                "/api/users/{id}",
-                                "/api/users/custom",
-                                "/api/users/{userID}/custom"
+                                API_USERS,
+                                API_USERS_ID,
+                                API_USERS_CUSTOM,
+                                API_USERS_USER_ID_CUSTOM
                         ).authenticated()
                         .requestMatchers(
                                 HttpMethod.POST,
-                                "/api/products"
+                                API_PRODUCTS
                         ).authenticated()
                         .requestMatchers(
                                 HttpMethod.PUT,
-                                "/api/users/{id}"
+                                API_USERS_ID
                         ).authenticated()
                         .requestMatchers(
                                 HttpMethod.PATCH,
-                                "/api/users/{id}"
+                                API_USERS_ID
                         ).authenticated()
                         .requestMatchers(
                                 HttpMethod.DELETE,
-                                "/api/users/{id}"
+                                API_USERS_ID
                         ).authenticated()
                         .anyRequest().permitAll()
                 )

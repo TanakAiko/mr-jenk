@@ -8,6 +8,7 @@ class ConfigServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// This test is intentionally empty - it verifies that the Spring application context loads successfully
 	}
 
 }
