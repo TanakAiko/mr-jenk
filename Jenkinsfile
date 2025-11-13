@@ -180,7 +180,7 @@ pipeline {
                             -Dsonar.projectName=frontend \
                             -Dsonar.projectBaseDir=buy-01-frontend \
                             -Dsonar.sources=src \
-                            -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts \
+                            -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts
                         """
 
                         echo "✅ Scanner completed for frontend"
