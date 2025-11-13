@@ -22,7 +22,7 @@ The Jenkins pipeline is now configured to send email notifications for:
 
 1. Go to **Manage Jenkins** → **Configure System**
 2. Scroll down to **Extended E-mail Notification** section
-3. Configure the following:
+3. Configure the  following:
 
 #### For Gmail (Recommended for Testing)
 
