@@ -171,7 +171,7 @@ pipeline {
                     echo "🔍 ANALYZING FRONTEND"
                     echo "📁 Path: buy-01-frontend"
                     echo "================================================"
-                    
+
                     withSonarQubeEnv('q1') {
                         echo "🔍 Running SonarQube scan for frontend..."
                         sh """
