@@ -150,7 +150,7 @@ pipeline {
                             """
                             echo "✅ Scanner completed for ${serviceName}"
                         }
-                        
+
                         echo "🚦 Waiting for Quality Gate result for ${serviceName}..."
                         timeout(time: 5, unit: 'MINUTES') {
                             def qg = waitForQualityGate(abortPipeline: false)
