@@ -159,7 +159,7 @@ pipeline {
                                 echo "❌ ${serviceName} failed Quality Gate: ${qg.status}"
 
                                 // Uncomment next line if you want to fail the pipeline
-                                // error "Pipeline aborted due to ${serviceName} Quality Gate failure"
+                                error "Pipeline aborted due to ${serviceName} Quality Gate failure"
                             } else {
                                 echo "✅ ${serviceName} PASSED Quality Gate!"
                             }
@@ -192,7 +192,7 @@ pipeline {
                         if (qg.status != 'OK') {
                             echo "❌ frontend failed Quality Gate: ${qg.status}"
                             // Uncomment next line if you want to fail the pipeline
-                            // error "Pipeline aborted due to frontend Quality Gate failure"
+                            error "Pipeline aborted due to frontend Quality Gate failure"
                         } else {
                             echo "✅ Frontend PASSED Quality Gate!"
                         }

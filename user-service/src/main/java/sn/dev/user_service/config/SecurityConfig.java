@@ -43,7 +43,6 @@ public class SecurityConfig {
     private static final String API_USERS_USER_ID_CUSTOM = "/api/users/{userID}/custom";
     private static final String API_PRODUCTS = "/api/products";
 
-    // Private final UserDetailsService userDetailsService;
     private final RSAKeysConfig rsaKeysConfig;
 
     @Bean
