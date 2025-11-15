@@ -12,7 +12,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import sn.dev.user_service.services.UserServices;
-
+    
 @SpringBootTest
 @AutoConfigureMockMvc
 public class SecurityConfigTest {
