@@ -15,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,6 +30,8 @@ import sn.dev.user_service.services.impl.UserServicesImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServicesImplTest {
+    private static final Logger logger = LoggerFactory.getLogger(UserServicesImplTest.class);
+    
     // Test data constants
     private static final String TEST_EMAIL = "a@example.com";
     private static final String TEST_EMAIL_MISSING = "missing@example.com";
@@ -72,7 +76,7 @@ public class UserServicesImplTest {
         assertThat(token).isEqualTo(TEST_JWT_TOKEN);
         verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtServices, times(1)).generateToken(authentication, TEST_USER_ID_1);
-        System.out.println("✅ USER/SERVICE: login_success_returnsToken() passed successfully.");
+        logger.info("✅ USER/SERVICE: login_success_returnsToken() passed successfully.");
     }
 
     @Test
@@ -84,7 +88,7 @@ public class UserServicesImplTest {
         assertThatThrownBy(() -> userServices.login(u))
             .isInstanceOf(AuthenticationCredentialsNotFoundException.class)
             .hasMessageContaining("Invalid username or password");
-        System.out.println("✅ USER/SERVICE: login_authenticationFails_throwsCredentialsNotFound() passed successfully.");
+        logger.info("✅ USER/SERVICE: login_authenticationFails_throwsCredentialsNotFound() passed successfully.");
     }
 
     @Test
@@ -92,7 +96,7 @@ public class UserServicesImplTest {
         when(userRepositories.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user(TEST_USER_ID_1, TEST_EMAIL, "p")));
         User result = userServices.findByEmail(TEST_EMAIL);
         assertThat(result.getId()).isEqualTo(TEST_USER_ID_1);
-        System.out.println("✅ USER/SERVICE: findByEmail_found_returnsUser() passed successfully.");
+        logger.info("✅ USER/SERVICE: findByEmail_found_returnsUser() passed successfully.");
     }
 
     @Test
@@ -101,7 +105,7 @@ public class UserServicesImplTest {
         assertThatThrownBy(() -> userServices.findByEmail(TEST_EMAIL_MISSING))
             .isInstanceOf(AuthenticationCredentialsNotFoundException.class)
             .hasMessageContaining("User not found with email");
-        System.out.println("✅ USER/SERVICE: findByEmail_notFound_throws() passed successfully.");
+        logger.info("✅ USER/SERVICE: findByEmail_notFound_throws() passed successfully.");
     }
 
     @Test
@@ -109,7 +113,7 @@ public class UserServicesImplTest {
         when(userRepositories.findById(TEST_USER_ID_1)).thenReturn(Optional.of(user(TEST_USER_ID_1, TEST_EMAIL, "p")));
         User result = userServices.findById(TEST_USER_ID_1);
         assertThat(result.getEmail()).isEqualTo(TEST_EMAIL);
-        System.out.println("✅ USER/SERVICE: findById_found_returnsUser() passed successfully.");
+        logger.info("✅ USER/SERVICE: findById_found_returnsUser() passed successfully.");
     }
 
     @Test
@@ -118,7 +122,7 @@ public class UserServicesImplTest {
         assertThatThrownBy(() -> userServices.findById(TEST_USER_ID_MISSING))
             .isInstanceOf(AuthenticationCredentialsNotFoundException.class)
             .hasMessageContaining("User not found with id");
-        System.out.println("✅ USER/SERVICE: findById_notFound_throws() passed successfully.");
+        logger.info("✅ USER/SERVICE: findById_notFound_throws() passed successfully.");
     }
 
     @Test
@@ -127,6 +131,6 @@ public class UserServicesImplTest {
         List<User> all = userServices.findAllUsers();
         assertThat(all).hasSize(1);
         verify(userRepositories, times(1)).findAll();
-        System.out.println("✅ USER/SERVICE: findAllUsers_returnsList() passed successfully.");
+        logger.info("✅ USER/SERVICE: findAllUsers_returnsList() passed successfully.");
     }
 } 
