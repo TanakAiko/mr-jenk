@@ -31,7 +31,7 @@ import sn.dev.user_service.services.impl.UserServicesImpl;
 @ExtendWith(MockitoExtension.class)
 public class UserServicesImplTest {
     private static final Logger logger = LoggerFactory.getLogger(UserServicesImplTest.class);
-    
+
     // Test data constants
     private static final String TEST_EMAIL = "a@example.com";
     private static final String TEST_EMAIL_MISSING = "missing@example.com";

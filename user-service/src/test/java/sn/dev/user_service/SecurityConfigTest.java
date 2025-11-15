@@ -13,10 +13,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import sn.dev.user_service.services.UserServices;
 
-/**
- * Integration tests for SecurityConfig to ensure security configuration is properly tested.
- * These tests verify CORS, CSRF, authentication, and authorization rules.
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 public class SecurityConfigTest {
