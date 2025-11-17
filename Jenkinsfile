@@ -193,7 +193,7 @@ pipeline {
                         echo "Quality Gate status for frontend: ${qg.status}"
                         if (qg.status != 'OK') {
                             echo "❌ frontend failed Quality Gate: ${qg.status}"
-                            error "Pipeline aborted due to frontend Quality Gate failure"
+                            error "Pipeline aborted due to front-end Quality Gate failure"
                         } else {
                             echo "✅ Frontend PASSED Quality Gate!"
                         }
