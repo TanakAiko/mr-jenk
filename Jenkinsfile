@@ -149,19 +149,17 @@ pipeline {
                                     -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
                             """
                             echo "✅ Scanner completed for ${serviceName}"
-                        }
-
-                        echo "🚦 Waiting for Quality Gate result for ${serviceName}..."
-                        timeout(time: 5, unit: 'MINUTES') {
-                            def qg = waitForQualityGate(abortPipeline: false)
-                            echo "Status: ${qg.status}"
-                            if (qg.status != 'OK') {
-                                echo "❌ ${serviceName} failed Quality Gate: ${qg.status}"
-
-                                // Uncomment next line if you want to fail the pipeline
-                                error "Pipeline aborted due to ${serviceName} Quality Gate failure"
-                            } else {
-                                echo "✅ ${serviceName} PASSED Quality Gate!"
+                            
+                            echo "🚦 Waiting for Quality Gate result for ${serviceName}..."
+                            timeout(time: 5, unit: 'MINUTES') {
+                                def qg = waitForQualityGate()
+                                echo "Quality Gate status for ${serviceName}: ${qg.status}"
+                                if (qg.status != 'OK') {
+                                    echo "❌ ${serviceName} failed Quality Gate: ${qg.status}"
+                                    error "Pipeline aborted due to ${serviceName} Quality Gate failure"
+                                } else {
+                                    echo "✅ ${serviceName} PASSED Quality Gate!"
+                                }
                             }
                         }
                     }
@@ -183,18 +181,17 @@ pipeline {
                             -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts
                         """
                         echo "✅ Scanner completed for frontend"
-                    }
-                    
-                    echo "🚦 Waiting for Quality Gate result for frontend..."
-                    timeout(time: 5, unit: 'MINUTES') {
-                        def qg = waitForQualityGate(abortPipeline: false)
-                        echo "Status: ${qg.status}"
-                        if (qg.status != 'OK') {
-                            echo "❌ frontend failed Quality Gate: ${qg.status}"
-                            // Uncomment next line if you want to fail the pipeline
-                            error "Pipeline aborted due to frontend Quality Gate failure"
-                        } else {
-                            echo "✅ Frontend PASSED Quality Gate!"
+                        
+                        echo "🚦 Waiting for Quality Gate result for frontend..."
+                        timeout(time: 5, unit: 'MINUTES') {
+                            def qg = waitForQualityGate()
+                            echo "Quality Gate status for frontend: ${qg.status}"
+                            if (qg.status != 'OK') {
+                                echo "❌ frontend failed Quality Gate: ${qg.status}"
+                                error "Pipeline aborted due to frontend Quality Gate failure"
+                            } else {
+                                echo "✅ Frontend PASSED Quality Gate!"
+                            }
                         }
                     }
                     
