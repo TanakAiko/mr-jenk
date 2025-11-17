@@ -185,7 +185,7 @@ pipeline {
                         """
                         echo "✅ Scanner completed for frontend"
                     }
-                    
+
                     // Wait for Quality Gate (MUST be outside withSonarQubeEnv)
                     echo "🚦 Waiting for Quality Gate result for frontend..."
                     timeout(time: 5, unit: 'MINUTES') {
