@@ -157,7 +157,7 @@ pipeline {
                         timeout(time: 5, unit: 'MINUTES') {
                             def qg = waitForQualityGate()
                             echo "Quality Gate status for ${serviceName}: ${qg.status}"
-                            echo "Full Quality Gate object structure: ${qg.inspect()}"
+                            echo "Full Quality Gate object structure: ${qg}"
                             if (qg.status != 'OK') {
                                 echo "❌ ${serviceName} failed Quality Gate: ${qg.status}"
                                 error "Pipeline aborted due to ${serviceName} Quality Gate failure"
