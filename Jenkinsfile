@@ -190,6 +190,8 @@ pipeline {
                     echo "🚦 Waiting for Quality Gate result for frontend..."
                     timeout(time: 5, unit: 'MINUTES') {
                         def qg = waitForQualityGate()
+                        echo "Full Quality Gate object structure: ${qg.inspect()}"
+                        echo "Full Quality Gate object in JSON format: ${qg.json}"
                         echo "Quality Gate status for frontend: ${qg.status}"
                         if (qg.status != 'OK') {
                             echo "❌ frontend failed Quality Gate: ${qg.status}"
