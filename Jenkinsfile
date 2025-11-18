@@ -124,7 +124,7 @@ pipeline {
                             ${SCANNER_HOME}/bin/sonar-scanner \
                                 -Dsonar.projectKey=buy-01 \
                                 -Dsonar.projectName=buy-01 \
-                                -Dsonar.modules=api-gateway,user-service,product-service,media-service,config-service,discovery-service,frontend \
+                                -Dsonar.modules=api-gateway,user-service,product-service,media-service,config-service,discovery-service,buy-01-frontend \
                                 -Dsonar.module.api-gateway.projectBaseDir=api-gateway \
                                 -Dsonar.module.api-gateway.sources=src/main/java \
                                 -Dsonar.module.api-gateway.tests=src/test/java \
@@ -149,9 +149,9 @@ pipeline {
                                 -Dsonar.module.discovery-service.sources=src/main/java \
                                 -Dsonar.module.discovery-service.tests=src/test/java \
                                 -Dsonar.module.discovery-service.java.binaries=target/classes \
-                                -Dsonar.module.frontend.projectBaseDir=buy-01-frontend \
-                                -Dsonar.module.frontend.sources=src \
-                                -Dsonar.module.frontend.exclusions=**/node_modules/**,**/*.spec.ts \
+                                -Dsonar.module.buy-01-frontend.projectBaseDir=buy-01-frontend \
+                                -Dsonar.module.buy-01-frontend.sources=src \
+                                -Dsonar.module.buy-01-frontend.exclusions=**/node_modules/**,**/*.spec.ts \
                                 -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
                         """
                     }
