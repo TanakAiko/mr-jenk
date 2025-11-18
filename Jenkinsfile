@@ -158,7 +158,7 @@ pipeline {
                                            "-Dsonar.projectBaseDir=${baseDir} " +
                                            "-Dsonar.sources=${svc.src} " +
                                            "-Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts "
-
+ 
                             if (svc.tests) {
                                 sonarCmd += "-Dsonar.tests=${svc.tests} "
                             }
