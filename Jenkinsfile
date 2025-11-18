@@ -151,6 +151,9 @@ pipeline {
 
                             sh sonarCmd
 
+                            echo "✅ Scanner completed for ${serviceName}"
+                        }
+
                             echo "🚦 Waiting for Quality Gate for ${svc.key}..."
                             timeout(time: 10, unit: 'MINUTES') {
                                 def qg = waitForQualityGate()
