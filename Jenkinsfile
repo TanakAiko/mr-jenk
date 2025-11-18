@@ -115,93 +115,62 @@ pipeline {
                     echo '================================================'
                     echo '📊 STAGE 2: SONARQUBE CODE QUALITY ANALYSIS'
                     echo '================================================'
-                    
-                    def services = [
-                        [name: "gateway", path: "api-gateway"],
-                        [name: "user", path: "user-service"],
-                        [name: "product", path: "product-service"],
-                        [name: "media", path: "media-service"],
-                        [name: "config", path: "config-service"],
-                        [name: "discovery", path: "discovery-service"],
 
-                    ]
+                    // Single multi-module SonarQube project for all services + frontend
+                    echo "🔍 Running SonarQube multi-module analysis for entire application..."
 
-                    // Use SonarQube Scanner for the entire project
-                    services.each { svc ->
-                        def serviceName = svc.name 
-                        def servicePath = svc.path
-
-                        echo "================================================"
-                        echo "🔍 ANALYZING SERVICE: ${serviceName}"
-                        echo "📁 Path: ${servicePath}"
-                        echo "================================================"
-
-                        // Run SonarQube analysis
-                        withSonarQubeEnv('q1') {        
-                            echo "🔍 Running SonarQube scan for ${serviceName}..."
-
-                            sh """
-                                ${SCANNER_HOME}/bin/sonar-scanner \
-                                    -Dsonar.projectKey=${serviceName} \
-                                    -Dsonar.projectName=${serviceName} \
-                                    -Dsonar.projectBaseDir=${servicePath} \
-                                    -Dsonar.sources=src \
-                                    -Dsonar.java.binaries=target/classes \
-                                    -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
-                            """
-                            echo "✅ Scanner completed for ${serviceName}"
-                        }
-                        
-                        // Wait for Quality Gate (MUST be outside withSonarQubeEnv)
-                        echo "🚦 Waiting for Quality Gate result for ${serviceName}..."
-                        timeout(time: 5, unit: 'MINUTES') {
-                            def qg = waitForQualityGate()
-                            echo "Quality Gate status for ${serviceName}: ${qg.status}"
-                            if (qg.status != 'OK') {
-                                echo "❌ ${serviceName} failed Quality Gate: ${qg.status}"
-                                error "Pipeline aborted due to ${serviceName} Quality Gate failure"
-                            } else {
-                                echo "✅ ${serviceName} PASSED Quality Gate!"
-                            }
-                        }
-                    }
-
-                    // Frontend analysis (separate from services)
-                    echo "================================================"
-                    echo "🔍 ANALYZING FRONTEND"
-                    echo "📁 Path: buy-01-frontend"
-                    echo "================================================"
-
-                    // Run SonarQube analysis
                     withSonarQubeEnv('q1') {
-                        echo "🔍 Running SonarQube scan for frontend..."
                         sh """
                             ${SCANNER_HOME}/bin/sonar-scanner \
-                            -Dsonar.projectKey=frontend \
-                            -Dsonar.projectName=frontend \
-                            -Dsonar.projectBaseDir=buy-01-frontend \
-                            -Dsonar.sources=src \
-                            -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts
+                                -Dsonar.projectKey=buy-01 \
+                                -Dsonar.projectName=buy-01 \
+                                -Dsonar.modules=api-gateway,user-service,product-service,media-service,config-service,discovery-service,frontend \
+                                -Dsonar.module.api-gateway.projectBaseDir=api-gateway \
+                                -Dsonar.module.api-gateway.sources=src/main/java \
+                                -Dsonar.module.api-gateway.tests=src/test/java \
+                                -Dsonar.module.api-gateway.java.binaries=target/classes \
+                                -Dsonar.module.user-service.projectBaseDir=user-service \
+                                -Dsonar.module.user-service.sources=src/main/java \
+                                -Dsonar.module.user-service.tests=src/test/java \
+                                -Dsonar.module.user-service.java.binaries=target/classes \
+                                -Dsonar.module.product-service.projectBaseDir=product-service \
+                                -Dsonar.module.product-service.sources=src/main/java \
+                                -Dsonar.module.product-service.tests=src/test/java \
+                                -Dsonar.module.product-service.java.binaries=target/classes \
+                                -Dsonar.module.media-service.projectBaseDir=media-service \
+                                -Dsonar.module.media-service.sources=src/main/java \
+                                -Dsonar.module.media-service.tests=src/test/java \
+                                -Dsonar.module.media-service.java.binaries=target/classes \
+                                -Dsonar.module.config-service.projectBaseDir=config-service \
+                                -Dsonar.module.config-service.sources=src/main/java \
+                                -Dsonar.module.config-service.tests=src/test/java \
+                                -Dsonar.module.config-service.java.binaries=target/classes \
+                                -Dsonar.module.discovery-service.projectBaseDir=discovery-service \
+                                -Dsonar.module.discovery-service.sources=src/main/java \
+                                -Dsonar.module.discovery-service.tests=src/test/java \
+                                -Dsonar.module.discovery-service.java.binaries=target/classes \
+                                -Dsonar.module.frontend.projectBaseDir=buy-01-frontend \
+                                -Dsonar.module.frontend.sources=src \
+                                -Dsonar.module.frontend.exclusions=**/node_modules/**,**/*.spec.ts \
+                                -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
                         """
-                        echo "✅ Scanner completed for frontend"
                     }
 
-                    // Wait for Quality Gate (MUST be outside withSonarQubeEnv)
-                    echo "🚦 Waiting for Quality Gate result for frontend..."
-                    timeout(time: 5, unit: 'MINUTES') {
+                    echo "🚦 Waiting for global Quality Gate result (all modules)..."
+                    timeout(time: 10, unit: 'MINUTES') {
                         def qg = waitForQualityGate()
-                        echo "Quality Gate status for frontend: ${qg.status}"
+                        echo "Global Quality Gate status for project buy-01: ${qg.status}"
                         if (qg.status != 'OK') {
-                            echo "❌ frontend failed Quality Gate: ${qg.status}"
-                            error "Pipeline aborted due to frontend Quality Gate failure"
+                            echo "❌ Quality Gate failed for at least one module (backend or frontend): ${qg.status}"
+                            error "Pipeline aborted due to global Quality Gate failure"
                         } else {
-                            echo "✅ Frontend PASSED Quality Gate!"
+                            echo "✅ Global Quality Gate PASSED for all modules!"
                         }
                     }
-                    
-                    echo "================================================"
-                    echo "✅✅✅ ALL SONARQUBE ANALYSES COMPLETED"
-                    echo "================================================"
+
+                    echo '================================================'
+                    echo '✅✅✅ SONARQUBE MULTI-MODULE ANALYSIS COMPLETED'
+                    echo '================================================'
                 }
             }
         }
