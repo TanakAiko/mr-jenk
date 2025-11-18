@@ -116,6 +116,20 @@ pipeline {
                     echo '📊 STAGE 2: SONARQUBE CODE QUALITY ANALYSIS'
                     echo '================================================'
 
+                    // Debug: verify compiled classes exist before SonarQube scan
+                    ['api-gateway','config-service','discovery-service','media-service','product-service','user-service'].each { svc ->
+                        echo "🔍 Checking Maven build output for ${svc}"
+                        sh """
+                            echo '----------------------------------------'
+                            echo "📁 Module: ${svc}"
+                            echo "📂 Listing ${svc}/target (if exists):"
+                            ls -R ${svc}/target || echo "❌ ${svc}/target does not exist"
+                            echo "📂 Listing ${svc}/target/classes (if exists):"
+                            ls -R ${svc}/target/classes || echo "❌ ${svc}/target/classes does not exist or is empty"
+                            echo '----------------------------------------'
+                        """
+                    }
+
                     // Single multi-module SonarQube project for all services + frontend
                     echo "🔍 Running SonarQube multi-module analysis for entire application..."
 
@@ -126,22 +140,28 @@ pipeline {
                                 -Dsonar.projectName=buy-01 \
                                 -Dsonar.modules=api-gateway,user-service,product-service,media-service,config-service,discovery-service,buy-01-frontend \
                                 -Dsonar.module.api-gateway.projectBaseDir=api-gateway \
-                                -Dsonar.module.api-gateway.sources=src \
+                                -Dsonar.module.api-gateway.sources=src/main/java \
+                                -Dsonar.module.api-gateway.tests=src/test/java \
                                 -Dsonar.module.api-gateway.java.binaries=target/classes \
                                 -Dsonar.module.user-service.projectBaseDir=user-service \
-                                -Dsonar.module.user-service.sources=src \
+                                -Dsonar.module.user-service.sources=src/main/java \
+                                -Dsonar.module.user-service.tests=src/test/java \
                                 -Dsonar.module.user-service.java.binaries=target/classes \
                                 -Dsonar.module.product-service.projectBaseDir=product-service \
-                                -Dsonar.module.product-service.sources=src \
+                                -Dsonar.module.product-service.sources=src/main/java \
+                                -Dsonar.module.product-service.tests=src/test/java \
                                 -Dsonar.module.product-service.java.binaries=target/classes \
                                 -Dsonar.module.media-service.projectBaseDir=media-service \
-                                -Dsonar.module.media-service.sources=src \
+                                -Dsonar.module.media-service.sources=src/main/java \
+                                -Dsonar.module.media-service.tests=src/test/java \
                                 -Dsonar.module.media-service.java.binaries=target/classes \
                                 -Dsonar.module.config-service.projectBaseDir=config-service \
-                                -Dsonar.module.config-service.sources=src \
+                                -Dsonar.module.config-service.sources=src/main/java \
+                                -Dsonar.module.config-service.tests=src/test/java \
                                 -Dsonar.module.config-service.java.binaries=target/classes \
                                 -Dsonar.module.discovery-service.projectBaseDir=discovery-service \
-                                -Dsonar.module.discovery-service.sources=src \
+                                -Dsonar.module.discovery-service.sources=src/main/java \
+                                -Dsonar.module.discovery-service.tests=src/test/java \
                                 -Dsonar.module.discovery-service.java.binaries=target/classes \
                                 -Dsonar.module.buy-01-frontend.projectBaseDir=buy-01-frontend \
                                 -Dsonar.module.buy-01-frontend.sources=src \
