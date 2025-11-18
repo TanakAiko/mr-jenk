@@ -160,7 +160,6 @@ pipeline {
                                 -Dsonar.module.buy-01-frontend.projectBaseDir=buy-01-frontend \
                                 -Dsonar.module.buy-01-frontend.sources=src \
                                 -Dsonar.module.buy-01-frontend.exclusions=**/node_modules/**,**/*.spec.ts \
-                                -Dsonar.java.binaries=**/target/classes \
                                 -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
                         """
                     }
