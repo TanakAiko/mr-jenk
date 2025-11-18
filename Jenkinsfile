@@ -142,30 +142,25 @@ pipeline {
                                 -Dsonar.module.api-gateway.projectBaseDir=api-gateway \
                                 -Dsonar.module.api-gateway.sources=src/main/java \
                                 -Dsonar.module.api-gateway.tests=src/test/java \
-                                -Dsonar.module.api-gateway.java.binaries=target/classes \
                                 -Dsonar.module.user-service.projectBaseDir=user-service \
                                 -Dsonar.module.user-service.sources=src/main/java \
                                 -Dsonar.module.user-service.tests=src/test/java \
-                                -Dsonar.module.user-service.java.binaries=target/classes \
                                 -Dsonar.module.product-service.projectBaseDir=product-service \
                                 -Dsonar.module.product-service.sources=src/main/java \
                                 -Dsonar.module.product-service.tests=src/test/java \
-                                -Dsonar.module.product-service.java.binaries=target/classes \
                                 -Dsonar.module.media-service.projectBaseDir=media-service \
                                 -Dsonar.module.media-service.sources=src/main/java \
                                 -Dsonar.module.media-service.tests=src/test/java \
-                                -Dsonar.module.media-service.java.binaries=target/classes \
                                 -Dsonar.module.config-service.projectBaseDir=config-service \
                                 -Dsonar.module.config-service.sources=src/main/java \
                                 -Dsonar.module.config-service.tests=src/test/java \
-                                -Dsonar.module.config-service.java.binaries=target/classes \
                                 -Dsonar.module.discovery-service.projectBaseDir=discovery-service \
                                 -Dsonar.module.discovery-service.sources=src/main/java \
                                 -Dsonar.module.discovery-service.tests=src/test/java \
-                                -Dsonar.module.discovery-service.java.binaries=target/classes \
                                 -Dsonar.module.buy-01-frontend.projectBaseDir=buy-01-frontend \
                                 -Dsonar.module.buy-01-frontend.sources=src \
                                 -Dsonar.module.buy-01-frontend.exclusions=**/node_modules/**,**/*.spec.ts \
+                                -Dsonar.java.binaries=**/target/classes \
                                 -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
                         """
                     }
