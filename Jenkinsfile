@@ -154,16 +154,15 @@ pipeline {
                             echo "✅ Scanner completed for ${serviceName}"
                         }
 
-                            echo "🚦 Waiting for Quality Gate for ${svc.key}..."
-                            timeout(time: 10, unit: 'MINUTES') {
-                                def qg = waitForQualityGate()
-                                echo "Quality Gate status for ${svc.key}: ${qg.status}"
-                                if (qg.status != 'OK') {
-                                    echo "❌ Quality Gate FAILED for ${svc.key}: ${qg.status}"
-                                    error "Pipeline aborted due to Quality Gate failure for ${svc.key}"
-                                } else {
-                                    echo "✅ Quality Gate PASSED for ${svc.key}"
-                                }
+                        echo "🚦 Waiting for Quality Gate for ${svc.key}..."
+                        timeout(time: 10, unit: 'MINUTES') {
+                            def qg = waitForQualityGate()
+                            echo "Quality Gate status for ${svc.key}: ${qg.status}"
+                            if (qg.status != 'OK') {
+                                echo "❌ Quality Gate FAILED for ${svc.key}: ${qg.status}"
+                                error "Pipeline aborted due to Quality Gate failure for ${svc.key}"
+                            } else {
+                                echo "✅ Quality Gate PASSED for ${svc.key}"
                             }
                         }
                     }
