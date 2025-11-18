@@ -116,20 +116,6 @@ pipeline {
                     echo '📊 STAGE 2: SONARQUBE CODE QUALITY ANALYSIS (PER SERVICE)' 
                     echo '================================================'
 
-                    // Debug: verify compiled classes exist before SonarQube scan
-                    ['api-gateway','config-service','discovery-service','media-service','product-service','user-service'].each { svc ->
-                        echo "🔍 Checking Maven build output for ${svc}"
-                        sh """
-                            echo '----------------------------------------'
-                            echo "📁 Module: ${svc}"
-                            echo "📂 Listing ${svc}/target (if exists):"
-                            ls -R ${svc}/target || echo "❌ ${svc}/target does not exist"
-                            echo "📂 Listing ${svc}/target/classes (if exists):"
-                            ls -R ${svc}/target/classes || echo "❌ ${svc}/target/classes does not exist or is empty"
-                            echo '----------------------------------------'
-                        """
-                    }
-
                     // Define services and matching SonarQube project keys
                     def services = [
                         [name: 'api-gateway',       key: 'buy-01-api-gateway',       src: 'src/main/java', tests: 'src/test/java'],
@@ -143,8 +129,8 @@ pipeline {
 
                     echo "🔍 Running SonarQube analysis for each service as separate projects..."
 
-                    withSonarQubeEnv('q1') {
-                        services.each { svc ->
+                    services.each { svc ->
+                        withSonarQubeEnv('q1') {
                             echo "================================================"
                             echo "▶️  Analyzing service: ${svc.name} (projectKey=${svc.key})"
                             echo "================================================"
