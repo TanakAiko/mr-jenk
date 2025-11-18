@@ -113,7 +113,7 @@ pipeline {
             steps {
                 script {
                     echo '================================================'
-                    echo '📊 STAGE 2: SONARQUBE CODE QUALITY ANALYSIS'
+                    echo '📊 STAGE 2: SONARQUBE CODE QUALITY ANALYSIS (PER SERVICE)' 
                     echo '================================================'
 
                     // Debug: verify compiled classes exist before SonarQube scan
@@ -130,54 +130,57 @@ pipeline {
                         """
                     }
 
-                    // Single multi-module SonarQube project for all services + frontend
-                    echo "🔍 Running SonarQube multi-module analysis for entire application..."
+                    // Define services and matching SonarQube project keys
+                    def services = [
+                        [name: 'api-gateway',       key: 'buy-01-api-gateway',       src: 'src/main/java', tests: 'src/test/java'],
+                        [name: 'config-service',    key: 'buy-01-config-service',    src: 'src/main/java', tests: 'src/test/java'],
+                        [name: 'discovery-service', key: 'buy-01-discovery-service', src: 'src/main/java', tests: 'src/test/java'],
+                        [name: 'media-service',     key: 'buy-01-media-service',     src: 'src/main/java', tests: 'src/test/java'],
+                        [name: 'product-service',   key: 'buy-01-product-service',   src: 'src/main/java', tests: 'src/test/java'],
+                        [name: 'user-service',      key: 'buy-01-user-service',      src: 'src/main/java', tests: 'src/test/java'],
+                        [name: 'buy-01-frontend',   key: 'buy-01-frontend',          src: 'src',            tests: null]
+                    ]
+
+                    echo "🔍 Running SonarQube analysis for each service as separate projects..."
 
                     withSonarQubeEnv('q1') {
-                        sh """
-                            ${SCANNER_HOME}/bin/sonar-scanner \
-                                -Dsonar.projectKey=buy-01 \
-                                -Dsonar.projectName=buy-01 \
-                                -Dsonar.modules=api-gateway,user-service,product-service,media-service,config-service,discovery-service,buy-01-frontend \
-                                -Dsonar.module.api-gateway.projectBaseDir=api-gateway \
-                                -Dsonar.module.api-gateway.sources=src/main/java \
-                                -Dsonar.module.api-gateway.tests=src/test/java \
-                                -Dsonar.module.user-service.projectBaseDir=user-service \
-                                -Dsonar.module.user-service.sources=src/main/java \
-                                -Dsonar.module.user-service.tests=src/test/java \
-                                -Dsonar.module.product-service.projectBaseDir=product-service \
-                                -Dsonar.module.product-service.sources=src/main/java \
-                                -Dsonar.module.product-service.tests=src/test/java \
-                                -Dsonar.module.media-service.projectBaseDir=media-service \
-                                -Dsonar.module.media-service.sources=src/main/java \
-                                -Dsonar.module.media-service.tests=src/test/java \
-                                -Dsonar.module.config-service.projectBaseDir=config-service \
-                                -Dsonar.module.config-service.sources=src/main/java \
-                                -Dsonar.module.config-service.tests=src/test/java \
-                                -Dsonar.module.discovery-service.projectBaseDir=discovery-service \
-                                -Dsonar.module.discovery-service.sources=src/main/java \
-                                -Dsonar.module.discovery-service.tests=src/test/java \
-                                -Dsonar.module.buy-01-frontend.projectBaseDir=buy-01-frontend \
-                                -Dsonar.module.buy-01-frontend.sources=src \
-                                -Dsonar.module.buy-01-frontend.exclusions=**/node_modules/**,**/*.spec.ts \
-                                -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
-                        """
-                    }
+                        services.each { svc ->
+                            echo "================================================"
+                            echo "▶️  Analyzing service: ${svc.name} (projectKey=${svc.key})"
+                            echo "================================================"
 
-                    echo "🚦 Waiting for global Quality Gate result (all modules)..."
-                    timeout(time: 10, unit: 'MINUTES') {
-                        def qg = waitForQualityGate()
-                        echo "Global Quality Gate status for project buy-01: ${qg.status}"
-                        if (qg.status != 'OK') {
-                            echo "❌ Quality Gate failed for at least one module (backend or frontend): ${qg.status}"
-                            error "Pipeline aborted due to global Quality Gate failure"
-                        } else {
-                            echo "✅ Global Quality Gate PASSED for all modules!"
+                            def baseDir = svc.name
+
+                            // Build the sonar-scanner command dynamically
+                            def sonarCmd = "${SCANNER_HOME}/bin/sonar-scanner " +
+                                           "-Dsonar.projectKey=${svc.key} " +
+                                           "-Dsonar.projectName=${svc.key} " +
+                                           "-Dsonar.projectBaseDir=${baseDir} " +
+                                           "-Dsonar.sources=${svc.src} " +
+                                           "-Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts "
+
+                            if (svc.tests) {
+                                sonarCmd += "-Dsonar.tests=${svc.tests} "
+                            }
+
+                            sh sonarCmd
+
+                            echo "🚦 Waiting for Quality Gate for ${svc.key}..."
+                            timeout(time: 10, unit: 'MINUTES') {
+                                def qg = waitForQualityGate()
+                                echo "Quality Gate status for ${svc.key}: ${qg.status}"
+                                if (qg.status != 'OK') {
+                                    echo "❌ Quality Gate FAILED for ${svc.key}: ${qg.status}"
+                                    error "Pipeline aborted due to Quality Gate failure for ${svc.key}"
+                                } else {
+                                    echo "✅ Quality Gate PASSED for ${svc.key}"
+                                }
+                            }
                         }
                     }
 
                     echo '================================================'
-                    echo '✅✅✅ SONARQUBE MULTI-MODULE ANALYSIS COMPLETED'
+                    echo '✅✅✅ SONARQUBE PER-SERVICE ANALYSIS COMPLETED SUCCESSFULLY'
                     echo '================================================'
                 }
             }
