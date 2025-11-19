@@ -88,13 +88,34 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
         // Remove emojis and special characters, keep only alphanumeric, dots, hyphens, and underscores
         String sanitized = nameWithoutExtension.replaceAll("[^a-zA-Z0-9._-]", "");
-        
-        // Remove multiple consecutive dots, hyphens, or underscores
-        sanitized = sanitized.replaceAll("[._-]+", "_");
-        
-        // Remove leading/trailing dots, hyphens, or underscores
-        sanitized = sanitized.replaceAll("^[._-]+|[._-]+$", "");
-        
+
+        // Collapse sequences of '.', '_' or '-' to a single '_', and trim them from both ends
+        StringBuilder sb = new StringBuilder();
+        char lastOut = 0;
+        for (int i = 0; i < sanitized.length(); i++) {
+            char c = sanitized.charAt(i);
+            boolean isSeparator = (c == '.' || c == '_' || c == '-');
+
+            if (isSeparator) {
+                // Avoid leading separator and multiple separators
+                if (sb.length() > 0 && lastOut != '_') {
+                    sb.append('_');
+                    lastOut = '_';
+                }
+            } else {
+                sb.append(c);
+                lastOut = c;
+            }
+        }
+
+        // Remove trailing '_' if any
+        int len = sb.length();
+        if (len > 0 && sb.charAt(len - 1) == '_') {
+            sb.setLength(len - 1);
+        }
+
+        sanitized = sb.toString();
+
         // If sanitized name is empty, use "file"
         if (sanitized.isEmpty()) {
             sanitized = "file";
