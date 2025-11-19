@@ -113,66 +113,99 @@ pipeline {
             steps {
                 script {
                     echo '================================================'
-                    echo '📊 STAGE 2: SONARQUBE CODE QUALITY ANALYSIS (PER SERVICE)' 
+                    echo '📊 STAGE 2: SONARQUBE CODE QUALITY ANALYSIS'
                     echo '================================================'
-
-                    // Define services and matching SonarQube project keys
+                    
                     def services = [
-                        [name: 'api-gateway',       key: 'buy-01-api-gateway',       src: 'src/main/java', tests: 'src/test/java'],
-                        [name: 'config-service',    key: 'buy-01-config-service',    src: 'src/main/java', tests: 'src/test/java'],
-                        [name: 'discovery-service', key: 'buy-01-discovery-service', src: 'src/main/java', tests: 'src/test/java'],
-                        [name: 'media-service',     key: 'buy-01-media-service',     src: 'src/main/java', tests: 'src/test/java'],
-                        [name: 'product-service',   key: 'buy-01-product-service',   src: 'src/main/java', tests: 'src/test/java'],
-                        [name: 'user-service',      key: 'buy-01-user-service',      src: 'src/main/java', tests: 'src/test/java'],
-                        [name: 'buy-01-frontend',   key: 'buy-01-frontend',          src: 'src',            tests: null]
+                        [name: "gateway", path: "api-gateway"],
+                        [name: "user", path: "user-service"],
+                        [name: "product", path: "product-service"],
+                        [name: "media", path: "media-service"],
+                        [name: "config", path: "config-service"],
+                        [name: "discovery", path: "discovery-service"],
+
                     ]
 
-                    echo "🔍 Running SonarQube analysis for each service as separate projects..."
-
+                    // Use SonarQube Scanner for the entire project
                     services.each { svc ->
-                        withSonarQubeEnv('q1') {
-                            echo "================================================"
-                            echo "▶️  Analyzing service: ${svc.name} (projectKey=${svc.key})"
-                            echo "================================================"
+                        def serviceName = svc.name 
+                        def servicePath = svc.path
 
-                            def baseDir = svc.name
+                        echo "================================================"
+                        echo "🔍 ANALYZING SERVICE: ${serviceName}"
+                        echo "📁 Path: ${servicePath}"
+                        echo "================================================"
 
-                            // Build the sonar-scanner command dynamically
-                            def sonarCmd = "${SCANNER_HOME}/bin/sonar-scanner " +
-                                           "-Dsonar.projectKey=${svc.key} " +
-                                           "-Dsonar.projectName=${svc.key} " +
-                                           "-Dsonar.projectBaseDir=${baseDir} " +
-                                           "-Dsonar.sources=${svc.src} " +
-                                           "-Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts "
+                        // Run SonarQube analysis
+                        withSonarQubeEnv('q1') {        
+                            echo "🔍 Running SonarQube scan for ${serviceName}..."
 
-                            if (svc.tests) {
-                                sonarCmd += "-Dsonar.tests=${svc.tests} "
-                            }
-
-                            sh sonarCmd
-
+                            sh """
+                                ${SCANNER_HOME}/bin/sonar-scanner \
+                                    -Dsonar.projectKey=${serviceName} \
+                                    -Dsonar.projectName=${serviceName} \
+                                    -Dsonar.projectBaseDir=${servicePath} \
+                                    -Dsonar.sources=src \
+                                    -Dsonar.java.binaries=target/classes \
+                                    -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
+                            """
                             echo "✅ Scanner completed for ${serviceName}"
                         }
-
-                        echo "🚦 Waiting for Quality Gate for ${svc.key}..."
-                        timeout(time: 10, unit: 'MINUTES') {
+                        
+                        // Wait for Quality Gate (MUST be outside withSonarQubeEnv)
+                        echo "🚦 Waiting for Quality Gate result for ${serviceName}..."
+                        timeout(time: 5, unit: 'MINUTES') {
                             def qg = waitForQualityGate()
-                            echo "Quality Gate status for ${svc.key}: ${qg.status}"
+                            echo "Quality Gate status for ${serviceName}: ${qg.status}"
                             if (qg.status != 'OK') {
-                                echo "❌ Quality Gate FAILED for ${svc.key}: ${qg.status}"
-                                error "Pipeline aborted due to Quality Gate failure for ${svc.key}"
+                                echo "❌ ${serviceName} failed Quality Gate: ${qg.status}"
+                                error "Pipeline aborted due to ${serviceName} Quality Gate failure"
                             } else {
-                                echo "✅ Quality Gate PASSED for ${svc.key}"
+                                echo "✅ ${serviceName} PASSED Quality Gate!"
                             }
                         }
                     }
 
-                    echo '================================================'
-                    echo '✅✅✅ SONARQUBE PER-SERVICE ANALYSIS COMPLETED SUCCESSFULLY'
-                    echo '================================================'
+                    // Frontend analysis (separate from services)
+                    echo "================================================"
+                    echo "🔍 ANALYZING FRONTEND"
+                    echo "📁 Path: buy-01-frontend"
+                    echo "================================================"
+
+                    // Run SonarQube analysis
+                    withSonarQubeEnv('q1') {
+                        echo "🔍 Running SonarQube scan for frontend..."
+                        sh """
+                            ${SCANNER_HOME}/bin/sonar-scanner \
+                            -Dsonar.projectKey=frontend \
+                            -Dsonar.projectName=frontend \
+                            -Dsonar.projectBaseDir=buy-01-frontend \
+                            -Dsonar.sources=src \
+                            -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts
+                        """
+                        echo "✅ Scanner completed for frontend"
+                    }
+                    
+                    // Wait for Quality Gate (MUST be outside withSonarQubeEnv)
+                    echo "🚦 Waiting for Quality Gate result for frontend..."
+                    timeout(time: 5, unit: 'MINUTES') {
+                        def qg = waitForQualityGate()
+                        echo "Quality Gate status for frontend: ${qg.status}"
+                        if (qg.status != 'OK') {
+                            echo "❌ frontend failed Quality Gate: ${qg.status}"
+                            error "Pipeline aborted due to frontend Quality Gate failure"
+                        } else {
+                            echo "✅ Frontend PASSED Quality Gate!"
+                        }
+                    }
+                    
+                    echo "================================================"
+                    echo "✅✅✅ ALL SONARQUBE ANALYSES COMPLETED"
+                    echo "================================================"
                 }
             }
         }
+
 
         // Stage 3: Build all the Docker images using docker-compose 🐳
         // This command builds the images but does not run them.
