@@ -150,12 +150,23 @@ pipeline {
                                     -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
                             """
                             echo "✅ Scanner completed for ${serviceName}"
+
+                            // Extract ceTaskId from report-task.txt
+                            ceTaskId = sh(
+                                script: "cd ${servicePath} && grep '^ceTaskId=' .scannerwork/report-task.txt | cut -d'=' -f2",
+                                returnStdout: true
+                            ).trim()
+
+                            echo "📌 Captured ceTaskId for ${serviceName}: ${ceTaskId}"
                         }
                         
                         // Wait for Quality Gate (MUST be outside withSonarQubeEnv)
                         echo "🚦 Waiting for Quality Gate result for ${serviceName}..."
                         timeout(time: 5, unit: 'MINUTES') {
-                            def qg = waitForQualityGate(project: "${serviceName}")
+                            def qg = waitForQualityGate(
+                                installationName: 'q1',
+                                ceTaskId: ceTaskId
+                            )
                             echo "Quality Gate status for ${serviceName}: ${qg.status}"
                             if (qg.status != 'OK') {
                                 echo "❌ ${serviceName} failed Quality Gate: ${qg.status}"
@@ -184,12 +195,22 @@ pipeline {
                             -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts
                         """
                         echo "✅ Scanner completed for frontend"
+
+                        frontendCeTaskId = sh(
+                            script: "cd buy-01-frontend && grep '^ceTaskId=' .scannerwork/report-task.txt | cut -d'=' -f2",
+                            returnStdout: true
+                        ).trim()
+
+                        echo "📌 Captured ceTaskId for frontend: ${frontendCeTaskId}"
                     }
                     
                     // Wait for Quality Gate (MUST be outside withSonarQubeEnv)
                     echo "🚦 Waiting for Quality Gate result for frontend..."
                     timeout(time: 5, unit: 'MINUTES') {
-                        def qg = waitForQualityGate(project: "frontend")
+                        def qg = waitForQualityGate(
+                            installationName: 'q1',
+                            ceTaskId: frontendCeTaskId
+                        )
                         echo "Quality Gate status for frontend: ${qg.status}"
                         if (qg.status != 'OK') {
                             echo "❌ frontend failed Quality Gate: ${qg.status}"
