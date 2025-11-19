@@ -77,7 +77,28 @@ public class CloudStorageServiceImpl implements CloudStorageService {
             return "file";
         }
 
-        // Remove file extension first
+        FileNameParts parts = splitFileName(originalFileName);
+
+        String baseName = removeDisallowedCharacters(parts.baseName);
+        baseName = normalizeSeparators(baseName);
+        baseName = ensureNonEmpty(baseName);
+        baseName = limitLength(baseName, 50);
+
+        return baseName + parts.extension;
+    }
+
+    /** Simple holder for base name and extension parts. */
+    private static class FileNameParts {
+        final String baseName;
+        final String extension;
+
+        FileNameParts(String baseName, String extension) {
+            this.baseName = baseName;
+            this.extension = extension;
+        }
+    }
+
+    private FileNameParts splitFileName(String originalFileName) {
         String nameWithoutExtension = originalFileName;
         String extension = "";
         int lastDotIndex = originalFileName.lastIndexOf('.');
@@ -85,15 +106,20 @@ public class CloudStorageServiceImpl implements CloudStorageService {
             nameWithoutExtension = originalFileName.substring(0, lastDotIndex);
             extension = originalFileName.substring(lastDotIndex);
         }
+        return new FileNameParts(nameWithoutExtension, extension);
+    }
 
-        // Remove emojis and special characters, keep only alphanumeric, dots, hyphens, and underscores
-        String sanitized = nameWithoutExtension.replaceAll("[^a-zA-Z0-9._-]", "");
+    private String removeDisallowedCharacters(String input) {
+        // Keep only alphanumeric, dots, hyphens, and underscores
+        return input.replaceAll("[^a-zA-Z0-9._-]", "");
+    }
 
+    private String normalizeSeparators(String input) {
         // Collapse sequences of '.', '_' or '-' to a single '_', and trim them from both ends
         StringBuilder sb = new StringBuilder();
         char lastOut = 0;
-        for (int i = 0; i < sanitized.length(); i++) {
-            char c = sanitized.charAt(i);
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
             boolean isSeparator = (c == '.' || c == '_' || c == '-');
 
             if (isSeparator) {
@@ -114,18 +140,14 @@ public class CloudStorageServiceImpl implements CloudStorageService {
             sb.setLength(len - 1);
         }
 
-        sanitized = sb.toString();
+        return sb.toString();
+    }
 
-        // If sanitized name is empty, use "file"
-        if (sanitized.isEmpty()) {
-            sanitized = "file";
-        }
+    private String ensureNonEmpty(String input) {
+        return input.isEmpty() ? "file" : input;
+    }
 
-        // Limit length to 50 characters (excluding extension)
-        if (sanitized.length() > 50) {
-            sanitized = sanitized.substring(0, 50);
-        }
-
-        return sanitized + extension;
+    private String limitLength(String input, int maxLength) {
+        return input.length() > maxLength ? input.substring(0, maxLength) : input;
     }
 }
