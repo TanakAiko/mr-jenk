@@ -115,118 +115,42 @@ pipeline {
                     echo '================================================'
                     echo '📊 STAGE 2: SONARQUBE CODE QUALITY ANALYSIS'
                     echo '================================================'
-                    
-                    def services = [
-                        [name: "gateway", path: "api-gateway"],
-                        [name: "user", path: "user-service"],
-                        [name: "product", path: "product-service"],
-                        [name: "media", path: "media-service"],
-                        [name: "config", path: "config-service"],
-                        [name: "discovery", path: "discovery-service"],
 
-                    ]
-
-                    // Use SonarQube Scanner for the entire project
-                    services.each { svc ->
-                        def serviceName = svc.name 
-                        def servicePath = svc.path
-
-                        echo "================================================"
-                        echo "🔍 ANALYZING SERVICE: ${serviceName}"
-                        echo "📁 Path: ${servicePath}"
-                        echo "================================================"
-
-                        // Run SonarQube analysis
-                        withSonarQubeEnv('q1') {        
-                            echo "🔍 Running SonarQube scan for ${serviceName}..."
-
-                            sh """
-                                ${SCANNER_HOME}/bin/sonar-scanner \
-                                    -Dsonar.projectKey=${serviceName} \
-                                    -Dsonar.projectName=${serviceName} \
-                                    -Dsonar.projectBaseDir=${servicePath} \
-                                    -Dsonar.sources=src \
-                                    -Dsonar.java.binaries=target/classes \
-                                    -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
-                            """
-                            echo "✅ Scanner completed for ${serviceName}"
-
-                            // Extract ceTaskId from report-task.txt
-                            ceTaskId = sh(
-                                script: "cd ${servicePath} && grep '^ceTaskId=' .scannerwork/report-task.txt | cut -d'=' -f2",
-                                returnStdout: true
-                            ).trim()
-
-                            echo "📌 Captured ceTaskId for ${serviceName}: ${ceTaskId}"
-                        }
-                        
-                        // Wait for Quality Gate (MUST be outside withSonarQubeEnv)
-                        echo "🚦 Waiting for Quality Gate result for ${serviceName}..."
-                        timeout(time: 5, unit: 'MINUTES') {
-                            def qg = waitForQualityGate(
-                                installationName: 'q1',
-                                ceTaskId: ceTaskId
-                            )
-                            echo "Quality Gate status for ${serviceName}: ${qg.status}"
-                            if (qg.status != 'OK') {
-                                echo "❌ ${serviceName} failed Quality Gate: ${qg.status}"
-                                error "Pipeline aborted due to ${serviceName} Quality Gate failure"
-                            } else {
-                                echo "✅ ${serviceName} PASSED Quality Gate!"
-                            }
-                        }
-                    }
-
-                    // Frontend analysis (separate from services)
-                    echo "================================================"
-                    echo "🔍 ANALYZING FRONTEND"
-                    echo "📁 Path: buy-01-frontend"
-                    echo "================================================"
-
-                    // Run SonarQube analysis
+                    // Run a single SonarQube analysis for the whole monorepo
                     withSonarQubeEnv('q1') {
-                        echo "🔍 Running SonarQube scan for frontend..."
+                        echo "🔍 Running SonarQube scan for monorepo..."
+
                         sh """
                             ${SCANNER_HOME}/bin/sonar-scanner \
-                            -Dsonar.projectKey=frontend \
-                            -Dsonar.projectName=frontend \
-                            -Dsonar.projectBaseDir=buy-01-frontend \
-                            -Dsonar.sources=src \
-                            -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts
+                                -Dsonar.projectKey=buy-01 \
+                                -Dsonar.projectName=buy-01 \
+                                -Dsonar.projectBaseDir=. \
+                                -Dsonar.sources=api-gateway/src,user-service/src,product-service/src,media-service/src,config-service/src,discovery-service/src,buy-01-frontend/src \
+                                -Dsonar.java.binaries=api-gateway/target/classes,user-service/target/classes,product-service/target/classes,media-service/target/classes,config-service/target/classes,discovery-service/target/classes \
+                                -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
                         """
-                        echo "✅ Scanner completed for frontend"
-
-                        frontendCeTaskId = sh(
-                            script: "cd buy-01-frontend && grep '^ceTaskId=' .scannerwork/report-task.txt | cut -d'=' -f2",
-                            returnStdout: true
-                        ).trim()
-
-                        echo "📌 Captured ceTaskId for frontend: ${frontendCeTaskId}"
+                        echo "✅ Scanner completed for monorepo"
                     }
-                    
+
                     // Wait for Quality Gate (MUST be outside withSonarQubeEnv)
-                    echo "🚦 Waiting for Quality Gate result for frontend..."
-                    timeout(time: 5, unit: 'MINUTES') {
-                        def qg = waitForQualityGate(
-                            installationName: 'q1',
-                            ceTaskId: frontendCeTaskId
-                        )
-                        echo "Quality Gate status for frontend: ${qg.status}"
+                    echo "🚦 Waiting for Quality Gate result..."
+                    timeout(time: 10, unit: 'MINUTES') {
+                        def qg = waitForQualityGate() // compatible with older plugin versions
+                        echo "Quality Gate status: ${qg.status}"
                         if (qg.status != 'OK') {
-                            echo "❌ frontend failed Quality Gate: ${qg.status}"
-                            error "Pipeline aborted due to frontend Quality Gate failure"
+                            echo "❌ Quality Gate failed: ${qg.status}"
+                            error "Pipeline aborted due to Quality Gate failure"
                         } else {
-                            echo "✅ Frontend PASSED Quality Gate!"
+                            echo "✅ Quality Gate PASSED!"
                         }
                     }
-                    
-                    echo "================================================"
-                    echo "✅✅✅ ALL SONARQUBE ANALYSES COMPLETED"
-                    echo "================================================"
+
+                    echo '================================================'
+                    echo '✅✅✅ SONARQUBE ANALYSIS COMPLETED'
+                    echo '================================================'
                 }
             }
         }
-
 
         // Stage 3: Build all the Docker images using docker-compose 🐳
         // This command builds the images but does not run them.
