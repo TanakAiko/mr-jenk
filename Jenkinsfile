@@ -155,7 +155,7 @@ pipeline {
                         // Wait for Quality Gate (MUST be outside withSonarQubeEnv)
                         echo "🚦 Waiting for Quality Gate result for ${serviceName}..."
                         timeout(time: 5, unit: 'MINUTES') {
-                            def qg = waitForQualityGate()
+                            def qg = waitForQualityGate(project: "${serviceName}")
                             echo "Quality Gate status for ${serviceName}: ${qg.status}"
                             if (qg.status != 'OK') {
                                 echo "❌ ${serviceName} failed Quality Gate: ${qg.status}"
@@ -189,7 +189,7 @@ pipeline {
                     // Wait for Quality Gate (MUST be outside withSonarQubeEnv)
                     echo "🚦 Waiting for Quality Gate result for frontend..."
                     timeout(time: 5, unit: 'MINUTES') {
-                        def qg = waitForQualityGate()
+                        def qg = waitForQualityGate(project: "frontend")
                         echo "Quality Gate status for frontend: ${qg.status}"
                         if (qg.status != 'OK') {
                             echo "❌ frontend failed Quality Gate: ${qg.status}"
