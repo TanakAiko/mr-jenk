@@ -125,6 +125,81 @@ This project implements a microservices architecture with the following componen
 - File validation and processing
 - Cloud storage integration
 
+## 🖼️ Media Service & File Uploads
+
+The **media-service** handles all file uploads (such as product images and avatars) and stores them in **Supabase Storage**. Files are uploaded via the API Gateway and stored under a sanitized, unique key to ensure compatibility with Supabase and avoid collisions.
+
+### Upload Flow
+
+1. Client calls the media upload endpoint:
+   - `POST /api/media` with `multipart/form-data` containing the file.
+2. The request is routed through the API Gateway to `media-service`.
+3. `media-service`:
+   - Generates a **unique identifier** using `UUID.randomUUID()`.
+   - **Sanitizes** the original filename.
+   - Uploads the file bytes to Supabase via HTTP.
+4. On success, the service returns a **public Supabase URL** for the stored file.
+
+### Supabase Configuration
+
+The media-service uses the following configuration properties (typically provided via environment variables or config-service):
+
+- `supabase.project-url` – Base URL of your Supabase project, e.g. `https://<project-id>.supabase.co`
+- `supabase.api-key` – Service role or anon key with permission to upload to storage
+- `supabase.bucket-name` – Target storage bucket name (e.g. `media`)
+
+Example (environment variables for Docker):
+
+```bash
+SUPABASE_PROJECT_URL=https://<project-id>.supabase.co
+SUPABASE_API_KEY=<your-api-key>
+SUPABASE_BUCKET_NAME=media
+```
+
+### Filename Sanitization Logic
+
+To avoid errors with Supabase Storage keys and to keep URLs safe, uploaded filenames are **sanitized** in `CloudStorageServiceImpl`:
+
+1. **Split name and extension**
+   - The last `.` in the original filename is treated as the extension separator.
+   - Example: `"my cool image.png"` → base name `"my cool image"`, extension `".png"`.
+
+2. **Remove disallowed characters**
+   - Only these characters are kept in the base name: `a–z`, `A–Z`, `0–9`, `.`, `_`, `-`.
+   - All other characters (including emojis, spaces, accents, and most punctuation) are removed.
+
+3. **Normalize separators**
+   - Runs of `.`, `_`, and `-` are collapsed into a single `_`.
+   - Leading/trailing separators are removed.
+   - Examples:
+     - `"my---file__name.."` → `"my_file_name"`
+     - `"___file"` → `"file"`
+
+4. **Ensure non-empty name**
+   - If the sanitized base name becomes empty (e.g. filename was only emojis or symbols), it falls back to `"file"`.
+
+5. **Limit length**
+   - The base name is truncated to **50 characters** to keep keys short and robust.
+
+6. **Prefix with UUID**
+   - The final stored key is: `<uuid>_<sanitizedBaseName><extension>`
+   - Example output: `"550e8400-e29b-41d4-a716-446655440000_my_file.png"`
+
+### Error Handling
+
+- If the incoming file has **no content type**, the upload is rejected with an error.
+- If Supabase responds with a **non-2xx status**, the service throws a runtime exception to signal upload failure.
+
+### Public URL Format
+
+On success, the service returns a public URL like:
+
+```text
+{supabase.project-url}/storage/v1/object/public/{supabase.bucket-name}/{uuid}_{sanitizedBaseName}{extension}
+```
+
+You can store this URL in product or user documents (via product-service or user-service) and use it directly in the frontend for image rendering.
+
 ## 🛠️ Technology Stack
 
 ### Backend
