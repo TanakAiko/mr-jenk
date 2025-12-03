@@ -275,7 +275,7 @@ cd buy-01
 ### 2. Environment Setup
 Set up the following environment variables or update configuration files:
 ```bash
-export CONFIG_REPO_URI=https://github.com/mamadbah2/config-buy-01.git
+export CONFIG_REPO_URI=https://github.com/TanakAiko/config-buy-01.git
 export CONFIG_REPO_USERNAME=your-username
 export CONFIG_REPO_PASSWORD=your-password
 ```

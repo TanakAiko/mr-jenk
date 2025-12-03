@@ -20,7 +20,7 @@ services:
     ports:
       - "8888:8888"
     environment:
-      - DOCKER_EUREKA_URL=http://eureka-server:8761/eureka
+      - EUREKA_URL=http://eureka-server:8761/eureka
       - CONFIG_REPO_URI=${CONFIG_REPO_URI}
       - CONFIG_REPO_USERNAME=${CONFIG_REPO_USERNAME}
       - CONFIG_REPO_PASSWORD=${CONFIG_REPO_PASSWORD}
@@ -42,7 +42,7 @@ services:
     ports:
       - "8090:8090"
     environment:
-      - DOCKER_EUREKA_URL=http://eureka-server:8761/eureka
+      - EUREKA_URL=http://eureka-server:8761/eureka
       - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
     healthcheck:
       test: ["CMD", "curl", "-k", "-f", "https://localhost:8090/actuator/health"]
@@ -63,7 +63,7 @@ services:
     ports:
       - "8082:8082"
     environment:
-      - DOCKER_EUREKA_URL=http://eureka-server:8761/eureka
+      - EUREKA_URL=http://eureka-server:8761/eureka
       - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
       - DOCKER_MEDIA_SERVICE_URL=http://media-service:8083/api/media
     healthcheck:
@@ -89,7 +89,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - DOCKER_EUREKA_URL=http://eureka-server:8761/eureka
+      - EUREKA_URL=http://eureka-server:8761/eureka
       - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
@@ -113,7 +113,7 @@ services:
     ports:
       - "8083:8083"
     environment:
-      - DOCKER_EUREKA_URL=http://eureka-server:8761/eureka
+      - EUREKA_URL=http://eureka-server:8761/eureka
       - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
