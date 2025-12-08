@@ -1,0 +1,156 @@
+package sn.dev.order_service.services.impl;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
+import sn.dev.order_service.data.cart.CartDocument;
+import sn.dev.order_service.data.cart.CartItemDocument;
+import sn.dev.order_service.data.cart.CartRepository;
+import sn.dev.order_service.data.order.OrderDocument;
+import sn.dev.order_service.data.order.OrderItemDocument;
+import sn.dev.order_service.data.order.OrderItemStatus;
+import sn.dev.order_service.data.order.OrderRepository;
+import sn.dev.order_service.data.order.OrderStatus;
+import sn.dev.order_service.data.order.PaymentMode;
+
+@Service
+@RequiredArgsConstructor
+public class OrderServiceImpl implements sn.dev.order_service.services.OrderService {
+
+    private final OrderRepository orderRepository;
+    private final CartRepository cartRepository;
+
+    @Override
+    public List<OrderDocument> getOrdersForUser(String userId) {
+        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    @Override
+    public List<OrderDocument> getOrdersForSeller(String sellerId) {
+        return orderRepository.findByItemsSellerIdOrderByCreatedAtDesc(sellerId);
+    }
+
+    @Override
+    public OrderDocument getOrderForUser(String userId, String orderId) {
+        OrderDocument order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+        if (!order.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("Access denied to this order");
+        }
+        return order;
+    }
+
+    @Override
+    public OrderDocument checkout(String userId) {
+        CartDocument cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalStateException("Cart is empty"));
+
+        if (cart.getItems().isEmpty()) {
+            throw new IllegalStateException("Cart is empty");
+        }
+
+        OrderDocument order = new OrderDocument();
+        order.setId(UUID.randomUUID().toString());
+        order.setUserId(userId);
+        order.setPaymentMode(PaymentMode.PAY_ON_DELIVERY);
+        order.setStatus(OrderStatus.PENDING);
+        order.setCreatedAt(Instant.now());
+        order.setUpdatedAt(Instant.now());
+
+        double total = 0.0;
+        for (CartItemDocument cartItem : cart.getItems()) {
+            OrderItemDocument item = new OrderItemDocument();
+            item.setProductId(cartItem.getProductId());
+            item.setSellerId(cartItem.getSellerId());
+            item.setProductName(cartItem.getProductName());
+            item.setUnitPrice(cartItem.getPriceSnapshot());
+            item.setQuantity(cartItem.getQuantity());
+            item.setSubtotal(cartItem.getPriceSnapshot() * cartItem.getQuantity());
+            item.setStatus(OrderItemStatus.PENDING);
+            total += item.getSubtotal();
+            order.getItems().add(item);
+        }
+        order.setTotalPrice(total);
+
+        OrderDocument saved = orderRepository.save(order);
+
+        cartRepository.deleteByUserId(userId);
+        return saved;
+    }
+
+    @Override
+    public OrderDocument cancelOrder(String userId, String orderId) {
+        OrderDocument order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+        if (!order.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("Access denied to this order");
+        }
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException("Only pending orders can be cancelled");
+        }
+        order.setStatus(OrderStatus.CANCELLED);
+        order.getItems().forEach(i -> i.setStatus(OrderItemStatus.CANCELLED));
+        order.setUpdatedAt(Instant.now());
+        return orderRepository.save(order);
+    }
+
+    @Override
+    public OrderDocument redoOrderToCart(String userId, String orderId) {
+        OrderDocument order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+        if (!order.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("Access denied to this order");
+        }
+
+        CartDocument cart = cartRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    CartDocument c = new CartDocument();
+                    c.setUserId(userId);
+                    c.setCreatedAt(Instant.now());
+                    c.setUpdatedAt(Instant.now());
+                    return c;
+                });
+
+        cart.getItems().clear();
+        order.getItems().forEach(orderItem -> {
+            CartItemDocument cartItem = new CartItemDocument();
+            cartItem.setProductId(orderItem.getProductId());
+            cartItem.setSellerId(orderItem.getSellerId());
+            cartItem.setProductName(orderItem.getProductName());
+            cartItem.setPriceSnapshot(orderItem.getUnitPrice());
+            cartItem.setQuantity(orderItem.getQuantity());
+            cartItem.setCreatedAt(Instant.now());
+            cartItem.setUpdatedAt(Instant.now());
+            cart.getItems().add(cartItem);
+        });
+        cart.setUpdatedAt(Instant.now());
+        cartRepository.save(cart);
+
+        return order;
+    }
+
+    @Override
+    public OrderDocument updateOrderItemStatusForSeller(String sellerId, String orderId, String itemId,
+            OrderItemStatus newStatus) {
+        OrderDocument order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+
+        boolean found = false;
+        for (OrderItemDocument item : order.getItems()) {
+            if (item.getProductId().equals(itemId) && item.getSellerId().equals(sellerId)) {
+                item.setStatus(newStatus);
+                found = true;
+            }
+        }
+        if (!found) {
+            throw new IllegalArgumentException("Order item not found or does not belong to this seller");
+        }
+
+        order.setUpdatedAt(Instant.now());
+        return orderRepository.save(order);
+    }
+}
