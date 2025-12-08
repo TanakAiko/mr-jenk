@@ -29,11 +29,6 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartDocument getCart(String userId) {
-        return getOrCreateCart(userId);
-    }
-
-    @Override
     public CartDocument addItem(String userId, String productId, int quantity) {
         CartDocument cart = getOrCreateCart(userId);
         boolean found = false;
