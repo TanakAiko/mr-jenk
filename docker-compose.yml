@@ -104,7 +104,6 @@ services:
       api-gateway:
         condition: service_healthy
 
-
   media-service:
     image: media-service
     build:
@@ -117,6 +116,29 @@ services:
       - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+
+  order-service:
+    image: order-service
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8084"
+    environment:
+      - EUREKA_URL=http://eureka-server:8761/eureka
+      - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
       interval: 10s
       retries: 5
       start_period: 5s
@@ -148,4 +170,6 @@ services:
       product-service:
         condition: service_healthy
       api-gateway:
+        condition: service_healthy
+      order-service:
         condition: service_healthy
