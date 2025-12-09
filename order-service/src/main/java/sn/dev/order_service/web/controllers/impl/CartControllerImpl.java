@@ -1,6 +1,8 @@
 package sn.dev.order_service.web.controllers.impl;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,13 +20,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@RequiredArgsConstructor
 public class CartControllerImpl implements CartController {
 
     private final CartService cartService;
-
-    public CartControllerImpl(CartService cartService) {
-        this.cartService = cartService;
-    }
 
     @Override
     public ResponseEntity<CartResponseDto> getCart() {

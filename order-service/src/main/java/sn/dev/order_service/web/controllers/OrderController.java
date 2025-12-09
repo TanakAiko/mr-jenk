@@ -2,10 +2,12 @@ package sn.dev.order_service.web.controllers;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import sn.dev.order_service.data.order.OrderItemStatus;
+import sn.dev.order_service.web.dto.UpdateOrderItemStatusRequestDto;
 import sn.dev.order_service.web.dto.OrderResponseDto;
 
 @RequestMapping("/api/orders")
@@ -27,10 +29,12 @@ public interface OrderController {
     ResponseEntity<OrderResponseDto> redoToCart(@PathVariable String orderId);
 
     @GetMapping("/seller")
+    @PreAuthorize("hasAuthority('SELLER')")
     ResponseEntity<List<OrderResponseDto>> getOrdersForSeller();
 
     @PatchMapping("/{orderId}/items/{itemId}/status")
+    @PreAuthorize("hasAuthority('SELLER')")
     ResponseEntity<OrderResponseDto> updateItemStatus(@PathVariable String orderId,
                                                       @PathVariable String itemId,
-                                                      @RequestParam OrderItemStatus status);
+                                                      @Valid @RequestBody UpdateOrderItemStatusRequestDto requestDto);
 }

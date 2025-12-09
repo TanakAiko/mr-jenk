@@ -2,11 +2,11 @@ package sn.dev.order_service.web.controllers.impl;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -17,6 +17,7 @@ import sn.dev.order_service.services.OrderService;
 import sn.dev.order_service.web.controllers.OrderController;
 import sn.dev.order_service.web.dto.OrderItemDto;
 import sn.dev.order_service.web.dto.OrderResponseDto;
+import sn.dev.order_service.web.dto.UpdateOrderItemStatusRequestDto;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,10 +25,18 @@ public class OrderControllerImpl implements OrderController {
 
     private final OrderService orderService;
 
+    // private String getCurrentUserId() {
+    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    //     Jwt jwt = (Jwt) auth.getPrincipal();
+    //     return jwt.getClaimAsString("userID");
+    // }
+
     private String getCurrentUserId() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) auth.getPrincipal();
-        return jwt.getClaimAsString("userID");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            return jwt.getClaimAsString("userID");
+        }
+        throw new IllegalStateException("User ID not found in JWT");
     }
 
     private String getCurrentSellerId() {
@@ -115,8 +124,17 @@ public class OrderControllerImpl implements OrderController {
     @Override
     public ResponseEntity<OrderResponseDto> updateItemStatus(String orderId,
                                                              String itemId,
-                                                             @RequestParam OrderItemStatus status) {
+                                                             @Valid UpdateOrderItemStatusRequestDto requestDto) {
         String sellerId = getCurrentSellerId();
+        String statusValue = requestDto.getStatus();
+
+        OrderItemStatus status;
+        try {
+            status = OrderItemStatus.valueOf(statusValue);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Invalid order item status: " + statusValue);
+        }
+
         OrderDocument order = orderService.updateOrderItemStatusForSeller(sellerId, orderId, itemId, status);
         return ResponseEntity.ok(toDto(order));
     }
