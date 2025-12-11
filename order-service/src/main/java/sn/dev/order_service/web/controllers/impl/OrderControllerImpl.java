@@ -27,12 +27,6 @@ public class OrderControllerImpl implements OrderController {
 
     private final OrderService orderService;
 
-    // private String getCurrentUserId() {
-    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    //     Jwt jwt = (Jwt) auth.getPrincipal();
-    //     return jwt.getClaimAsString("userID");
-    // }
-
     private String getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {

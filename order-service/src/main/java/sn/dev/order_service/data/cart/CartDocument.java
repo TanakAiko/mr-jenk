@@ -15,7 +15,6 @@ public class CartDocument {
 
     @Id
     private String id;
-
     private String userId;
     private List<CartItemDocument> items = new ArrayList<>();
     private Instant createdAt;

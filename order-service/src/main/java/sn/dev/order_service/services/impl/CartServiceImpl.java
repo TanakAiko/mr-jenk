@@ -5,16 +5,19 @@ import java.time.Instant;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import sn.dev.order_service.data.Product;
 import sn.dev.order_service.data.cart.CartDocument;
 import sn.dev.order_service.data.cart.CartItemDocument;
 import sn.dev.order_service.data.cart.CartRepository;
 import sn.dev.order_service.services.CartService;
+import sn.dev.order_service.services.ProductServiceClient;
 
 @Service
 @RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
+    private final ProductServiceClient productServiceClient;
 
     @Override
     public CartDocument getOrCreateCart(String userId) {
@@ -41,9 +44,13 @@ public class CartServiceImpl implements CartService {
             }
         }
         if (!found) {
+            Product product = productServiceClient.getProductById(productId);
             CartItemDocument newItem = new CartItemDocument();
             newItem.setProductId(productId);
             newItem.setQuantity(quantity);
+            newItem.setPriceSnapshot(product.getPrice());
+            newItem.setProductName(product.getName());
+            newItem.setSellerId(product.getUserId());
             newItem.setCreatedAt(Instant.now());
             newItem.setUpdatedAt(Instant.now());
             cart.getItems().add(newItem);

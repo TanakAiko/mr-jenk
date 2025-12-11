@@ -85,6 +85,7 @@ public class CartControllerImpl implements CartController {
         double totalPrice = itemDtos.stream()
                 .mapToDouble(CartItemDto::subtotal)
                 .sum();
+        totalPrice = Math.round(totalPrice * 100.0) / 100.0; // round to 2 decimal places
 
         return new CartResponseDto(
                 cart.getUserId(),
@@ -94,7 +95,8 @@ public class CartControllerImpl implements CartController {
     }
 
     private CartItemDto mapItemToDto(CartItemDocument item) {
-        double subtotal = item.getPriceSnapshot() * item.getQuantity();
+        double rawSubtotal = item.getPriceSnapshot() * item.getQuantity();
+        double subtotal = Math.round(rawSubtotal * 100.0) / 100.0; // round to 2 decimal places
         return new CartItemDto(
                 item.getProductId(),
                 item.getSellerId(),
