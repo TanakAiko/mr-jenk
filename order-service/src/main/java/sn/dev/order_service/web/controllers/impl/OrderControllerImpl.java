@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import sn.dev.order_service.data.order.OrderDocument;
 import sn.dev.order_service.data.order.OrderItemDocument;
 import sn.dev.order_service.data.order.OrderItemStatus;
@@ -19,6 +20,7 @@ import sn.dev.order_service.web.dto.OrderItemDto;
 import sn.dev.order_service.web.dto.OrderResponseDto;
 import sn.dev.order_service.web.dto.UpdateOrderItemStatusRequestDto;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class OrderControllerImpl implements OrderController {
@@ -75,6 +77,7 @@ public class OrderControllerImpl implements OrderController {
 
     @Override
     public ResponseEntity<OrderResponseDto> checkout() {
+        log.info("[OrderController] POST /api/orders/checkout - checkout called");
         String userId = getCurrentUserId();
         OrderDocument order = orderService.checkout(userId);
         return ResponseEntity.ok(toDto(order));
@@ -82,6 +85,7 @@ public class OrderControllerImpl implements OrderController {
 
     @Override
     public ResponseEntity<List<OrderResponseDto>> getMyOrders() {
+        log.info("[OrderController] GET /api/orders - getMyOrders called");
         String userId = getCurrentUserId();
         List<OrderResponseDto> orders = orderService.getOrdersForUser(userId)
                 .stream()
@@ -92,6 +96,7 @@ public class OrderControllerImpl implements OrderController {
 
     @Override
     public ResponseEntity<OrderResponseDto> getOrder(String orderId) {
+        log.info("[OrderController] GET /api/orders/{} - getOrder called", orderId);
         String userId = getCurrentUserId();
         OrderDocument order = orderService.getOrderForUser(userId, orderId);
         return ResponseEntity.ok(toDto(order));
@@ -99,6 +104,7 @@ public class OrderControllerImpl implements OrderController {
 
     @Override
     public ResponseEntity<OrderResponseDto> cancelOrder(String orderId) {
+        log.info("[OrderController] PATCH /api/orders/{}/cancel - cancelOrder called", orderId);
         String userId = getCurrentUserId();
         OrderDocument order = orderService.cancelOrder(userId, orderId);
         return ResponseEntity.ok(toDto(order));
@@ -106,6 +112,7 @@ public class OrderControllerImpl implements OrderController {
 
     @Override
     public ResponseEntity<OrderResponseDto> redoToCart(String orderId) {
+        log.info("[OrderController] POST /api/orders/{}/redo-to-cart - redoToCart called", orderId);
         String userId = getCurrentUserId();
         OrderDocument order = orderService.redoOrderToCart(userId, orderId);
         return ResponseEntity.ok(toDto(order));
@@ -113,6 +120,7 @@ public class OrderControllerImpl implements OrderController {
 
     @Override
     public ResponseEntity<List<OrderResponseDto>> getOrdersForSeller() {
+        log.info("[OrderController] GET /api/orders/seller - getOrdersForSeller called");
         String sellerId = getCurrentSellerId();
         List<OrderResponseDto> orders = orderService.getOrdersForSeller(sellerId)
                 .stream()
@@ -125,6 +133,7 @@ public class OrderControllerImpl implements OrderController {
     public ResponseEntity<OrderResponseDto> updateItemStatus(String orderId,
                                                              String itemId,
                                                              @Valid UpdateOrderItemStatusRequestDto requestDto) {
+        log.info("[OrderController] PATCH /api/orders/{}/items/{}/status - updateItemStatus called", orderId, itemId);
         String sellerId = getCurrentSellerId();
         String statusValue = requestDto.getStatus();
 

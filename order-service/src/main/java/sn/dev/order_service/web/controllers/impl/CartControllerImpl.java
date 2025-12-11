@@ -2,6 +2,7 @@ package sn.dev.order_service.web.controllers.impl;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,6 +20,7 @@ import sn.dev.order_service.web.dto.CartResponseDto;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class CartControllerImpl implements CartController {
@@ -27,6 +29,7 @@ public class CartControllerImpl implements CartController {
 
     @Override
     public ResponseEntity<CartResponseDto> getCart() {
+        log.info("[CartController] GET /api/cart - getCart called");
         String userId = getCurrentUserId();
         CartDocument cart = cartService.getOrCreateCart(userId);
         return ResponseEntity.ok(mapToDto(cart));
@@ -34,6 +37,7 @@ public class CartControllerImpl implements CartController {
 
     @Override
     public ResponseEntity<CartResponseDto> addItem(String productId, @Valid CartItemRequestDto requestDto) {
+        log.info("[CartController] POST /api/cart/items/{} - addItem called", productId);
         String userId = getCurrentUserId();
         int quantity = requestDto.getQuantity();
         CartDocument cart = cartService.addItem(userId, productId, quantity);
@@ -42,6 +46,7 @@ public class CartControllerImpl implements CartController {
 
     @Override
     public ResponseEntity<CartResponseDto> updateItemQuantity(String productId, @Valid CartItemRequestDto requestDto) {
+        log.info("[CartController] PUT /api/cart/items/{} - updateItemQuantity called", productId);
         String userId = getCurrentUserId();
         int quantity = requestDto.getQuantity();
         CartDocument cart = cartService.updateItemQuantity(userId, productId, quantity);
@@ -50,6 +55,7 @@ public class CartControllerImpl implements CartController {
 
     @Override
     public ResponseEntity<CartResponseDto> removeItem(String productId) {
+        log.info("[CartController] DELETE /api/cart/items/{} - removeItem called", productId);
         String userId = getCurrentUserId();
         CartDocument cart = cartService.removeItem(userId, productId);
         return ResponseEntity.ok(mapToDto(cart));
@@ -57,6 +63,7 @@ public class CartControllerImpl implements CartController {
 
     @Override
     public ResponseEntity<Void> clearCart() {
+        log.info("[CartController] DELETE /api/cart - clearCart called");
         String userId = getCurrentUserId();
         cartService.clearCart(userId);
         return ResponseEntity.noContent().build();
