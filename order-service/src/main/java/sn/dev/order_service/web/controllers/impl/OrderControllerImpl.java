@@ -57,6 +57,28 @@ public class OrderControllerImpl implements OrderController {
         );
     }
 
+    private OrderResponseDto toDtoForSeller(OrderDocument order, String sellerId) {
+        List<OrderItemDto> items = order.getItems().stream()
+                .filter(i -> sellerId.equals(i.getSellerId()))
+                .map(this::toItemDto)
+                .toList();
+
+        double sellerTotal = items.stream()
+                .mapToDouble(OrderItemDto::subtotal)
+                .sum();
+
+        return new OrderResponseDto(
+                order.getId(),
+                order.getUserId(),
+                order.getStatus().name(),
+                order.getPaymentMode().name(),
+                sellerTotal,
+                order.getCreatedAt(),
+                order.getUpdatedAt(),
+                items
+        );
+    }
+
     private OrderItemDto toItemDto(OrderItemDocument item) {
         return new OrderItemDto(
                 item.getProductId(),
@@ -118,7 +140,7 @@ public class OrderControllerImpl implements OrderController {
         String sellerId = getCurrentSellerId();
         List<OrderResponseDto> orders = orderService.getOrdersForSeller(sellerId)
                 .stream()
-                .map(this::toDto)
+                .map(order -> toDtoForSeller(order, sellerId))
                 .toList();
         return ResponseEntity.ok(orders);
     }
@@ -139,6 +161,7 @@ public class OrderControllerImpl implements OrderController {
         }
 
         OrderDocument order = orderService.updateOrderItemStatusForSeller(sellerId, orderId, itemId, status);
-        return ResponseEntity.ok(toDto(order));
+        // Return a seller-scoped view of the order (only this seller's items and totals)
+        return ResponseEntity.ok(toDtoForSeller(order, sellerId));
     }
 }

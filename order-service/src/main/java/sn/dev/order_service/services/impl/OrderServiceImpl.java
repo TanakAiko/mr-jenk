@@ -36,6 +36,10 @@ public class OrderServiceImpl implements sn.dev.order_service.services.OrderServ
 
     @Override
     public OrderDocument getOrderForUser(String userId, String orderId) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("orderId must not be null");
+        }
+        
         OrderDocument order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
         if (!order.getUserId().equals(userId)) {
@@ -84,6 +88,10 @@ public class OrderServiceImpl implements sn.dev.order_service.services.OrderServ
 
     @Override
     public OrderDocument cancelOrder(String userId, String orderId) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("orderId must not be null");
+        }
+
         OrderDocument order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
         if (!order.getUserId().equals(userId)) {
@@ -100,6 +108,10 @@ public class OrderServiceImpl implements sn.dev.order_service.services.OrderServ
 
     @Override
     public OrderDocument redoOrderToCart(String userId, String orderId) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("orderId must not be null");
+        }
+
         OrderDocument order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
         if (!order.getUserId().equals(userId)) {
@@ -136,6 +148,10 @@ public class OrderServiceImpl implements sn.dev.order_service.services.OrderServ
     @Override
     public OrderDocument updateOrderItemStatusForSeller(String sellerId, String orderId, String itemId,
             OrderItemStatus newStatus) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("orderId must not be null");
+        }
+
         OrderDocument order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
 
@@ -148,6 +164,26 @@ public class OrderServiceImpl implements sn.dev.order_service.services.OrderServ
         }
         if (!found) {
             throw new IllegalArgumentException("Order item not found or does not belong to this seller");
+        }
+
+        // Update overall order status based on all item statuses
+        boolean allPending = order.getItems().stream()
+                .allMatch(i -> i.getStatus() == OrderItemStatus.PENDING);
+        boolean allConfirmed = order.getItems().stream()
+                .allMatch(i -> i.getStatus() == OrderItemStatus.CONFIRMED);
+        boolean allShipped = order.getItems().stream()
+                .allMatch(i -> i.getStatus() == OrderItemStatus.SHIPPED);
+        boolean allDelivered = order.getItems().stream()
+                .allMatch(i -> i.getStatus() == OrderItemStatus.DELIVERED);
+
+        if (allDelivered) {
+            order.setStatus(OrderStatus.DELIVERED);
+        } else if (allShipped) {
+            order.setStatus(OrderStatus.SHIPPED);
+        } else if (allConfirmed) {
+            order.setStatus(OrderStatus.CONFIRMED);
+        } else if (allPending) {
+            order.setStatus(OrderStatus.PENDING);
         }
 
         order.setUpdatedAt(Instant.now());
