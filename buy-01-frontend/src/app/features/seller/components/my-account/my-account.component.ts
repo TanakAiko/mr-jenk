@@ -270,7 +270,7 @@ export class MyAccountComponent implements OnInit, OnDestroy {
 
   canEditAvatar(): boolean {
     // Only sellers can edit their avatar
-    return this.userProfile?.role === 'SELLER';
+    return this.userProfile?.role === 'SELLER' || this.userProfile?.role === 'CLIENT';
   }
 
   goBack(): void {

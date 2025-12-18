@@ -36,10 +36,6 @@ export class SignUpComponent {
     ).subscribe((value) => {
       console.log(value)
       this.isSeller = !!value
-      if (!this.isSeller) {
-        this.selectedFile= null
-        this.selectedFileName= "Aucun fichier selectionne"
-      }
       }
     )
   }
