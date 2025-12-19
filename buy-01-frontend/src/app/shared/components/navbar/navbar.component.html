@@ -15,6 +15,12 @@
 
     <!-- User Actions -->
     <div class="navbar-actions desktop-nav">
+      <!-- Cart Button -->
+      <a *ngIf="isLoggedIn" routerLink="/cart" class="cart-btn">
+        <lucide-icon [img]="ShoppingCart" class="cart-icon"></lucide-icon>
+        <span class="cart-text">Cart</span>
+      </a>
+
       <ng-container *ngIf="isLoggedIn; else loginButton">
         <!-- User Profile Dropdown -->
         <div class="user-profile">
@@ -85,6 +91,15 @@
              (click)="navigateToProducts()">
             <lucide-icon [img]="Home" class="nav-icon"></lucide-icon>
             <span>Products</span>
+          </a>
+
+          <!-- Cart Link -->
+          <a routerLink="/cart"
+             routerLinkActive="active"
+             class="mobile-nav-link"
+             (click)="closeMobileMenu()">
+            <lucide-icon [img]="ShoppingCart" class="nav-icon"></lucide-icon>
+            <span>Cart</span>
           </a>
 
           <!-- My Account Link -->

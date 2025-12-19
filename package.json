@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "jwt-decode": "^4.0.0",
     "lucide-angular": "^0.525.0"
   },
   "devDependencies": {

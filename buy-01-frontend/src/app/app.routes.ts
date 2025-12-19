@@ -4,6 +4,7 @@ import { ProductListingComponent } from "./features/products/components/product-
 import { authGuard } from "./auth/guards/auth.guard";
 import { sellerGuard } from "./auth/guards/seller.guard";
 import { ProductDetailsComponent } from "./features/products/components/product-details/product-details.component";
+import { CartPageComponent } from "./features/cart/components/cart-page/cart-page.component";
 import { MyProductsComponent } from "./features/seller/components/my-products/my-products.component";
 import { CreateProductComponent } from "./features/seller/components/create-product/create-product.component";
 import { EditProductComponent } from "./features/seller/components/edit-product/edit-product.component";
@@ -22,13 +23,12 @@ export const routes: Routes = [
     component: ProductDetailsComponent,
     // Allow guest access to product details
   },
-  // TODO: Create cart and orders components later
-  // {
-  //   path: "cart",
-  //   loadComponent: () =>
-  //     import("./features/cart/cart.component").then((m) => m.CartComponent),
-  //   canActivate: [authGuard], // Only logged-in users
-  // },
+  {
+    path: "cart",
+    component: CartPageComponent,
+    canActivate: [authGuard],
+  },
+  // TODO: Create orders components later
   // {
   //   path: "orders",
   //   loadComponent: () =>
