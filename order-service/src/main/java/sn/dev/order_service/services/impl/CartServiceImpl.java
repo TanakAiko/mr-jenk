@@ -45,15 +45,23 @@ public class CartServiceImpl implements CartService {
         }
         if (!found) {
             Product product = productServiceClient.getProductById(productId);
+            
+            System.out.println("Adding product to cart: " + product);
+
             CartItemDocument newItem = new CartItemDocument();
             newItem.setProductId(productId);
             newItem.setQuantity(quantity);
             newItem.setPriceSnapshot(product.getPrice());
             newItem.setProductName(product.getName());
+            if (product.getImages() != null && !product.getImages().isEmpty()) {
+                newItem.setImageUrl(product.getImages().get(0).getImageUrl());
+            }
             newItem.setSellerId(product.getUserId());
             newItem.setCreatedAt(Instant.now());
             newItem.setUpdatedAt(Instant.now());
             cart.getItems().add(newItem);
+
+            System.out.println("New cart item added: " + newItem);
         }
         cart.setUpdatedAt(Instant.now());
         return cartRepository.save(cart);

@@ -6,5 +6,6 @@ public record CartItemDto(
         String productName,
         double priceSnapshot,
         int quantity,
-        double subtotal
+        double subtotal,
+        String imageUrl
 ) {}

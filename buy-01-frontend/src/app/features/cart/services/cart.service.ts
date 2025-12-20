@@ -40,7 +40,7 @@ export class CartService {
         quantity: '0',
         price: item.priceSnapshot.toString(),
         userId: item.sellerId,
-        images: [] // Not provided by backend
+        images: item.imageUrl ? [{ id: '0', imageUrl: item.imageUrl, productId: item.productId }] : []
       },
       quantity: item.quantity
     }));

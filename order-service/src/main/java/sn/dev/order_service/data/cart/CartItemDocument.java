@@ -12,6 +12,7 @@ public class CartItemDocument {
     private String productName;
     private double priceSnapshot;
     private int quantity;
+    private String imageUrl;
     private Instant createdAt;
     private Instant updatedAt;
 
