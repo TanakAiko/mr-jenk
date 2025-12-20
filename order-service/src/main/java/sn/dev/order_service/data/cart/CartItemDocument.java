@@ -13,6 +13,7 @@ public class CartItemDocument {
     private double priceSnapshot;
     private int quantity;
     private String imageUrl;
+    private int availableQuantity;
     private Instant createdAt;
     private Instant updatedAt;
 

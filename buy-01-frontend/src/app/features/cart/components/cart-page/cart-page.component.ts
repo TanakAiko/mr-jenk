@@ -30,6 +30,12 @@ export class CartPageComponent {
     this.cartService.updateQuantity(itemId, newQuantity);
   }
 
+  getMaxQuantity(item: CartItemModel): number {
+    // Assuming item.product.quantity holds the available stock
+    // If it's a string, convert it to a number. Default to a high number if not available.
+    return item.product.quantity ? Number(item.product.quantity) : 99;
+  }
+
   removeItem(itemId: string) {
     this.cartService.removeFromCart(itemId);
   }

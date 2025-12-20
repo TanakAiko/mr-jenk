@@ -37,7 +37,7 @@ export class CartService {
         id: item.productId,
         name: item.productName,
         description: '', // Not provided by backend
-        quantity: '0',
+        quantity: item.availableQuantity ? item.availableQuantity.toString() : '99', // Map availableQuantity from backend
         price: item.priceSnapshot.toString(),
         userId: item.sellerId,
         images: item.imageUrl ? [{ id: '0', imageUrl: item.imageUrl, productId: item.productId }] : []

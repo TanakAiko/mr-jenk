@@ -104,7 +104,8 @@ public class CartControllerImpl implements CartController {
                 item.getPriceSnapshot(),
                 item.getQuantity(),
                 subtotal,
-                item.getImageUrl()
+                item.getImageUrl(),
+                item.getAvailableQuantity()
         );
     }
 }
