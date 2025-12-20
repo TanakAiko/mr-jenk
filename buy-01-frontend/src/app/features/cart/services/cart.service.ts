@@ -21,7 +21,8 @@ export class CartService {
     this.http.get<any>(this.apiUrl).subscribe({
       next: (response) => {
         if (response && response.items) {
-          this.cartItemsSubject.next(response.items);
+          const mappedItems = this.mapResponseItems(response.items);
+          this.cartItemsSubject.next(mappedItems);
         }
       },
       error: (err) => {
@@ -30,19 +31,38 @@ export class CartService {
     });
   }
 
+  private mapResponseItems(items: any[]): CartItemModel[] {
+    return items.map(item => ({
+      product: {
+        id: item.productId,
+        name: item.productName,
+        description: '', // Not provided by backend
+        quantity: '0',
+        price: item.priceSnapshot.toString(),
+        userId: item.sellerId,
+        images: [] // Not provided by backend
+      },
+      quantity: item.quantity
+    }));
+  }
+
   private saveCart(items: CartItemModel[]) {
     localStorage.setItem('cart', JSON.stringify(items));
     this.cartItemsSubject.next(items);
   }
 
   addToCart(product: ProductModels, quantity: number = 1) {
+    console.log('Adding to cart:', product, 'Quantity:', quantity);
     const currentItems = this.cartItemsSubject.value;
-    const existingItem = currentItems.find(item => item.product.id === product.id);
+    console.log('Current cart items:', currentItems);
+    
+    // Add safety check for item.product
+    const existingItem = currentItems.find(item => item.product && item.product.id === product.id);
 
     let updatedItems;
     if (existingItem) {
       updatedItems = currentItems.map(item =>
-        item.product.id === product.id
+        item.product && item.product.id === product.id
           ? { ...item, quantity: item.quantity + quantity }
           : item
       );
@@ -54,7 +74,8 @@ export class CartService {
     this.http.post(`${this.apiUrl}/items/${product.id}`, { quantity }).subscribe({
       next: (response: any) => {
         if (response && response.items) {
-          this.cartItemsSubject.next(response.items);
+          const mappedItems = this.mapResponseItems(response.items);
+          this.cartItemsSubject.next(mappedItems);
         }
       },
       error: (err) => {
@@ -66,13 +87,15 @@ export class CartService {
 
   removeFromCart(productId: string) {
     const currentItems = this.cartItemsSubject.value;
-    const updatedItems = currentItems.filter(item => item.product.id !== productId);
+    // Add safety check for item.product
+    const updatedItems = currentItems.filter(item => item.product && item.product.id !== productId);
     this.cartItemsSubject.next(updatedItems);
 
     this.http.delete(`${this.apiUrl}/items/${productId}`).subscribe({
       next: (response: any) => {
         if (response && response.items) {
-          this.cartItemsSubject.next(response.items);
+          const mappedItems = this.mapResponseItems(response.items);
+          this.cartItemsSubject.next(mappedItems);
         }
       },
       error: (err) => {
@@ -84,7 +107,8 @@ export class CartService {
 
   updateQuantity(productId: string, quantity: number) {
     const currentItems = this.cartItemsSubject.value;
-    const item = currentItems.find(item => item.product.id === productId);
+    // Add safety check for item.product
+    const item = currentItems.find(item => item.product && item.product.id === productId);
     if (!item) return;
 
     if (quantity <= 0) {
@@ -93,14 +117,15 @@ export class CartService {
     }
 
     const updatedItems = currentItems.map(i =>
-      i.product.id === productId ? { ...i, quantity } : i
+      i.product && i.product.id === productId ? { ...i, quantity } : i
     );
     this.cartItemsSubject.next(updatedItems);
 
     this.http.put(`${this.apiUrl}/items/${productId}`, { quantity }).subscribe({
       next: (response: any) => {
         if (response && response.items) {
-          this.cartItemsSubject.next(response.items);
+          const mappedItems = this.mapResponseItems(response.items);
+          this.cartItemsSubject.next(mappedItems);
         }
       },
       error: (err) => {
@@ -126,6 +151,8 @@ export class CartService {
 
   getCartTotal(): number {
     return this.cartItemsSubject.value.reduce((total, item) => {
+      // Add safety check for item.product
+      if (!item.product) return total;
       return total + (Number(item.product.price) * item.quantity);
     }, 0);
   }
