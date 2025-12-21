@@ -41,6 +41,13 @@
             <span class="label">Total Amount</span>
             <span class="value">{{ order.totalPrice | currency }}</span>
           </div>
+          <button 
+            *ngIf="order.status === 'PENDING'" 
+            class="cancel-btn" 
+            (click)="cancelOrder(order.id)"
+          >
+            Cancel Order
+          </button>
         </div>
       </div>
     </div>

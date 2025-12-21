@@ -35,6 +35,7 @@
   border-radius: 12px;
   border: 1px solid var(--border-primary);
   overflow: hidden;
+  color: var(--text-primary); /* Ensure text color is readable */
 }
 
 .cart-item {
@@ -96,8 +97,8 @@
 }
 
 .item-price {
-  color: var(--text-secondary);
-  font-weight: 500;
+  color: var(--text-primary); /* Make price more visible */
+  font-weight: 600; /* Increase weight */
 }
 
 /* Quantity & Actions */

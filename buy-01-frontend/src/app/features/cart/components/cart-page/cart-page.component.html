@@ -93,7 +93,7 @@
             <span>{{ cartTotal | currency }}</span>
           </div>
 
-          <button class="checkout-btn">
+          <button class="checkout-btn" (click)="checkout()">
             Proceed to Checkout
             <lucide-icon [img]="ArrowRight" [size]="20"></lucide-icon>
           </button>

@@ -19,4 +19,12 @@ export class OrderService {
   getOrderById(id: string): Observable<Order> {
     return this.http.get<Order>(`${this.apiUrl}/${id}`);
   }
+
+  checkout(): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}/checkout`, {});
+  }
+
+  cancelOrder(orderId: string): Observable<Order> {
+    return this.http.patch<Order>(`${this.apiUrl}/${orderId}/cancel`, {});
+  }
 }

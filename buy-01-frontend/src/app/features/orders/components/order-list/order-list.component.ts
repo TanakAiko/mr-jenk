@@ -41,4 +41,19 @@ export class OrderListComponent implements OnInit {
   getStatusClass(status: string): string {
     return `status-${status.toLowerCase()}`;
   }
+
+  cancelOrder(orderId: string) {
+    if (confirm('Are you sure you want to cancel this order?')) {
+      this.orderService.cancelOrder(orderId).subscribe({
+        next: () => {
+          // Refresh orders
+          this.orders$ = this.orderService.getOrders();
+        },
+        error: (err) => {
+          console.error('Error cancelling order', err);
+          alert('Failed to cancel order');
+        }
+      });
+    }
+  }
 }

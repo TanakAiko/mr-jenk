@@ -85,6 +85,20 @@ export class CartService {
     });
   }
 
+  clearCart() {
+    const currentItems = this.cartItemsSubject.value;
+    this.cartItemsSubject.next([]);
+
+    this.http.delete(this.apiUrl).subscribe({
+      next: () => {
+      },
+      error: (err) => {
+        console.error('Error clearing cart', err);
+        this.cartItemsSubject.next(currentItems);
+      }
+    });
+  }
+
   removeFromCart(productId: string) {
     const currentItems = this.cartItemsSubject.value;
     // Add safety check for item.product
@@ -105,23 +119,17 @@ export class CartService {
     });
   }
 
-  updateQuantity(productId: string, quantity: number) {
+  updateQuantity(itemId: string, newQuantity: number) {
     const currentItems = this.cartItemsSubject.value;
-    // Add safety check for item.product
-    const item = currentItems.find(item => item.product && item.product.id === productId);
-    if (!item) return;
-
-    if (quantity <= 0) {
-      this.removeFromCart(productId);
-      return;
-    }
-
-    const updatedItems = currentItems.map(i =>
-      i.product && i.product.id === productId ? { ...i, quantity } : i
+    const updatedItems = currentItems.map(item =>
+      item.product && item.product.id === itemId
+        ? { ...item, quantity: newQuantity }
+        : item
     );
     this.cartItemsSubject.next(updatedItems);
-
-    this.http.put(`${this.apiUrl}/items/${productId}`, { quantity }).subscribe({
+    
+    // Call backend to update quantity
+    this.http.put(`${this.apiUrl}/items/${itemId}`, { quantity: newQuantity }).subscribe({
       next: (response: any) => {
         if (response && response.items) {
           const mappedItems = this.mapResponseItems(response.items);
@@ -130,20 +138,7 @@ export class CartService {
       },
       error: (err) => {
         console.error('Error updating quantity', err);
-        this.cartItemsSubject.next(currentItems);
-      }
-    });
-  }
-
-  clearCart() {
-    const currentItems = this.cartItemsSubject.value;
-    this.cartItemsSubject.next([]);
-
-    this.http.delete(this.apiUrl).subscribe({
-      next: () => {
-      },
-      error: (err) => {
-        console.error('Error clearing cart', err);
+        // Revert on error
         this.cartItemsSubject.next(currentItems);
       }
     });
@@ -151,8 +146,6 @@ export class CartService {
 
   getCartTotal(): number {
     return this.cartItemsSubject.value.reduce((total, item) => {
-      // Add safety check for item.product
-      if (!item.product) return total;
       return total + (Number(item.product.price) * item.quantity);
     }, 0);
   }

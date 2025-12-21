@@ -1,7 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { CartService } from '../../services/cart.service';
+import { OrderService } from '../../../orders/services/order.service';
 import { CartItemModel } from '../../models/cart-item.model';
 import { Observable } from 'rxjs';
 import { LucideAngularModule, Trash2, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-angular';
@@ -15,6 +16,8 @@ import { LucideAngularModule, Trash2, Minus, Plus, ShoppingBag, ArrowRight } fro
 })
 export class CartPageComponent {
   private cartService = inject(CartService);
+  private orderService = inject(OrderService);
+  private router = inject(Router);
   
   cartItems$: Observable<CartItemModel[]> = this.cartService.cartItems$;
   
@@ -46,5 +49,20 @@ export class CartPageComponent {
 
   get cartTotal(): number {
     return this.cartService.getCartTotal();
+  }
+
+  checkout() {
+    this.orderService.checkout().subscribe({
+      next: (order) => {
+        console.log('Checkout successful', order);
+        // Clear the cart after successful checkout
+        this.cartService.clearCart();
+        this.router.navigate(['/orders']);
+      },
+      error: (err) => {
+        console.error('Checkout failed', err);
+        alert('Checkout failed. Please try again.');
+      }
+    });
   }
 }

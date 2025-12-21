@@ -30,6 +30,7 @@
   border: 1px solid var(--border-primary);
   border-radius: 12px;
   overflow: hidden;
+  color: var(--text-primary); /* Ensure text color is readable */
 }
 
 .order-header {
@@ -143,12 +144,12 @@
 }
 
 .item-name {
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
 .item-meta {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
 }
 
@@ -210,6 +211,22 @@
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
+}
+
+.cancel-btn {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 1px solid var(--accent-red);
+  color: var(--accent-red);
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+  background-color: var(--accent-red);
+  color: white;
 }
 
 @keyframes spin {
