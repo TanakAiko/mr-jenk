@@ -51,19 +51,20 @@
 
 .order-id .label {
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: #374151;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .order-id .value {
   font-weight: 600;
-  color: var(--text-primary);
+  color: #1f2937;
 }
 
 .order-date {
-  color: var(--text-secondary);
+  color: #1f2937;
   font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .order-status {
@@ -163,7 +164,8 @@
   background: var(--gray-50);
   border-top: 1px solid var(--border-primary);
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .total-amount {
@@ -173,14 +175,14 @@
 }
 
 .total-amount .label {
-  color: var(--text-secondary);
+  color: #374151;
   font-weight: 500;
 }
 
 .total-amount .value {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1f2937;
 }
 
 .empty-state {
@@ -216,17 +218,20 @@
 .cancel-btn {
   padding: 0.5rem 1rem;
   background-color: transparent;
-  border: 1px solid var(--accent-red);
-  color: var(--accent-red);
+  border: 1px solid #d1d5db;
+  color: #374151;
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .cancel-btn:hover {
-  background-color: var(--accent-red);
-  color: white;
+  background-color: #fef2f2;
+  border-color: #ef4444;
+  color: #ef4444;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.1);
+  transform: translateY(-1px);
 }
 
 @keyframes spin {
