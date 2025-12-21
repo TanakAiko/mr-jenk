@@ -75,6 +75,7 @@ public class OrderServiceImpl implements sn.dev.order_service.services.OrderServ
             item.setQuantity(cartItem.getQuantity());
             item.setSubtotal(cartItem.getPriceSnapshot() * cartItem.getQuantity());
             item.setStatus(OrderItemStatus.PENDING);
+            item.setImageUrl(cartItem.getImageUrl());
             total += item.getSubtotal();
             order.getItems().add(item);
         }
@@ -135,6 +136,7 @@ public class OrderServiceImpl implements sn.dev.order_service.services.OrderServ
             cartItem.setProductName(orderItem.getProductName());
             cartItem.setPriceSnapshot(orderItem.getUnitPrice());
             cartItem.setQuantity(orderItem.getQuantity());
+            cartItem.setImageUrl(orderItem.getImageUrl());
             cartItem.setCreatedAt(Instant.now());
             cartItem.setUpdatedAt(Instant.now());
             cart.getItems().add(cartItem);

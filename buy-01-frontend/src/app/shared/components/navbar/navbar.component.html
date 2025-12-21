@@ -42,6 +42,12 @@
                 My Account
               </a>
 
+              <!-- My Orders Link -->
+              <a routerLink="/orders" class="dropdown-item" (click)="closeDropdown()">
+                <lucide-icon [img]="ShoppingBag" class="dropdown-icon"></lucide-icon>
+                My Orders
+              </a>
+
               <!-- Seller Specific Navigation -->
               <ng-container *ngIf="isSeller">
                 <div class="dropdown-divider"></div>

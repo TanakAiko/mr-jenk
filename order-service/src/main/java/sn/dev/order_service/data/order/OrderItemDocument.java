@@ -12,5 +12,6 @@ public class OrderItemDocument {
     private int quantity;
     private double subtotal;
     private OrderItemStatus status;
+    private String imageUrl;
 
 }

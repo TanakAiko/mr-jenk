@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   Home,
+  ShoppingBag,
 } from "lucide-angular";
 
 export interface User {
@@ -46,6 +47,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   readonly LogOut = LogOut;
   readonly Menu = Menu;
   readonly Home = Home;
+  readonly ShoppingBag = ShoppingBag;
 
   constructor(
     private router: Router,

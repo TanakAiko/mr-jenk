@@ -10,6 +10,7 @@ import { CreateProductComponent } from "./features/seller/components/create-prod
 import { EditProductComponent } from "./features/seller/components/edit-product/edit-product.component";
 import { MyAccountComponent } from "./features/seller/components/my-account/my-account.component";
 import { NotFoundComponent } from "./shared/components/not-found/not-found.component";
+import { OrderListComponent } from "./features/orders/components/order-list/order-list.component";
 
 export const routes: Routes = [
   { path: "auth", component: SignComponent },
@@ -26,6 +27,11 @@ export const routes: Routes = [
   {
     path: "cart",
     component: CartPageComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: "orders",
+    component: OrderListComponent,
     canActivate: [authGuard],
   },
   // TODO: Create orders components later

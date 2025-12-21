@@ -1,0 +1,63 @@
+<div class="container">
+  <div class="header">
+    <h1>My Orders</h1>
+    <p class="subtitle">Track and manage your orders</p>
+  </div>
+
+  <ng-container *ngIf="orders$ | async as orders; else loading">
+    <div class="orders-list" *ngIf="orders.length > 0; else emptyState">
+      <div class="order-card" *ngFor="let order of orders">
+        <div class="order-header">
+          <div class="order-id">
+            <span class="label">Order ID</span>
+            <span class="value">#{{ order.id }}</span>
+          </div>
+          <div class="order-date">
+            {{ order.createdAt | date:'mediumDate' }}
+          </div>
+          <div class="order-status" [ngClass]="getStatusClass(order.status)">
+            <lucide-icon [img]="getStatusIcon(order.status)" [size]="16"></lucide-icon>
+            <span>{{ order.status }}</span>
+          </div>
+        </div>
+
+        <div class="order-items">
+          <div class="item" *ngFor="let item of order.items">
+            <div class="item-image">
+              <img [src]="item.imageUrl || 'assets/images/placeholder.svg'" [alt]="item.productName">
+            </div>
+            <div class="item-details">
+              <span class="item-name">{{ item.productName }}</span>
+              <span class="item-meta">Qty: {{ item.quantity }}</span>
+            </div>
+            <div class="item-price">
+              {{ item.unitPrice | currency }}
+            </div>
+          </div>
+        </div>
+
+        <div class="order-footer">
+          <div class="total-amount">
+            <span class="label">Total Amount</span>
+            <span class="value">{{ order.totalPrice | currency }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading your orders...</p>
+    </div>
+  </ng-template>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <lucide-icon [img]="Package" [size]="64"></lucide-icon>
+      <h2>No orders yet</h2>
+      <p>You haven't placed any orders yet.</p>
+    </div>
+  </ng-template>
+</div>

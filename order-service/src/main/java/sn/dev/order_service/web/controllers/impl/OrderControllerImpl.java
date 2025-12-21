@@ -87,7 +87,8 @@ public class OrderControllerImpl implements OrderController {
                 item.getUnitPrice(),
                 item.getQuantity(),
                 item.getSubtotal(),
-                item.getStatus().name()
+                item.getStatus().name(),
+                item.getImageUrl()
         );
     }
 
