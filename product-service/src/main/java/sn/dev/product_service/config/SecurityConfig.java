@@ -31,6 +31,8 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.POST, "/api/products").authenticated()
                                                 .requestMatchers(HttpMethod.PUT, "/api/products/{id}").authenticated()
+                                                .requestMatchers(HttpMethod.PUT, "/api/products/{id}/reduce-quantity/{quantity}").authenticated()
+                                                .requestMatchers(HttpMethod.PUT, "/api/products/{id}/restore-quantity/{quantity}").authenticated()
                                                 .requestMatchers(HttpMethod.PATCH, "/api/products/{id}").authenticated()
                                                 .requestMatchers(HttpMethod.DELETE, "/api/products/{id}")
                                                 .authenticated()

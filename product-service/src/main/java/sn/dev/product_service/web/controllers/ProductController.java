@@ -37,4 +37,10 @@ public interface ProductController {
     @PreAuthorize("hasAuthority('SELLER')")
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable String id);
+
+    @PutMapping("/{id}/reduce-quantity/{quantity}")
+    ResponseEntity<Void> reduceQuantity(@PathVariable String id, @PathVariable int quantity);
+
+    @PutMapping("/{id}/restore-quantity/{quantity}")
+    ResponseEntity<Void> restoreQuantity(@PathVariable String id, @PathVariable int quantity);
 }

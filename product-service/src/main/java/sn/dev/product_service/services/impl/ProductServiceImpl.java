@@ -52,4 +52,21 @@ public class ProductServiceImpl implements ProductService {
     public void deleteByUserId(String userId) {
         productRepo.deleteByUserId(userId);
     }
+
+    @Override
+    public void reduceQuantity(String id, int quantity) {
+        Product product = getById(id);
+        if (product.getQuantity() < quantity) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient quantity for product: " + id);
+        }
+        product.setQuantity(product.getQuantity() - quantity);
+        productRepo.save(product);
+    }
+
+    @Override
+    public void restoreQuantity(String id, int quantity) {
+        Product product = getById(id);
+        product.setQuantity(product.getQuantity() + quantity);
+        productRepo.save(product);
+    }
 }

@@ -18,4 +18,8 @@ public interface ProductService {
     void delete(Product product);
 
     void deleteByUserId(String userId);
+
+    void reduceQuantity(String id, int quantity);
+
+    void restoreQuantity(String id, int quantity);
 }

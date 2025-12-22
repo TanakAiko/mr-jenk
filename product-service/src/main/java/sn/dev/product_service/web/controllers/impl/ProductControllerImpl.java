@@ -160,4 +160,16 @@ public class ProductControllerImpl implements ProductController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @Override
+    public ResponseEntity<Void> reduceQuantity(String id, int quantity) {
+        productService.reduceQuantity(id, quantity);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> restoreQuantity(String id, int quantity) {
+        productService.restoreQuantity(id, quantity);
+        return ResponseEntity.ok().build();
+    }
 }

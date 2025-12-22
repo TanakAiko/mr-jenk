@@ -96,6 +96,7 @@ public class OrderControllerImpl implements OrderController {
     public ResponseEntity<OrderResponseDto> checkout() {
         log.info("[OrderController] POST /api/orders/checkout - checkout called");
         String userId = getCurrentUserId();
+        // The checkout process includes reducing product quantities via ProductServiceClient
         OrderDocument order = orderService.checkout(userId);
         return ResponseEntity.ok(toDto(order));
     }
