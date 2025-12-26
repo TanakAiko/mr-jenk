@@ -117,11 +117,11 @@ export class ProductListingComponent implements OnInit {
 
   formatPrice(price: number | string): string {
     const numericPrice = typeof price === "string" ? parseFloat(price) : price;
-    return new Intl.NumberFormat("fr-SN", {
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "XOF",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(numericPrice);
   }
 

@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 import { Observable } from 'rxjs';
-import { LucideAngularModule, Package, Clock, CheckCircle, Truck, XCircle } from 'lucide-angular';
+import { Router } from '@angular/router';
+import { LucideAngularModule, Package, Clock, CheckCircle, Truck, XCircle, RotateCcw } from 'lucide-angular';
 
 @Component({
   selector: 'app-order-list',
@@ -14,6 +15,7 @@ import { LucideAngularModule, Package, Clock, CheckCircle, Truck, XCircle } from
 })
 export class OrderListComponent implements OnInit {
   private orderService = inject(OrderService);
+  private router = inject(Router);
   orders$: Observable<Order[]> | undefined;
 
   // Icons
@@ -22,6 +24,7 @@ export class OrderListComponent implements OnInit {
   readonly CheckCircle = CheckCircle;
   readonly Truck = Truck;
   readonly XCircle = XCircle;
+  readonly RotateCcw = RotateCcw;
 
   ngOnInit() {
     this.orders$ = this.orderService.getOrders();
@@ -52,6 +55,20 @@ export class OrderListComponent implements OnInit {
         error: (err) => {
           console.error('Error cancelling order', err);
           alert('Failed to cancel order');
+        }
+      });
+    }
+  }
+
+  reorder(orderId: string) {
+    if (confirm('Do you want to add these items to your cart?')) {
+      this.orderService.reorder(orderId).subscribe({
+        next: () => {
+          this.router.navigate(['/cart']);
+        },
+        error: (err) => {
+          console.error('Error reordering', err);
+          alert('Failed to reorder items');
         }
       });
     }

@@ -35,4 +35,8 @@ export class OrderService {
   updateOrderItemStatus(orderId: string, itemId: string, status: string): Observable<Order> {
     return this.http.patch<Order>(`${this.apiUrl}/${orderId}/items/${itemId}/status`, { status });
   }
+
+  reorder(orderId: string): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}/${orderId}/redo-to-cart`, {});
+  }
 }

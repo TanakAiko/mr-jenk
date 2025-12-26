@@ -54,6 +54,14 @@
           >
             Cancel Order
           </button>
+          <button 
+            *ngIf="order.status === 'CANCELLED' || order.status === 'DELIVERED'" 
+            class="reorder-btn" 
+            (click)="reorder(order.id)"
+          >
+            <lucide-icon [img]="RotateCcw" [size]="16"></lucide-icon>
+            Reorder
+          </button>
         </div>
       </div>
     </div>
