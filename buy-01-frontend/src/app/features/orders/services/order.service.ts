@@ -39,4 +39,12 @@ export class OrderService {
   reorder(orderId: string): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/${orderId}/redo-to-cart`, {});
   }
+
+  searchOrders(query: string): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.apiUrl}/search`, { params: { query } });
+  }
+
+  searchSellerOrders(query: string): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.apiUrl}/seller/search`, { params: { query } });
+  }
 }

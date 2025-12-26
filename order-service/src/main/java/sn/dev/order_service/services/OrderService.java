@@ -21,4 +21,8 @@ public interface OrderService {
 
     OrderDocument updateOrderItemStatusForSeller(String sellerId, String orderId, String itemId,
             OrderItemStatus newStatus);
+
+    List<OrderDocument> searchOrdersForUser(String userId, String query);
+
+    List<OrderDocument> searchOrdersForSeller(String sellerId, String query);
 }

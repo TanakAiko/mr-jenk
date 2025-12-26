@@ -102,6 +102,20 @@ public class OrderControllerImpl implements OrderController {
     }
 
     @Override
+    public ResponseEntity<List<OrderResponseDto>> searchOrders(String query) {
+        String userId = getCurrentUserId();
+        List<OrderDocument> orders = orderService.searchOrdersForUser(userId, query);
+        return ResponseEntity.ok(orders.stream().map(this::toDto).toList());
+    }
+
+    @Override
+    public ResponseEntity<List<OrderResponseDto>> searchSellerOrders(String query) {
+        String sellerId = getCurrentSellerId();
+        List<OrderDocument> orders = orderService.searchOrdersForSeller(sellerId, query);
+        return ResponseEntity.ok(orders.stream().map(o -> toDtoForSeller(o, sellerId)).toList());
+    }
+
+    @Override
     public ResponseEntity<List<OrderResponseDto>> getMyOrders() {
         log.info("[OrderController] GET /api/orders - getMyOrders called");
         String userId = getCurrentUserId();

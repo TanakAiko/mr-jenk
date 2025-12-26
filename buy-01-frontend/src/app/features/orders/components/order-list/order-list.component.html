@@ -2,6 +2,16 @@
   <div class="header">
     <h1>My Orders</h1>
     <p class="subtitle">Track and manage your orders</p>
+    <div class="search-bar">
+      <input 
+        type="text" 
+        placeholder="Search orders by ID or product name..." 
+        class="search-input"
+        [value]="searchTerm"
+        #searchInput
+        (input)="onSearch(searchInput.value)"
+      />
+    </div>
   </div>
 
   <ng-container *ngIf="orders$ | async as orders; else loading">

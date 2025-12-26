@@ -2,9 +2,10 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { Router } from '@angular/router';
 import { LucideAngularModule, Package, Clock, CheckCircle, Truck, XCircle, RotateCcw } from 'lucide-angular';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-order-list',
@@ -17,6 +18,8 @@ export class OrderListComponent implements OnInit {
   private orderService = inject(OrderService);
   private router = inject(Router);
   orders$: Observable<Order[]> | undefined;
+  searchTerm: string = '';
+  private searchSubject = new Subject<string>();
 
   // Icons
   readonly Package = Package;
@@ -28,6 +31,25 @@ export class OrderListComponent implements OnInit {
 
   ngOnInit() {
     this.orders$ = this.orderService.getOrders();
+    this.setupSearchSubscription();
+  }
+
+  private setupSearchSubscription() {
+    this.searchSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe(term => {
+      if (term.trim()) {
+        this.orders$ = this.orderService.searchOrders(term);
+      } else {
+        this.orders$ = this.orderService.getOrders();
+      }
+    });
+  }
+
+  onSearch(term: string) {
+    this.searchTerm = term;
+    this.searchSubject.next(term);
   }
 
   getStatusIcon(status: string) {

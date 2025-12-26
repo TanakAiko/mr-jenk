@@ -226,4 +226,37 @@ public class OrderServiceImpl implements sn.dev.order_service.services.OrderServ
         order.setUpdatedAt(Instant.now());
         return orderRepository.save(order);
     }
+
+    @Override
+    public List<OrderDocument> searchOrdersForUser(String userId, String query) {
+        // Simple search implementation: filter by order ID or product name
+        // In a real app, this should be done with a more complex MongoDB query
+        List<OrderDocument> allOrders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        String lowerQuery = query.toLowerCase();
+        
+        return allOrders.stream()
+                .filter(order -> 
+                    order.getId().toLowerCase().contains(lowerQuery) ||
+                    order.getItems().stream().anyMatch(item -> 
+                        item.getProductName().toLowerCase().contains(lowerQuery)
+                    )
+                )
+                .toList();
+    }
+
+    @Override
+    public List<OrderDocument> searchOrdersForSeller(String sellerId, String query) {
+        List<OrderDocument> allOrders = orderRepository.findByItemsSellerIdOrderByCreatedAtDesc(sellerId);
+        String lowerQuery = query.toLowerCase();
+        
+        return allOrders.stream()
+                .filter(order -> 
+                    order.getId().toLowerCase().contains(lowerQuery) ||
+                    order.getItems().stream().anyMatch(item -> 
+                        item.getSellerId().equals(sellerId) && 
+                        item.getProductName().toLowerCase().contains(lowerQuery)
+                    )
+                )
+                .toList();
+    }
 }

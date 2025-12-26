@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrderService } from '../../../orders/services/order.service';
 import { Order, OrderItem } from '../../../orders/models/order.model';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-seller-orders',
@@ -15,6 +16,8 @@ export class SellerOrdersComponent implements OnInit {
   orders: Order[] = [];
   loading = false;
   error: string | null = null;
+  searchTerm: string = '';
+  private searchSubject = new Subject<string>();
   
   readonly orderStatuses = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
@@ -22,6 +25,40 @@ export class SellerOrdersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadOrders();
+    this.setupSearchSubscription();
+  }
+
+  private setupSearchSubscription() {
+    this.searchSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe(term => {
+      if (term.trim()) {
+        this.searchOrders(term);
+      } else {
+        this.loadOrders();
+      }
+    });
+  }
+
+  onSearch(term: string) {
+    this.searchTerm = term;
+    this.searchSubject.next(term);
+  }
+
+  searchOrders(query: string): void {
+    this.loading = true;
+    this.orderService.searchSellerOrders(query).subscribe({
+      next: (orders) => {
+        this.orders = orders;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error searching seller orders', err);
+        this.error = 'Failed to search orders. Please try again.';
+        this.loading = false;
+      }
+    });
   }
 
   loadOrders(): void {

@@ -2,6 +2,16 @@
   <div class="page-header">
     <h2 class="page-title">Seller Orders</h2>
     <p class="page-subtitle">Manage your orders and track shipments</p>
+    <div class="search-bar">
+      <input 
+        type="text" 
+        placeholder="Search orders by ID or product name..." 
+        class="search-input"
+        [value]="searchTerm"
+        #searchInput
+        (input)="onSearch(searchInput.value)"
+      />
+    </div>
   </div>
 
   <div *ngIf="loading" class="loading-state">
