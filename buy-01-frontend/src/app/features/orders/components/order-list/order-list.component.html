@@ -28,7 +28,13 @@
             </div>
             <div class="item-details">
               <span class="item-name">{{ item.productName }}</span>
-              <span class="item-meta">Qty: {{ item.quantity }}</span>
+              <div class="item-meta-row">
+                <span class="item-meta">Qty: {{ item.quantity }}</span>
+                <div class="item-status-badge" [ngClass]="getStatusClass(item.status)">
+                  <lucide-icon [img]="getStatusIcon(item.status)" [size]="14"></lucide-icon>
+                  <span>{{ item.status }}</span>
+                </div>
+              </div>
             </div>
             <div class="item-price">
               {{ item.unitPrice | currency }}
