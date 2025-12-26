@@ -55,6 +55,10 @@
                   <lucide-icon [img]="Package" class="dropdown-icon"></lucide-icon>
                   My Products
                 </a>
+                <a routerLink="/seller/orders" class="dropdown-item" (click)="closeDropdown()">
+                  <lucide-icon [img]="ClipboardList" class="dropdown-icon"></lucide-icon>
+                  Seller Orders
+                </a>
               </ng-container>
 
               <div class="dropdown-divider"></div>
@@ -109,12 +113,21 @@
           </a>
 
           <!-- My Account Link -->
-          <a routerLink="/my-account"
+          <a routerLink="/seller/my-account"
              routerLinkActive="active"
              class="mobile-nav-link"
              (click)="closeMobileMenu()">
             <lucide-icon [img]="User" class="nav-icon"></lucide-icon>
             <span>My Account</span>
+          </a>
+
+          <!-- My Orders Link -->
+          <a routerLink="/orders"
+             routerLinkActive="active"
+             class="mobile-nav-link"
+             (click)="closeMobileMenu()">
+            <lucide-icon [img]="ShoppingBag" class="nav-icon"></lucide-icon>
+            <span>My Orders</span>
           </a>
 
           <!-- Seller Specific Navigation in Mobile -->
@@ -125,6 +138,13 @@
                (click)="navigateToMyProducts()">
               <lucide-icon [img]="Package" class="nav-icon"></lucide-icon>
               <span>My Products</span>
+            </a>
+            <a routerLink="/seller/orders"
+               routerLinkActive="active"
+               class="mobile-nav-link"
+               (click)="closeMobileMenu()">
+              <lucide-icon [img]="ClipboardList" class="nav-icon"></lucide-icon>
+              <span>Seller Orders</span>
             </a>
           </ng-container>
 

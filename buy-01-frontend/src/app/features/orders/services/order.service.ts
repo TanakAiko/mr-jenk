@@ -27,4 +27,12 @@ export class OrderService {
   cancelOrder(orderId: string): Observable<Order> {
     return this.http.patch<Order>(`${this.apiUrl}/${orderId}/cancel`, {});
   }
+
+  getSellerOrders(): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.apiUrl}/seller`);
+  }
+
+  updateOrderItemStatus(orderId: string, itemId: string, status: string): Observable<Order> {
+    return this.http.patch<Order>(`${this.apiUrl}/${orderId}/items/${itemId}/status`, { status });
+  }
 }

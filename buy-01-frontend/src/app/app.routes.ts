@@ -11,6 +11,7 @@ import { EditProductComponent } from "./features/seller/components/edit-product/
 import { MyAccountComponent } from "./features/seller/components/my-account/my-account.component";
 import { NotFoundComponent } from "./shared/components/not-found/not-found.component";
 import { OrderListComponent } from "./features/orders/components/order-list/order-list.component";
+import { SellerOrdersComponent } from "./features/seller/components/seller-orders/seller-orders.component";
 
 export const routes: Routes = [
   { path: "auth", component: SignComponent },
@@ -57,6 +58,11 @@ export const routes: Routes = [
   {
     path: "seller/edit-product/:id",
     component: EditProductComponent,
+    canActivate: [sellerGuard], // Only sellers
+  },
+  {
+    path: "seller/orders",
+    component: SellerOrdersComponent,
     canActivate: [sellerGuard], // Only sellers
   },
   {
