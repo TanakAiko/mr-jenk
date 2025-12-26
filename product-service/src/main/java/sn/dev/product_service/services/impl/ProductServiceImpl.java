@@ -27,6 +27,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<Product> search(String query) {
+        return productRepo.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(query, query);
+    }
+
+    @Override
     public Product getById(String id) {
         return productRepo.findById(id)
                 .orElseThrow(

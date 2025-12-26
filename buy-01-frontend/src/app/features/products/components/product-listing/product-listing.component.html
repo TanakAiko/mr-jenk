@@ -20,12 +20,13 @@
   </div>
 
   <!-- Filters and Search Section -->
-  <div class="filters-section" *ngIf="allProducts && allProducts.length > 0">
+  <div class="filters-section" *ngIf="(allProducts && allProducts.length > 0) || searchTerm">
     <div class="search-bar">
       <input
         type="text"
         placeholder="Search products..."
         class="search-input"
+        [value]="searchTerm"
         #searchInput
         (input)="onSearch(searchInput.value)"
       />
@@ -66,8 +67,8 @@
   </div>
 
   <!-- Products Grid -->
-  <div class="product-grid" *ngIf="allProducts && allProducts.length > 0 && !isLoading">
-    <div class="product-card" *ngFor="let product of allProducts; trackBy: trackByProductId">
+  <div class="product-grid" *ngIf="filteredProducts && filteredProducts.length > 0 && !isLoading">
+    <div class="product-card" *ngFor="let product of filteredProducts; trackBy: trackByProductId">
 
       <!-- Product Image -->
       <div class="product-image-container" [routerLink]="['/products', product.id]">

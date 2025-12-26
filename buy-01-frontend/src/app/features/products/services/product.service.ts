@@ -12,13 +12,14 @@ export class ProductService {
 
   constructor(private httpClient: HttpClient) {}
 
-  getProductList(): Observable<ProductModels[]> {
-    // const xender =
+  getProductList(search?: string): Observable<ProductModels[]> {
+    let url = `${this.apiUrl}/api/products`;
+    if (search) {
+      url += `?search=${encodeURIComponent(search)}`;
+    }
     return this.httpClient
-      .get<ProductModels[]>(`${this.apiUrl}/api/products`)
+      .get<ProductModels[]>(url)
       .pipe(catchError((err) => throwError(() => err)));
-
-    // return xender;
   }
 
   getOneProduct(id: string): Observable<ProductModels> {

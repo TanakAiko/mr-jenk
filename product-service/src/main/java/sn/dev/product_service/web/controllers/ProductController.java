@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.validation.Valid;
 import sn.dev.product_service.web.dto.ProductCreateDTO;
@@ -24,7 +25,7 @@ public interface ProductController {
     ResponseEntity<ProductResponseDTO> create(@ModelAttribute @Valid ProductCreateDTO productCreateDTO);
 
     @GetMapping
-    ResponseEntity<List<ProductResponseDTO>> getAll();
+    ResponseEntity<List<ProductResponseDTO>> getAll(@RequestParam(required = false) String search);
 
     @GetMapping("/{id}")
     ResponseEntity<ProductResponseDTO> getById(@PathVariable String id);
