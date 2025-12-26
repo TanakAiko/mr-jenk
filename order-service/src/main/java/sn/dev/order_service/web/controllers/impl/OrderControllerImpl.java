@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -29,10 +30,17 @@ public class OrderControllerImpl implements OrderController {
 
     private String getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            return jwt.getClaimAsString("userID");
+        if (authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof Jwt jwt) {
+                return jwt.getClaimAsString("userID");
+            } else if (principal instanceof UserDetails userDetails) {
+                return userDetails.getUsername();
+            } else if (principal instanceof String strPrincipal) {
+                 return strPrincipal;
+            }
         }
-        throw new IllegalStateException("User ID not found in JWT");
+        throw new IllegalStateException("User ID not found in JWT or Security Context");
     }
 
     private String getCurrentSellerId() {

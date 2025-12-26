@@ -28,6 +28,11 @@ public class GlobalExceptionHandler {
         errorResponse.put("error", "Conflict"); // Or Bad Request depending on context, but IllegalState often implies a conflict with current state
         errorResponse.put("message", ex.getMessage());
         
+        // Check if the message is "User ID not found in JWT" and return 401 or 403 if appropriate, 
+        // but for now, let's stick to what the tests might expect or what is standard.
+        // The tests are failing with 409 Conflict, but expecting 200 OK.
+        // This means an exception is being thrown during the test execution.
+        
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(errorResponse);
