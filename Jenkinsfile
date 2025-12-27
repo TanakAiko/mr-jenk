@@ -331,7 +331,7 @@ pipeline {
             echo 'Application is running. Access it at:'
             echo '  - Frontend: http://localhost:4400'
             echo '  - API Gateway: http://localhost:8090'
-            echo '  - Eureka Dashboard: http://localhost:8761'
+            echo '  - Eureka Dashboard: http://localhost:9761'
             
             // Optional: Clean up only dangling/unused images to save disk space
             // but keep the running containers and their images
@@ -397,7 +397,7 @@ pipeline {
                                     <ul style="list-style-type: none; padding: 0;">
                                         <li style="padding: 5px 0;">🌐 <strong>Frontend:</strong> <a href="http://localhost:4400">http://localhost:4400</a></li>
                                         <li style="padding: 5px 0;">🚪 <strong>API Gateway:</strong> <a href="http://localhost:8090">http://localhost:8090</a></li>
-                                        <li style="padding: 5px 0;">🔍 <strong>Eureka Dashboard:</strong> <a href="http://localhost:8761">http://localhost:8761</a></li>
+                                        <li style="padding: 5px 0;">🔍 <strong>Eureka Dashboard:</strong> <a href="http://localhost:9761">http://localhost:9761</a></li>
                                         <li style="padding: 5px 0;">⚙️ <strong>Config Service:</strong> <a href="http://localhost:8888">http://localhost:8888</a></li>
                                     </ul>
                                     

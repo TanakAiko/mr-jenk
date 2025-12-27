@@ -36,7 +36,7 @@ flowchart TB
     end
     
     subgraph Discovery["🔍 Service Discovery"]
-        EUREKA["Eureka Server<br/>Port 8761<br/>Netflix Eureka"]
+        EUREKA["Eureka Server<br/>Port 9761<br/>Netflix Eureka"]
     end
     
     subgraph Config["⚙️ Configuration"]
@@ -97,7 +97,7 @@ This project implements a microservices architecture with the following componen
 ### Backend Services
 - **API Gateway** (Port 8090) - Entry point for all client requests
 - **Config Service** (Port 8888) - Centralized configuration management
-- **Discovery Service** (Port 8761) - Eureka service registry
+- **Discovery Service** (Port 9761) - Eureka service registry
 - **User Service** (Port 8081) - User authentication and management
 - **Product Service** (Port 8082) - Product catalog management
 - **Media Service** (Port 8083) - File upload and media handling
@@ -301,7 +301,7 @@ docker compose ps
 ### 4. Access the Application
 - **Frontend**: http://localhost:4400 or https://localhost:8443
 - **API Gateway**: http://localhost:8090
-- **Eureka Dashboard**: http://localhost:8761
+- **Eureka Dashboard**: http://localhost:9761
 - **Config Service**: http://localhost:8888
 
 ## 🔧 Development Setup
@@ -442,7 +442,7 @@ The pipeline automatically sends professional HTML email notifications:
 
 | Service | Port | Health Check |
 |---------|------|--------------|
-| eureka-server | 8761 | `/actuator/health` |
+| eureka-server | 9761 | `/actuator/health` |
 | config-service | 8888 | `/actuator/health` |
 | api-gateway | 8090 | `/actuator/health` |
 | user-service | 8081 | `/actuator/health` |
