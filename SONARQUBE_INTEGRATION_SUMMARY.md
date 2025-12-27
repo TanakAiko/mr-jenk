@@ -88,7 +88,7 @@ SonarQube has been successfully integrated into your Jenkins CI/CD pipeline for 
                       ↓
 ┌─────────────────────────────────────────────────┐
 │ Stage 3: Build Docker Images                   │
-│ └─ docker-compose build --parallel             │
+│ └─ docker compose build --parallel             │
 └─────────────────────────────────────────────────┘
                       ↓
 ┌─────────────────────────────────────────────────┐
@@ -98,7 +98,7 @@ SonarQube has been successfully integrated into your Jenkins CI/CD pipeline for 
                       ↓
 ┌─────────────────────────────────────────────────┐
 │ Stage 5: Deploy Application                    │
-│ └─ docker-compose up with tagged images        │
+│ └─ docker compose up with tagged images        │
 └─────────────────────────────────────────────────┘
                       ↓
 ┌─────────────────────────────────────────────────┐

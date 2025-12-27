@@ -289,13 +289,13 @@ export CONFIG_REPO_PASSWORD=your-password
 ### 3. Build and Run with Docker Compose
 ```bash
 # Build all services
-docker-compose build
+docker compose build
 
 # Start all services
-docker-compose up -d
+docker compose up -d
 
 # Check service status
-docker-compose ps
+docker compose ps
 ```
 
 ### 4. Access the Application
