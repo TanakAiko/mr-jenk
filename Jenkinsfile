@@ -333,14 +333,14 @@ pipeline {
             echo '  - API Gateway: http://localhost:8090'
             echo '  - Eureka Dashboard: http://localhost:9761'
             echo '  - Config Service: http://localhost:9888'
-            
+
             // Optional: Clean up only dangling/unused images to save disk space
             // but keep the running containers and their images
             sh """
                 docker image prune -f
             """
         }
-        
+
         success {
             script {
                 echo '================================================'
