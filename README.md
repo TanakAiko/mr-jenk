@@ -36,18 +36,18 @@ flowchart TB
     end
     
     subgraph Discovery["🔍 Service Discovery"]
-        EUREKA["Eureka Server<br/>Port 8761<br/>Netflix Eureka"]
+        EUREKA["Eureka Server<br/>Port 9761<br/>Netflix Eureka"]
     end
     
     subgraph Config["⚙️ Configuration"]
-        CONFIGSVC["Config Service<br/>Port 8888<br/>Spring Cloud Config"]
+        CONFIGSVC["Config Service<br/>Port 9888<br/>Spring Cloud Config"]
     end
     
     subgraph Services["🔧 Microservices"]
-        USER["👤 User Service<br/>Port 8081<br/>Authentication & Users"]
-        PRODUCT["📦 Product Service<br/>Port 8082<br/>Product Catalog"]
-        MEDIA["🖼️ Media Service<br/>Port 8083<br/>File Upload & Storage"]
-        ORDER["🛒 Order Service<br/>Port 8084<br/>Order Management"]
+        USER["👤 User Service<br/>Port 9081<br/>Authentication & Users"]
+        PRODUCT["📦 Product Service<br/>Port 9082<br/>Product Catalog"]
+        MEDIA["🖼️ Media Service<br/>Port 9083<br/>File Upload & Storage"]
+        ORDER["🛒 Order Service<br/>Port 9084<br/>Order Management"]
     end
     
     subgraph Data["💾 Data Layer"]
@@ -96,12 +96,12 @@ This project implements a microservices architecture with the following componen
 
 ### Backend Services
 - **API Gateway** (Port 8090) - Entry point for all client requests
-- **Config Service** (Port 8888) - Centralized configuration management
-- **Discovery Service** (Port 8761) - Eureka service registry
-- **User Service** (Port 8081) - User authentication and management
-- **Product Service** (Port 8082) - Product catalog management
-- **Media Service** (Port 8083) - File upload and media handling
-- **Order Service** (Port 8084) - Order processing and management
+- **Config Service** (Port 9888) - Centralized configuration management
+- **Discovery Service** (Port 9761) - Eureka service registry
+- **User Service** (Port 9081) - User authentication and management
+- **Product Service** (Port 9082) - Product catalog management
+- **Media Service** (Port 9083) - File upload and media handling
+- **Order Service** (Port 9084) - Order processing and management
 
 ### Frontend
 - **Angular Frontend** (Port 4400/80/443) - Modern web interface
@@ -301,8 +301,8 @@ docker compose ps
 ### 4. Access the Application
 - **Frontend**: http://localhost:4400 or https://localhost:8443
 - **API Gateway**: http://localhost:8090
-- **Eureka Dashboard**: http://localhost:8761
-- **Config Service**: http://localhost:8888
+- **Eureka Dashboard**: http://localhost:9761
+- **Config Service**: http://localhost:9888
 
 ## 🔧 Development Setup
 
@@ -442,13 +442,13 @@ The pipeline automatically sends professional HTML email notifications:
 
 | Service | Port | Health Check |
 |---------|------|--------------|
-| eureka-server | 8761 | `/actuator/health` |
-| config-service | 8888 | `/actuator/health` |
+| eureka-server | 9761 | `/actuator/health` |
+| config-service | 9888 | `/actuator/health` |
 | api-gateway | 8090 | `/actuator/health` |
-| user-service | 8081 | `/actuator/health` |
-| product-service | 8082 | `/actuator/health` |
-| media-service | 8083 | `/actuator/health` |
-| order-service | 8084 | `/actuator/health` |
+| user-service | 9081 | `/actuator/health` |
+| product-service | 9082 | `/actuator/health` |
+| media-service | 9083 | `/actuator/health` |
+| order-service | 9084 | `/actuator/health` |
 | frontend | 80, 443 | - |
 
 ## 🔍 Monitoring & Health Checks
