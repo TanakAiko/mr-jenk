@@ -145,7 +145,7 @@ pipeline {
 
                     // Wait for Quality Gate (MUST be outside withSonarQubeEnv)
                     echo "🚦 Waiting for Quality Gate result..."
-                    timeout(time: 3, unit: 'MINUTES') {
+                    timeout(time: 2, unit: 'MINUTES') {
                         def qg = waitForQualityGate() // compatible with older plugin versions
                         echo "Quality Gate status: ${qg.status}"
                         if (qg.status != 'OK') {
