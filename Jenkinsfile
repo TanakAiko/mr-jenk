@@ -6,6 +6,12 @@ import groovy.transform.Field
 pipeline {
     agent any
 
+    tools {
+        nodejs 'NodeJS'
+        maven 'Maven'
+        jdk 'Java 21'
+    }
+
     // Best practice: Define environment variables for the pipeline
     // Jenkins can inject credentials securely into these variables
     environment {
