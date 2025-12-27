@@ -4,7 +4,13 @@ import groovy.transform.Field
 @Field String LAST_SUCCESSFUL_TAG = ''
 
 pipeline {
-    agent any
+    agent {
+        docker { 
+            // This image comes pre-packaged with Chrome Headless and Angular CLI
+            image 'trion/ng-cli-karma:latest' 
+            args '-u root' 
+        }
+    }
 
     tools {
         nodejs 'NodeJS'
