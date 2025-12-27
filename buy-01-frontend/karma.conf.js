@@ -41,7 +41,8 @@ module.exports = function(config) {
           '--no-sandbox',       // Required for running as a privileged user (e.g., root)
           '--disable-gpu',      // Disable GPU acceleration
           '--disable-web-security', // Disable web security (use with caution)
-          '--disable-features=VizDisplayCompositor'
+          '--disable-features=VizDisplayCompositor',
+          '--disable-setuid-sandbox'
         ]
       }
     },
