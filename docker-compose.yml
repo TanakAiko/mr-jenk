@@ -61,13 +61,13 @@ services:
       context: ./product-service
       dockerfile: Dockerfile
     ports:
-      - "8082:8082"
+      - "9082:9082"
     environment:
       - EUREKA_URL=http://eureka-server:9761/eureka
       - DOCKER_CONFIG_SERVICE_URL=http://config-service:9888
-      - DOCKER_MEDIA_SERVICE_URL=http://media-service:8083/api/media
+      - DOCKER_MEDIA_SERVICE_URL=http://media-service:9083/api/media
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9082/actuator/health"]
       interval: 10s
       retries: 5
       start_period: 5s
@@ -87,12 +87,12 @@ services:
       context: ./user-service
       dockerfile: Dockerfile
     ports:
-      - "8081:8081"
+      - "9081:9081"
     environment:
       - EUREKA_URL=http://eureka-server:9761/eureka
       - DOCKER_CONFIG_SERVICE_URL=http://config-service:9888
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9081/actuator/health"]
       interval: 10s
       retries: 5
       start_period: 5s
@@ -110,12 +110,12 @@ services:
       context: ./media-service
       dockerfile: Dockerfile
     ports:
-      - "8083:8083"
+      - "9083:9083"
     environment:
       - EUREKA_URL=http://eureka-server:9761/eureka
       - DOCKER_CONFIG_SERVICE_URL=http://config-service:9888
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9083/actuator/health"]
       interval: 10s
       retries: 5
       start_period: 5s
@@ -133,14 +133,14 @@ services:
       context: ./order-service
       dockerfile: Dockerfile
     ports:
-      - "8084:8084"
+      - "9084:9084"
     environment:
       - EUREKA_URL=http://eureka-server:9761/eureka
       - DOCKER_CONFIG_SERVICE_URL=http://config-service:9888
-      - DOCKER_MEDIA_SERVICE_URL=http://media-service:8083/api/media
-      - DOCKER_PRODUCT_SERVICE_URL=http://product-service:8082/api/products
+      - DOCKER_MEDIA_SERVICE_URL=http://media-service:9083/api/media
+      - DOCKER_PRODUCT_SERVICE_URL=http://product-service:9082/api/products
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9084/actuator/health"]
       interval: 10s
       retries: 5
       start_period: 5s

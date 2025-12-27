@@ -44,10 +44,10 @@ flowchart TB
     end
     
     subgraph Services["🔧 Microservices"]
-        USER["👤 User Service<br/>Port 8081<br/>Authentication & Users"]
-        PRODUCT["📦 Product Service<br/>Port 8082<br/>Product Catalog"]
-        MEDIA["🖼️ Media Service<br/>Port 8083<br/>File Upload & Storage"]
-        ORDER["🛒 Order Service<br/>Port 8084<br/>Order Management"]
+        USER["👤 User Service<br/>Port 9081<br/>Authentication & Users"]
+        PRODUCT["📦 Product Service<br/>Port 9082<br/>Product Catalog"]
+        MEDIA["🖼️ Media Service<br/>Port 9083<br/>File Upload & Storage"]
+        ORDER["🛒 Order Service<br/>Port 9084<br/>Order Management"]
     end
     
     subgraph Data["💾 Data Layer"]
@@ -98,10 +98,10 @@ This project implements a microservices architecture with the following componen
 - **API Gateway** (Port 8090) - Entry point for all client requests
 - **Config Service** (Port 9888) - Centralized configuration management
 - **Discovery Service** (Port 9761) - Eureka service registry
-- **User Service** (Port 8081) - User authentication and management
-- **Product Service** (Port 8082) - Product catalog management
-- **Media Service** (Port 8083) - File upload and media handling
-- **Order Service** (Port 8084) - Order processing and management
+- **User Service** (Port 9081) - User authentication and management
+- **Product Service** (Port 9082) - Product catalog management
+- **Media Service** (Port 9083) - File upload and media handling
+- **Order Service** (Port 9084) - Order processing and management
 
 ### Frontend
 - **Angular Frontend** (Port 4400/80/443) - Modern web interface
@@ -445,10 +445,10 @@ The pipeline automatically sends professional HTML email notifications:
 | eureka-server | 9761 | `/actuator/health` |
 | config-service | 9888 | `/actuator/health` |
 | api-gateway | 8090 | `/actuator/health` |
-| user-service | 8081 | `/actuator/health` |
-| product-service | 8082 | `/actuator/health` |
-| media-service | 8083 | `/actuator/health` |
-| order-service | 8084 | `/actuator/health` |
+| user-service | 9081 | `/actuator/health` |
+| product-service | 9082 | `/actuator/health` |
+| media-service | 9083 | `/actuator/health` |
+| order-service | 9084 | `/actuator/health` |
 | frontend | 80, 443 | - |
 
 ## 🔍 Monitoring & Health Checks
