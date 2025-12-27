@@ -163,7 +163,7 @@ pipeline {
             }
         }
 
-        // Stage 3: Build all the Docker images using docker-compose 🐳
+        // Stage 3: Build all the Docker images using docker compose 🐳
         // This command builds the images but does not run them.
         stage('Build Docker Images') {
             steps {
@@ -171,13 +171,13 @@ pipeline {
                 echo '🐳 STAGE 3: BUILDING DOCKER IMAGES'
                 echo '================================================'
                 echo 'Building all Docker images from their Dockerfiles...'
-                // Pass the credentials to the docker-compose command
+                // Pass the credentials to the docker compose command
                 withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'CONFIG_REPO_USERNAME', passwordVariable: 'CONFIG_REPO_PASSWORD')]) {
                     sh '''
                         export CONFIG_REPO_URI=${CONFIG_REPO_URI}
                         export CONFIG_REPO_USERNAME=${CONFIG_REPO_USERNAME}
                         export CONFIG_REPO_PASSWORD=${CONFIG_REPO_PASSWORD}
-                        docker-compose build --parallel
+                        docker compose build --parallel
                     '''
                 }
             }
@@ -241,18 +241,18 @@ pipeline {
                         services.each { service ->
                             def imageTag = "${DOCKERHUB_USERNAME}/${service}:${CURRENT_BUILD_TAG}"
                             sh "docker pull ${imageTag}"
-                            // Re-tag the pulled image as latest for docker-compose to use
+                            // Re-tag the pulled image as latest for docker compose to use
                             sh "docker tag ${imageTag} ${service}:latest"
                         }
 
-                        // Deploy using docker-compose
+                        // Deploy using docker compose
                         echo 'Stopping any existing containers...'
                         sh '''
                             # Stop and remove existing containers to free up ports
-                            docker-compose down || true
+                            docker compose down || true
                         '''
                         
-                        echo 'Starting all services with docker-compose...'
+                        echo 'Starting all services with docker compose...'
                         // Pass credentials securely as environment variables
                         withEnv([
                             "CONFIG_REPO_URI=${env.CONFIG_REPO_URI}",
@@ -264,7 +264,7 @@ pipeline {
                                 # --no-build: Do not build images, use existing/pulled images
                                 # --force-recreate: Ensures all containers are replaced with new ones, applying all changes.
                                 # --remove-orphans: Cleans up containers for services that are no longer defined in the compose file.
-                                docker-compose up -d --no-build --force-recreate --remove-orphans
+                                docker compose up -d --no-build --force-recreate --remove-orphans
                             '''
                         }
                     }
@@ -436,7 +436,7 @@ pipeline {
                 
                 // ALWAYS stop any running containers first to avoid conflicts
                 echo '🛑 Stopping any running containers...'
-                sh 'docker-compose down || true'
+                sh 'docker compose down || true'
                 echo '================================================'
                 
                 // Attempt automatic rollback if we have a previous successful build
@@ -476,7 +476,7 @@ pipeline {
                                 "CONFIG_REPO_USERNAME=${CONFIG_REPO_USERNAME}",
                                 "CONFIG_REPO_PASSWORD=${CONFIG_REPO_PASSWORD}"
                             ]) {
-                                sh 'docker-compose up -d --no-build --force-recreate --remove-orphans || true'
+                                sh 'docker compose up -d --no-build --force-recreate --remove-orphans || true'
                             }
                             
                             echo '================================================'

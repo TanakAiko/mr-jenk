@@ -202,8 +202,8 @@ for service in api-gateway config-service discovery-service media-service produc
 done
 
 # 4. Redeploy
-docker-compose down
-docker-compose up -d --no-build --force-recreate --remove-orphans
+docker compose down
+docker compose up -d --no-build --force-recreate --remove-orphans
 
 # 5. Update the rollback file
 echo "$TARGET_BUILD" > .last_successful_build
@@ -430,19 +430,19 @@ if (currentBuild.result == 'FAILURE' && currentStage == 'Deploy') {
 ```bash
 cat .last_successful_build
 docker ps
-docker-compose logs --tail=50
+docker compose logs --tail=50
 ```
 
 ### Manual Rollback
 ```bash
 TARGET="build-42-54818bf"
 docker pull tanakaiko/config-service:$TARGET
-docker-compose down && docker-compose up -d
+docker compose down && docker compose up -d
 ```
 
 ### Emergency Stop
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### View All Available Versions
