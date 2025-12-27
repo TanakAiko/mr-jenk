@@ -303,7 +303,7 @@ Encoding:       UTF-8
 | SonarQube Dashboard | http://localhost:9000 | View quality metrics |
 | Project Overview | http://localhost:9000/dashboard?id=buy-01-ecommerce | Project analysis |
 | Jenkins | http://localhost:8080 | CI/CD pipeline |
-| Application | http://localhost:4200 | E-commerce platform |
+| Application | http://localhost:4400 | E-commerce platform |
 
 ## 📞 Troubleshooting
 

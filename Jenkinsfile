@@ -17,7 +17,7 @@ pipeline {
     environment {
         CONFIG_REPO_URI = 'https://github.com/TanakAiko/config-buy-01.git'
         ROLLBACK_FILE = '.last_successful_build' // File to persist last successful build info
-        CHROME_BIN = '/usr/bin/chromium-browser'
+        CHROME_BIN = '/usr/bin/google-chrome'
     }
 
     stages {
@@ -329,7 +329,7 @@ pipeline {
         always {
             echo 'Pipeline completed!'
             echo 'Application is running. Access it at:'
-            echo '  - Frontend: http://localhost:4200'
+            echo '  - Frontend: http://localhost:4400'
             echo '  - API Gateway: http://localhost:8090'
             echo '  - Eureka Dashboard: http://localhost:8761'
             
@@ -395,7 +395,7 @@ pipeline {
                                     
                                     <h3 style="margin-top: 20px;">Application Access</h3>
                                     <ul style="list-style-type: none; padding: 0;">
-                                        <li style="padding: 5px 0;">🌐 <strong>Frontend:</strong> <a href="http://localhost:4200">http://localhost:4200</a></li>
+                                        <li style="padding: 5px 0;">🌐 <strong>Frontend:</strong> <a href="http://localhost:4400">http://localhost:4400</a></li>
                                         <li style="padding: 5px 0;">🚪 <strong>API Gateway:</strong> <a href="http://localhost:8090">http://localhost:8090</a></li>
                                         <li style="padding: 5px 0;">🔍 <strong>Eureka Dashboard:</strong> <a href="http://localhost:8761">http://localhost:8761</a></li>
                                         <li style="padding: 5px 0;">⚙️ <strong>Config Service:</strong> <a href="http://localhost:8888">http://localhost:8888</a></li>

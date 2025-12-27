@@ -27,7 +27,7 @@ A modern, full-stack e-commerce application built with **Spring Boot** microserv
 ```mermaid
 flowchart TB
     subgraph Client["🖥️ Client Layer"]
-        WEB["🌐 Angular Frontend<br/>Port 4200/80/443"]
+        WEB["🌐 Angular Frontend<br/>Port 4400/80/443"]
         MOBILE["📱 Mobile Apps<br/>(Future)"]
     end
     
@@ -104,7 +104,7 @@ This project implements a microservices architecture with the following componen
 - **Order Service** (Port 8084) - Order processing and management
 
 ### Frontend
-- **Angular Frontend** (Port 4200/80/443) - Modern web interface
+- **Angular Frontend** (Port 4400/80/443) - Modern web interface
 
 ### Infrastructure
 - **MongoDB Atlas** - Database for all services
@@ -299,7 +299,7 @@ docker-compose ps
 ```
 
 ### 4. Access the Application
-- **Frontend**: http://localhost:4200 or https://localhost:8443
+- **Frontend**: http://localhost:4400 or https://localhost:8443
 - **API Gateway**: http://localhost:8090
 - **Eureka Dashboard**: http://localhost:8761
 - **Config Service**: http://localhost:8888
