@@ -7,8 +7,8 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'node-plugin'
-        maven 'maven-plugin'
+        nodejs 'NodeJS'
+        maven 'Maven'
         jdk 'Java 21'
     }
 
