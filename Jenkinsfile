@@ -102,6 +102,10 @@ pipeline {
                 stage('Test User Service') {
                     steps { dir('user-service') { sh 'mvn -B clean verify' } }
                 }
+
+                stage('Test Order Service') {
+                    steps { dir('order-service') { sh 'mvn -B clean verify' } }
+                }
             }
         }
 
@@ -125,8 +129,8 @@ pipeline {
                                 -Dsonar.projectKey=buy-01 \
                                 -Dsonar.projectName=buy-01 \
                                 -Dsonar.projectBaseDir=. \
-                                -Dsonar.sources=api-gateway/src,user-service/src,product-service/src,media-service/src,config-service/src,discovery-service/src,buy-01-frontend/src \
-                                -Dsonar.java.binaries=api-gateway/target/classes,user-service/target/classes,product-service/target/classes,media-service/target/classes,config-service/target/classes,discovery-service/target/classes \
+                                -Dsonar.sources=api-gateway/src,user-service/src,product-service/src,media-service/src,config-service/src,discovery-service/src,order-service/src,buy-01-frontend/src \
+                                -Dsonar.java.binaries=api-gateway/target/classes,user-service/target/classes,product-service/target/classes,media-service/target/classes,config-service/target/classes,discovery-service/target/classes,order-service/target/classes \
                                 -Dsonar.exclusions=**/node_modules/**,**/target/**,**/*.spec.ts
                         """
                         echo "✅ Scanner completed for monorepo"
@@ -180,7 +184,7 @@ pipeline {
                 echo '================================================'
                 echo 'Pushing Docker images to Docker Hub...'
                 script {
-                    def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'buy-01-frontend']
+                    def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'order-service', 'buy-01-frontend']
 
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
                         sh "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin"
@@ -217,7 +221,7 @@ pipeline {
                 echo '================================================'
                 echo 'Deploying the application stack from Docker Hub images...'
                 script {
-                    def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'buy-01-frontend']
+                    def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'order-service', 'buy-01-frontend']
 
                     withCredentials([
                         usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD'),
@@ -435,7 +439,7 @@ pipeline {
                     echo '================================================'
                     
                     try {
-                        def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'buy-01-frontend']
+                        def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'order-service', 'buy-01-frontend']
                         
                         withCredentials([
                             usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD'),

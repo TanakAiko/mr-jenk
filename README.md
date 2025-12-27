@@ -47,6 +47,7 @@ flowchart TB
         USER["👤 User Service<br/>Port 8081<br/>Authentication & Users"]
         PRODUCT["📦 Product Service<br/>Port 8082<br/>Product Catalog"]
         MEDIA["🖼️ Media Service<br/>Port 8083<br/>File Upload & Storage"]
+        ORDER["🛒 Order Service<br/>Port 8084<br/>Order Management"]
     end
     
     subgraph Data["💾 Data Layer"]
@@ -59,19 +60,23 @@ flowchart TB
     APIGATE --> USER
     APIGATE --> PRODUCT
     APIGATE --> MEDIA
+    APIGATE --> ORDER
     
     USER -.-> EUREKA
     PRODUCT -.-> EUREKA
     MEDIA -.-> EUREKA
+    ORDER -.-> EUREKA
     APIGATE -.-> EUREKA
     
     USER -.-> CONFIGSVC
     PRODUCT -.-> CONFIGSVC
     MEDIA -.-> CONFIGSVC
+    ORDER -.-> CONFIGSVC
     
     USER --> MONGO
     PRODUCT --> MONGO
     MEDIA --> MONGO
+    ORDER --> MONGO
     MEDIA --> SUPABASE
     
     classDef clientStyle fill:#e1f5fe,stroke:#01579b,stroke-width:2px
@@ -82,7 +87,7 @@ flowchart TB
     
     class WEB,MOBILE clientStyle
     class APIGATE gatewayStyle
-    class USER,PRODUCT,MEDIA serviceStyle
+    class USER,PRODUCT,MEDIA,ORDER serviceStyle
     class MONGO,SUPABASE dataStyle
     class EUREKA,CONFIGSVC configStyle
 ```
@@ -96,6 +101,7 @@ This project implements a microservices architecture with the following componen
 - **User Service** (Port 8081) - User authentication and management
 - **Product Service** (Port 8082) - Product catalog management
 - **Media Service** (Port 8083) - File upload and media handling
+- **Order Service** (Port 8084) - Order processing and management
 
 ### Frontend
 - **Angular Frontend** (Port 4200/80/443) - Modern web interface
@@ -442,6 +448,7 @@ The pipeline automatically sends professional HTML email notifications:
 | user-service | 8081 | `/actuator/health` |
 | product-service | 8082 | `/actuator/health` |
 | media-service | 8083 | `/actuator/health` |
+| order-service | 8084 | `/actuator/health` |
 | frontend | 80, 443 | - |
 
 ## 🔍 Monitoring & Health Checks
