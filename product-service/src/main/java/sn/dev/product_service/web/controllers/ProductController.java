@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.validation.Valid;
 import sn.dev.product_service.web.dto.ProductCreateDTO;
@@ -24,7 +25,7 @@ public interface ProductController {
     ResponseEntity<ProductResponseDTO> create(@ModelAttribute @Valid ProductCreateDTO productCreateDTO);
 
     @GetMapping
-    ResponseEntity<List<ProductResponseDTO>> getAll();
+    ResponseEntity<List<ProductResponseDTO>> getAll(@RequestParam(required = false) String search);
 
     @GetMapping("/{id}")
     ResponseEntity<ProductResponseDTO> getById(@PathVariable String id);
@@ -37,4 +38,10 @@ public interface ProductController {
     @PreAuthorize("hasAuthority('SELLER')")
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable String id);
+
+    @PutMapping("/{id}/reduce-quantity/{quantity}")
+    ResponseEntity<Void> reduceQuantity(@PathVariable String id, @PathVariable int quantity);
+
+    @PutMapping("/{id}/restore-quantity/{quantity}")
+    ResponseEntity<Void> restoreQuantity(@PathVariable String id, @PathVariable int quantity);
 }

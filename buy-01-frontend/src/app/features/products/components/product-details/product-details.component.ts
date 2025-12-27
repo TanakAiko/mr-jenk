@@ -4,6 +4,7 @@ import { RouterModule, ActivatedRoute } from "@angular/router";
 import { ProductService } from "../../services/product.service";
 import { ProductModels } from "../../models/product.models";
 import { AuthService } from "../../../../auth/services/auth.service";
+import { CartService } from "../../../cart/services/cart.service";
 import { Subscription } from "rxjs";
 
 @Component({
@@ -28,6 +29,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   private activatedRoute = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private location = inject(Location);
+  private cartService = inject(CartService);
 
   ngOnInit(): void {
     // Subscribe to route parameter changes
@@ -120,7 +122,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
     }
 
     if (this.product && this.getQuantityAsNumber(this.product.quantity) > 0) {
-      // TODO: Implement actual cart functionality
+      this.cartService.addToCart(this.product, this.selectedQuantity);
       console.log(
         `Adding ${this.selectedQuantity} of product ${this.product.id} to cart`,
       );

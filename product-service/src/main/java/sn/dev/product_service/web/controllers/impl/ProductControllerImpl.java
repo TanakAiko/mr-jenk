@@ -55,10 +55,16 @@ public class ProductControllerImpl implements ProductController {
     }
 
     @Override
-    public ResponseEntity<List<ProductResponseDTO>> getAll() {
-        System.out.println("GET(getAll) products");
+    public ResponseEntity<List<ProductResponseDTO>> getAll(String search) {
+        System.out.println("GET(getAll) products with search: " + search);
 
-        List<Product> products = productService.getAll();
+        List<Product> products;
+        if (search != null && !search.trim().isEmpty()) {
+            products = productService.search(search);
+        } else {
+            products = productService.getAll();
+        }
+
         List<ProductResponseDTO> responseList = products
             .stream()
             .map(product -> {
@@ -159,5 +165,17 @@ public class ProductControllerImpl implements ProductController {
         mediaServiceClient.deleteByProductId(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> reduceQuantity(String id, int quantity) {
+        productService.reduceQuantity(id, quantity);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> restoreQuantity(String id, int quantity) {
+        productService.restoreQuantity(id, quantity);
+        return ResponseEntity.ok().build();
     }
 }

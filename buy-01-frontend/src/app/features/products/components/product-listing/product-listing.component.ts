@@ -5,6 +5,7 @@ import { RouterLink } from "@angular/router";
 import { AuthService } from "../../../../auth/services/auth.service";
 import { CommonModule } from "@angular/common";
 import { JwtService } from "../../../../shared/services/jwt.service";
+import { Subject, debounceTime, distinctUntilChanged } from "rxjs";
 
 @Component({
   selector: "app-product-listing",
@@ -19,6 +20,7 @@ export class ProductListingComponent implements OnInit {
   isLoading = false;
   selectedSort: string = "";
   searchTerm: string = "";
+  private searchSubject = new Subject<string>();
 
   private productService = inject(ProductService);
   private authService = inject(AuthService);
@@ -36,6 +38,16 @@ export class ProductListingComponent implements OnInit {
   ngOnInit() {
     this.checkUserStatus();
     this.loadProducts();
+    this.setupSearchSubscription();
+  }
+
+  private setupSearchSubscription() {
+    this.searchSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe(term => {
+      this.loadProducts(term);
+    });
   }
 
   private checkUserStatus() {
@@ -50,13 +62,18 @@ export class ProductListingComponent implements OnInit {
     }
   }
 
-  private loadProducts() {
+  private loadProducts(search?: string) {
     this.isLoading = true;
-    this.productService.getProductList().subscribe({
+    this.productService.getProductList(search).subscribe({
       next: (value) => {
         console.log("Products loaded successfully:");
         this.allProducts = value;
-        this.filteredProducts = value;
+        this.filteredProducts = [...value]; // Create a copy to avoid reference issues if needed, though not strictly necessary here
+        
+        if (this.selectedSort) {
+          this.sortProducts(this.selectedSort as "name" | "price");
+        }
+
         this.isLoading = false;
         console.log(value);
       },
@@ -100,11 +117,11 @@ export class ProductListingComponent implements OnInit {
 
   formatPrice(price: number | string): string {
     const numericPrice = typeof price === "string" ? parseFloat(price) : price;
-    return new Intl.NumberFormat("fr-SN", {
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "XOF",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(numericPrice);
   }
 
@@ -159,28 +176,12 @@ export class ProductListingComponent implements OnInit {
 
   // Search functionality
   onSearch(term: string) {
-    this.searchTerm = term.toLowerCase();
-    this.filterProducts();
+    this.searchTerm = term;
+    this.searchSubject.next(term);
   }
 
   private filterProducts() {
-    if (!this.allProducts) return;
-
-    if (!this.searchTerm) {
-      this.filteredProducts = [...this.allProducts];
-    } else {
-      this.filteredProducts = this.allProducts.filter(
-        (product) =>
-          product.name.toLowerCase().includes(this.searchTerm) ||
-          (product.description &&
-            product.description.toLowerCase().includes(this.searchTerm)),
-      );
-    }
-
-    // Reapply sort if one was selected
-    if (this.selectedSort) {
-      this.sortProducts(this.selectedSort as "name" | "price");
-    }
+    // Deprecated: Filtering is now handled by the backend
   }
 
   // Track by function for better performance

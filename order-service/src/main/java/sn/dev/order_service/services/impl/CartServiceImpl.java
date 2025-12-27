@@ -33,10 +33,16 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartDocument addItem(String userId, String productId, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than 0");
+        }
         CartDocument cart = getOrCreateCart(userId);
         boolean found = false;
         for (CartItemDocument item : cart.getItems()) {
             if (item.getProductId().equals(productId)) {
+                if (item.getQuantity() + quantity > item.getAvailableQuantity()) {
+                    throw new IllegalArgumentException("Requested quantity exceeds available stock");
+                }
                 item.setQuantity(item.getQuantity() + quantity);
                 item.setUpdatedAt(Instant.now());
                 found = true;
@@ -45,15 +51,28 @@ public class CartServiceImpl implements CartService {
         }
         if (!found) {
             Product product = productServiceClient.getProductById(productId);
+            
+            if (quantity > product.getQuantity()) {
+                throw new IllegalArgumentException("Requested quantity exceeds available stock");
+            }
+
+            System.out.println("Adding product to cart: " + product);
+
             CartItemDocument newItem = new CartItemDocument();
             newItem.setProductId(productId);
             newItem.setQuantity(quantity);
             newItem.setPriceSnapshot(product.getPrice());
             newItem.setProductName(product.getName());
+            if (product.getImages() != null && !product.getImages().isEmpty()) {
+                newItem.setImageUrl(product.getImages().get(0).getImageUrl());
+            }
+            newItem.setAvailableQuantity(product.getQuantity());
             newItem.setSellerId(product.getUserId());
             newItem.setCreatedAt(Instant.now());
             newItem.setUpdatedAt(Instant.now());
             cart.getItems().add(newItem);
+
+            System.out.println("New cart item added: " + newItem);
         }
         cart.setUpdatedAt(Instant.now());
         return cartRepository.save(cart);
@@ -63,10 +82,13 @@ public class CartServiceImpl implements CartService {
     public CartDocument updateItemQuantity(String userId, String productId, int quantity) {
         CartDocument cart = getOrCreateCart(userId);
         cart.getItems().removeIf(item -> {
-            if (item.getProductId().equals(productId) && quantity <= 0) {
-                return true;
-            }
             if (item.getProductId().equals(productId)) {
+                if (quantity <= 0) {
+                    return true;
+                }
+                if (quantity > item.getAvailableQuantity()) {
+                    throw new IllegalArgumentException("Requested quantity exceeds available stock");
+                }
                 item.setQuantity(quantity);
                 item.setUpdatedAt(Instant.now());
             }

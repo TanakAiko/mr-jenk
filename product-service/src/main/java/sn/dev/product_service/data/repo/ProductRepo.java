@@ -9,5 +9,6 @@ import sn.dev.product_service.data.entities.Product;
 public interface ProductRepo extends MongoRepository<Product, String> {
     List<Product> findByUserId(String userId);
     void deleteByUserId(String userId);
+    List<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name, String description);
     
 }

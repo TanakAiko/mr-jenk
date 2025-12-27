@@ -67,7 +67,8 @@ SonarQube has been successfully integrated into your Jenkins CI/CD pipeline for 
 │ ├─ Discovery Service (mvn test)                │
 │ ├─ Media Service (mvn test)                    │
 │ ├─ Product Service (mvn test)                  │
-│ └─ User Service (mvn test)                     │
+│ ├─ User Service (mvn test)                     │
+│ └─ Order Service (mvn test)                    │
 └─────────────────────────────────────────────────┘
                       ↓
 ┌─────────────────────────────────────────────────┐

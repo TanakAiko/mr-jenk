@@ -7,5 +7,6 @@ public record OrderItemDto(
         double unitPrice,
         int quantity,
         double subtotal,
-        String status
+        String status,
+        String imageUrl
 ) {}

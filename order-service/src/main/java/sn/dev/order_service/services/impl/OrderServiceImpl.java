@@ -16,6 +16,7 @@ import sn.dev.order_service.data.order.OrderItemStatus;
 import sn.dev.order_service.data.order.OrderRepository;
 import sn.dev.order_service.data.order.OrderStatus;
 import sn.dev.order_service.data.order.PaymentMode;
+import sn.dev.order_service.services.ProductServiceClient;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class OrderServiceImpl implements sn.dev.order_service.services.OrderServ
 
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
+    private final ProductServiceClient productServiceClient;
 
     @Override
     public List<OrderDocument> getOrdersForUser(String userId) {
@@ -66,18 +68,40 @@ public class OrderServiceImpl implements sn.dev.order_service.services.OrderServ
         order.setUpdatedAt(Instant.now());
 
         double total = 0.0;
-        for (CartItemDocument cartItem : cart.getItems()) {
-            OrderItemDocument item = new OrderItemDocument();
-            item.setProductId(cartItem.getProductId());
-            item.setSellerId(cartItem.getSellerId());
-            item.setProductName(cartItem.getProductName());
-            item.setUnitPrice(cartItem.getPriceSnapshot());
-            item.setQuantity(cartItem.getQuantity());
-            item.setSubtotal(cartItem.getPriceSnapshot() * cartItem.getQuantity());
-            item.setStatus(OrderItemStatus.PENDING);
-            total += item.getSubtotal();
-            order.getItems().add(item);
+        // List to keep track of items for which quantity was successfully reduced
+        java.util.List<CartItemDocument> processedItems = new java.util.ArrayList<>();
+
+        try {
+            for (CartItemDocument cartItem : cart.getItems()) {
+                // Reduce quantity in product service
+                productServiceClient.reduceQuantity(cartItem.getProductId(), cartItem.getQuantity());
+                processedItems.add(cartItem);
+
+                OrderItemDocument item = new OrderItemDocument();
+                item.setProductId(cartItem.getProductId());
+                item.setSellerId(cartItem.getSellerId());
+                item.setProductName(cartItem.getProductName());
+                item.setUnitPrice(cartItem.getPriceSnapshot());
+                item.setQuantity(cartItem.getQuantity());
+                item.setSubtotal(cartItem.getPriceSnapshot() * cartItem.getQuantity());
+                item.setStatus(OrderItemStatus.PENDING);
+                item.setImageUrl(cartItem.getImageUrl());
+                total += item.getSubtotal();
+                order.getItems().add(item);
+            }
+        } catch (Exception e) {
+            // Compensation: Restore quantity for items that were already processed
+            for (CartItemDocument processed : processedItems) {
+                try {
+                    productServiceClient.restoreQuantity(processed.getProductId(), processed.getQuantity());
+                } catch (Exception ex) {
+                    // Log error: Failed to compensate transaction
+                    System.err.println("CRITICAL: Failed to restore quantity for product " + processed.getProductId() + " during checkout rollback.");
+                }
+            }
+            throw new IllegalStateException("Checkout failed due to product service error: " + e.getMessage(), e);
         }
+
         order.setTotalPrice(total);
 
         OrderDocument saved = orderRepository.save(order);
@@ -100,6 +124,18 @@ public class OrderServiceImpl implements sn.dev.order_service.services.OrderServ
         if (order.getStatus() != OrderStatus.PENDING) {
             throw new IllegalStateException("Only pending orders can be cancelled");
         }
+
+        // Restore quantities
+        for (OrderItemDocument item : order.getItems()) {
+            try {
+                productServiceClient.restoreQuantity(item.getProductId(), item.getQuantity());
+            } catch (Exception e) {
+                System.err.println("Failed to restore quantity for product " + item.getProductId() + ": " + e.getMessage());
+                // We continue to cancel the order even if restore fails, or we could throw exception.
+                // For now, we proceed but log the error.
+            }
+        }
+
         order.setStatus(OrderStatus.CANCELLED);
         order.getItems().forEach(i -> i.setStatus(OrderItemStatus.CANCELLED));
         order.setUpdatedAt(Instant.now());
@@ -135,6 +171,7 @@ public class OrderServiceImpl implements sn.dev.order_service.services.OrderServ
             cartItem.setProductName(orderItem.getProductName());
             cartItem.setPriceSnapshot(orderItem.getUnitPrice());
             cartItem.setQuantity(orderItem.getQuantity());
+            cartItem.setImageUrl(orderItem.getImageUrl());
             cartItem.setCreatedAt(Instant.now());
             cartItem.setUpdatedAt(Instant.now());
             cart.getItems().add(cartItem);
@@ -188,5 +225,38 @@ public class OrderServiceImpl implements sn.dev.order_service.services.OrderServ
 
         order.setUpdatedAt(Instant.now());
         return orderRepository.save(order);
+    }
+
+    @Override
+    public List<OrderDocument> searchOrdersForUser(String userId, String query) {
+        // Simple search implementation: filter by order ID or product name
+        // In a real app, this should be done with a more complex MongoDB query
+        List<OrderDocument> allOrders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        String lowerQuery = query.toLowerCase();
+        
+        return allOrders.stream()
+                .filter(order -> 
+                    order.getId().toLowerCase().contains(lowerQuery) ||
+                    order.getItems().stream().anyMatch(item -> 
+                        item.getProductName().toLowerCase().contains(lowerQuery)
+                    )
+                )
+                .toList();
+    }
+
+    @Override
+    public List<OrderDocument> searchOrdersForSeller(String sellerId, String query) {
+        List<OrderDocument> allOrders = orderRepository.findByItemsSellerIdOrderByCreatedAtDesc(sellerId);
+        String lowerQuery = query.toLowerCase();
+        
+        return allOrders.stream()
+                .filter(order -> 
+                    order.getId().toLowerCase().contains(lowerQuery) ||
+                    order.getItems().stream().anyMatch(item -> 
+                        item.getSellerId().equals(sellerId) && 
+                        item.getProductName().toLowerCase().contains(lowerQuery)
+                    )
+                )
+                .toList();
     }
 }

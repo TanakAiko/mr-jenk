@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -29,10 +30,17 @@ public class OrderControllerImpl implements OrderController {
 
     private String getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            return jwt.getClaimAsString("userID");
+        if (authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof Jwt jwt) {
+                return jwt.getClaimAsString("userID");
+            } else if (principal instanceof UserDetails userDetails) {
+                return userDetails.getUsername();
+            } else if (principal instanceof String strPrincipal) {
+                 return strPrincipal;
+            }
         }
-        throw new IllegalStateException("User ID not found in JWT");
+        throw new IllegalStateException("User ID not found in JWT or Security Context");
     }
 
     private String getCurrentSellerId() {
@@ -87,7 +95,8 @@ public class OrderControllerImpl implements OrderController {
                 item.getUnitPrice(),
                 item.getQuantity(),
                 item.getSubtotal(),
-                item.getStatus().name()
+                item.getStatus().name(),
+                item.getImageUrl()
         );
     }
 
@@ -95,8 +104,23 @@ public class OrderControllerImpl implements OrderController {
     public ResponseEntity<OrderResponseDto> checkout() {
         log.info("[OrderController] POST /api/orders/checkout - checkout called");
         String userId = getCurrentUserId();
+        // The checkout process includes reducing product quantities via ProductServiceClient
         OrderDocument order = orderService.checkout(userId);
         return ResponseEntity.ok(toDto(order));
+    }
+
+    @Override
+    public ResponseEntity<List<OrderResponseDto>> searchOrders(String query) {
+        String userId = getCurrentUserId();
+        List<OrderDocument> orders = orderService.searchOrdersForUser(userId, query);
+        return ResponseEntity.ok(orders.stream().map(this::toDto).toList());
+    }
+
+    @Override
+    public ResponseEntity<List<OrderResponseDto>> searchSellerOrders(String query) {
+        String sellerId = getCurrentSellerId();
+        List<OrderDocument> orders = orderService.searchOrdersForSeller(sellerId, query);
+        return ResponseEntity.ok(orders.stream().map(o -> toDtoForSeller(o, sellerId)).toList());
     }
 
     @Override

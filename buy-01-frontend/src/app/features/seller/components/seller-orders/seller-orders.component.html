@@ -1,0 +1,104 @@
+<div class="container">
+  <div class="page-header">
+    <h2 class="page-title">Seller Orders</h2>
+    <p class="page-subtitle">Manage your orders and track shipments</p>
+    <div class="search-bar">
+      <input 
+        type="text" 
+        placeholder="Search orders by ID or product name..." 
+        class="search-input"
+        [value]="searchTerm"
+        #searchInput
+        (input)="onSearch(searchInput.value)"
+      />
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading orders...</p>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error && orders.length === 0" class="empty-state">
+    <div class="empty-state-icon">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+        <path d="m3.3 7 8.7 5 8.7-5"></path>
+        <path d="M12 22V12"></path>
+      </svg>
+    </div>
+    <h2>No Orders Found</h2>
+    <p>You haven't received any orders yet.</p>
+  </div>
+
+  <div *ngIf="!loading && orders.length > 0" class="orders-list">
+    <div *ngFor="let order of orders" class="order-card">
+      <!-- Order Header -->
+      <div class="order-header">
+        <div class="order-info">
+          <div class="info-group">
+            <span class="label">Order ID</span>
+            <span class="value font-mono">{{ order.id }}</span>
+          </div>
+          <div class="info-group">
+            <span class="label">Date</span>
+            <span class="value">{{ order.createdAt | date:'medium' }}</span>
+          </div>
+          <div class="info-group">
+            <span class="label">Total (Your Items)</span>
+            <span class="value price">{{ order.totalPrice | currency }}</span>
+          </div>
+        </div>
+        <div class="order-status">
+          <span class="status-badge" [ngClass]="order.status.toLowerCase()">
+            {{ order.status }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="order-items">
+        <div *ngFor="let item of order.items" class="order-item">
+          <!-- Product Image -->
+          <div class="item-image">
+            <img [src]="item.imageUrl || 'assets/images/placeholder.png'" 
+                 [alt]="item.productName">
+          </div>
+
+          <!-- Product Details -->
+          <div class="item-details">
+            <h3 class="item-name">{{ item.productName }}</h3>
+            <div class="item-meta">
+              <span>Qty: {{ item.quantity }}</span>
+              <span>{{ item.unitPrice | currency }} each</span>
+            </div>
+          </div>
+
+          <!-- Status Management -->
+          <div class="item-actions">
+            <label class="action-label">Status</label>
+            <select 
+              [ngModel]="item.status" 
+              (ngModelChange)="updateStatus(order.id, item, $event)"
+              class="status-select"
+              [disabled]="order.status === 'CANCELLED'">
+              <option *ngFor="let status of orderStatuses" [value]="status">
+                {{ status }}
+              </option>
+            </select>
+          </div>
+          
+          <!-- Subtotal -->
+          <div class="item-subtotal">
+            <span class="label">Subtotal</span>
+            <span class="value">{{ item.subtotal | currency }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

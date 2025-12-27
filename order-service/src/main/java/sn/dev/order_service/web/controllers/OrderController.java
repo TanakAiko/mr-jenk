@@ -37,4 +37,11 @@ public interface OrderController {
     ResponseEntity<OrderResponseDto> updateItemStatus(@PathVariable String orderId,
                                                       @PathVariable String itemId,
                                                       @Valid @RequestBody UpdateOrderItemStatusRequestDto requestDto);
+
+    @GetMapping("/search")
+    ResponseEntity<List<OrderResponseDto>> searchOrders(@RequestParam String query);
+
+    @GetMapping("/seller/search")
+    @PreAuthorize("hasAuthority('SELLER')")
+    ResponseEntity<List<OrderResponseDto>> searchSellerOrders(@RequestParam String query);
 }

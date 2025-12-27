@@ -15,6 +15,12 @@
 
     <!-- User Actions -->
     <div class="navbar-actions desktop-nav">
+      <!-- Cart Button -->
+      <a *ngIf="isLoggedIn" routerLink="/cart" class="cart-btn">
+        <lucide-icon [img]="ShoppingCart" class="cart-icon"></lucide-icon>
+        <span class="cart-text">Cart</span>
+      </a>
+
       <ng-container *ngIf="isLoggedIn; else loginButton">
         <!-- User Profile Dropdown -->
         <div class="user-profile">
@@ -36,12 +42,22 @@
                 My Account
               </a>
 
+              <!-- My Orders Link -->
+              <a routerLink="/orders" class="dropdown-item" (click)="closeDropdown()">
+                <lucide-icon [img]="ShoppingBag" class="dropdown-icon"></lucide-icon>
+                My Orders
+              </a>
+
               <!-- Seller Specific Navigation -->
               <ng-container *ngIf="isSeller">
                 <div class="dropdown-divider"></div>
                 <a routerLink="/seller/my-products" class="dropdown-item" (click)="closeDropdown()">
                   <lucide-icon [img]="Package" class="dropdown-icon"></lucide-icon>
                   My Products
+                </a>
+                <a routerLink="/seller/orders" class="dropdown-item" (click)="closeDropdown()">
+                  <lucide-icon [img]="ClipboardList" class="dropdown-icon"></lucide-icon>
+                  Seller Orders
                 </a>
               </ng-container>
 
@@ -87,13 +103,31 @@
             <span>Products</span>
           </a>
 
+          <!-- Cart Link -->
+          <a routerLink="/cart"
+             routerLinkActive="active"
+             class="mobile-nav-link"
+             (click)="closeMobileMenu()">
+            <lucide-icon [img]="ShoppingCart" class="nav-icon"></lucide-icon>
+            <span>Cart</span>
+          </a>
+
           <!-- My Account Link -->
-          <a routerLink="/my-account"
+          <a routerLink="/seller/my-account"
              routerLinkActive="active"
              class="mobile-nav-link"
              (click)="closeMobileMenu()">
             <lucide-icon [img]="User" class="nav-icon"></lucide-icon>
             <span>My Account</span>
+          </a>
+
+          <!-- My Orders Link -->
+          <a routerLink="/orders"
+             routerLinkActive="active"
+             class="mobile-nav-link"
+             (click)="closeMobileMenu()">
+            <lucide-icon [img]="ShoppingBag" class="nav-icon"></lucide-icon>
+            <span>My Orders</span>
           </a>
 
           <!-- Seller Specific Navigation in Mobile -->
@@ -104,6 +138,13 @@
                (click)="navigateToMyProducts()">
               <lucide-icon [img]="Package" class="nav-icon"></lucide-icon>
               <span>My Products</span>
+            </a>
+            <a routerLink="/seller/orders"
+               routerLinkActive="active"
+               class="mobile-nav-link"
+               (click)="closeMobileMenu()">
+              <lucide-icon [img]="ClipboardList" class="nav-icon"></lucide-icon>
+              <span>Seller Orders</span>
             </a>
           </ng-container>
 

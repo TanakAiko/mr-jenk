@@ -15,7 +15,13 @@ public interface ProductService {
 
     List<Product> getAll();
 
+    List<Product> search(String query);
+
     void delete(Product product);
 
     void deleteByUserId(String userId);
+
+    void reduceQuantity(String id, int quantity);
+
+    void restoreQuantity(String id, int quantity);
 }

@@ -4,11 +4,14 @@ import { ProductListingComponent } from "./features/products/components/product-
 import { authGuard } from "./auth/guards/auth.guard";
 import { sellerGuard } from "./auth/guards/seller.guard";
 import { ProductDetailsComponent } from "./features/products/components/product-details/product-details.component";
+import { CartPageComponent } from "./features/cart/components/cart-page/cart-page.component";
 import { MyProductsComponent } from "./features/seller/components/my-products/my-products.component";
 import { CreateProductComponent } from "./features/seller/components/create-product/create-product.component";
 import { EditProductComponent } from "./features/seller/components/edit-product/edit-product.component";
 import { MyAccountComponent } from "./features/seller/components/my-account/my-account.component";
 import { NotFoundComponent } from "./shared/components/not-found/not-found.component";
+import { OrderListComponent } from "./features/orders/components/order-list/order-list.component";
+import { SellerOrdersComponent } from "./features/seller/components/seller-orders/seller-orders.component";
 
 export const routes: Routes = [
   { path: "auth", component: SignComponent },
@@ -22,13 +25,17 @@ export const routes: Routes = [
     component: ProductDetailsComponent,
     // Allow guest access to product details
   },
-  // TODO: Create cart and orders components later
-  // {
-  //   path: "cart",
-  //   loadComponent: () =>
-  //     import("./features/cart/cart.component").then((m) => m.CartComponent),
-  //   canActivate: [authGuard], // Only logged-in users
-  // },
+  {
+    path: "cart",
+    component: CartPageComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: "orders",
+    component: OrderListComponent,
+    canActivate: [authGuard],
+  },
+  // TODO: Create orders components later
   // {
   //   path: "orders",
   //   loadComponent: () =>
@@ -51,6 +58,11 @@ export const routes: Routes = [
   {
     path: "seller/edit-product/:id",
     component: EditProductComponent,
+    canActivate: [sellerGuard], // Only sellers
+  },
+  {
+    path: "seller/orders",
+    component: SellerOrdersComponent,
     canActivate: [sellerGuard], // Only sellers
   },
   {
