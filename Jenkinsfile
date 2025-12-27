@@ -4,13 +4,7 @@ import groovy.transform.Field
 @Field String LAST_SUCCESSFUL_TAG = ''
 
 pipeline {
-    agent {
-        docker { 
-            // This image comes pre-packaged with Chrome Headless and Angular CLI
-            image 'trion/ng-cli-karma:latest' 
-            args '-u root' 
-        }
-    }
+    agent any
 
     tools {
         nodejs 'NodeJS'
@@ -23,6 +17,7 @@ pipeline {
     environment {
         CONFIG_REPO_URI = 'https://github.com/TanakAiko/config-buy-01.git'
         ROLLBACK_FILE = '.last_successful_build' // File to persist last successful build info
+        CHROME_BIN = '/usr/bin/chromium-browser'
     }
 
     stages {
