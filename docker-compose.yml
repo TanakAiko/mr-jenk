@@ -137,6 +137,8 @@ services:
     environment:
       - EUREKA_URL=http://eureka-server:8761/eureka
       - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
+      - DOCKER_MEDIA_SERVICE_URL=http://media-service:8083/api/media
+      - DOCKER_PRODUCT_SERVICE_URL=http://product-service:8082/api/products
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
       interval: 10s
@@ -148,6 +150,10 @@ services:
       config-service:
         condition: service_healthy
       api-gateway:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+      media-service:
         condition: service_healthy
 
   frontend:
