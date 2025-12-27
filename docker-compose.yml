@@ -18,14 +18,14 @@ services:
       context: ./config-service
       dockerfile: Dockerfile
     ports:
-      - "8888:8888"
+      - "9888:9888"
     environment:
       - EUREKA_URL=http://eureka-server:9761/eureka
       - CONFIG_REPO_URI=${CONFIG_REPO_URI}
       - CONFIG_REPO_USERNAME=${CONFIG_REPO_USERNAME}
       - CONFIG_REPO_PASSWORD=${CONFIG_REPO_PASSWORD}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9888/actuator/health"]
       interval: 10s
       retries: 5
       start_period: 5s
@@ -43,7 +43,7 @@ services:
       - "8090:8090"
     environment:
       - EUREKA_URL=http://eureka-server:9761/eureka
-      - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
+      - DOCKER_CONFIG_SERVICE_URL=http://config-service:9888
     healthcheck:
       test: ["CMD", "curl", "-k", "-f", "https://localhost:8090/actuator/health"]
       interval: 10s
@@ -64,7 +64,7 @@ services:
       - "8082:8082"
     environment:
       - EUREKA_URL=http://eureka-server:9761/eureka
-      - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
+      - DOCKER_CONFIG_SERVICE_URL=http://config-service:9888
       - DOCKER_MEDIA_SERVICE_URL=http://media-service:8083/api/media
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
@@ -90,7 +90,7 @@ services:
       - "8081:8081"
     environment:
       - EUREKA_URL=http://eureka-server:9761/eureka
-      - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
+      - DOCKER_CONFIG_SERVICE_URL=http://config-service:9888
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
       interval: 10s
@@ -113,7 +113,7 @@ services:
       - "8083:8083"
     environment:
       - EUREKA_URL=http://eureka-server:9761/eureka
-      - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
+      - DOCKER_CONFIG_SERVICE_URL=http://config-service:9888
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
       interval: 10s
@@ -136,7 +136,7 @@ services:
       - "8084:8084"
     environment:
       - EUREKA_URL=http://eureka-server:9761/eureka
-      - DOCKER_CONFIG_SERVICE_URL=http://config-service:8888
+      - DOCKER_CONFIG_SERVICE_URL=http://config-service:9888
       - DOCKER_MEDIA_SERVICE_URL=http://media-service:8083/api/media
       - DOCKER_PRODUCT_SERVICE_URL=http://product-service:8082/api/products
     healthcheck:

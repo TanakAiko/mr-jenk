@@ -40,7 +40,7 @@ flowchart TB
     end
     
     subgraph Config["⚙️ Configuration"]
-        CONFIGSVC["Config Service<br/>Port 8888<br/>Spring Cloud Config"]
+        CONFIGSVC["Config Service<br/>Port 9888<br/>Spring Cloud Config"]
     end
     
     subgraph Services["🔧 Microservices"]
@@ -96,7 +96,7 @@ This project implements a microservices architecture with the following componen
 
 ### Backend Services
 - **API Gateway** (Port 8090) - Entry point for all client requests
-- **Config Service** (Port 8888) - Centralized configuration management
+- **Config Service** (Port 9888) - Centralized configuration management
 - **Discovery Service** (Port 9761) - Eureka service registry
 - **User Service** (Port 8081) - User authentication and management
 - **Product Service** (Port 8082) - Product catalog management
@@ -302,7 +302,7 @@ docker compose ps
 - **Frontend**: http://localhost:4400 or https://localhost:8443
 - **API Gateway**: http://localhost:8090
 - **Eureka Dashboard**: http://localhost:9761
-- **Config Service**: http://localhost:8888
+- **Config Service**: http://localhost:9888
 
 ## 🔧 Development Setup
 
@@ -443,7 +443,7 @@ The pipeline automatically sends professional HTML email notifications:
 | Service | Port | Health Check |
 |---------|------|--------------|
 | eureka-server | 9761 | `/actuator/health` |
-| config-service | 8888 | `/actuator/health` |
+| config-service | 9888 | `/actuator/health` |
 | api-gateway | 8090 | `/actuator/health` |
 | user-service | 8081 | `/actuator/health` |
 | product-service | 8082 | `/actuator/health` |
