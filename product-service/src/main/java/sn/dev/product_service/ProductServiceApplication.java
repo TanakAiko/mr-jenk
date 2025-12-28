@@ -24,15 +24,4 @@ public class ProductServiceApplication {
 		SpringApplication.run(ProductServiceApplication.class, args);
 	}
 
-	@Bean
-	CommandLineRunner initData(MongoTemplate mongoTemplate) {
-		return args -> {
-			// Migration: Set version to 0 for documents that don't have it
-			Query query = new Query();
-			query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where("version").exists(false));
-			Update update = new Update().set("version", 0L);
-			mongoTemplate.updateMulti(query, update, Product.class);
-		};
-	}
-
 }
