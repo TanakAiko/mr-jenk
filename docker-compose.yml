@@ -103,6 +103,8 @@ services:
         condition: service_healthy
       api-gateway:
         condition: service_healthy
+      media-service:
+        condition: service_healthy
 
   media-service:
     image: media-service
