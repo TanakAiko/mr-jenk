@@ -436,9 +436,9 @@ pipeline {
                 echo '================================================'
                 
                 // ALWAYS stop any running containers first to avoid conflicts
-                // echo '🛑 Stopping any running containers...'
-                // sh 'docker compose down || true'
-                // echo '================================================'
+                echo '🛑 Stopping any running containers...'
+                sh 'docker compose down || true'
+                echo '================================================'
                 
                 // Attempt automatic rollback if we have a previous successful build
                 if (LAST_SUCCESSFUL_TAG && LAST_SUCCESSFUL_TAG != '' && LAST_SUCCESSFUL_TAG != 'null') {
