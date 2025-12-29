@@ -120,13 +120,11 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:9083/actuator/health"]
       interval: 10s
       retries: 5
-      start_period: 5s
+      start_period: 60s
     depends_on:
       eureka-server:
         condition: service_healthy
       config-service:
-        condition: service_healthy
-      api-gateway:
         condition: service_healthy
 
   order-service:
