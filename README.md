@@ -299,7 +299,7 @@ docker compose ps
 ```
 
 ### 4. Access the Application
-- **Frontend**: http://localhost:4400 or https://localhost:8443
+- **Frontend**: http://localhost:4400 or https://localhost:8444
 - **API Gateway**: http://localhost:8090
 - **Eureka Dashboard**: http://localhost:9761
 - **Config Service**: http://localhost:9888

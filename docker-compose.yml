@@ -163,7 +163,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4400:80"
-      - "8443:443"
+      - "8444:443"
     depends_on:
       eureka-server:
         condition: service_healthy
