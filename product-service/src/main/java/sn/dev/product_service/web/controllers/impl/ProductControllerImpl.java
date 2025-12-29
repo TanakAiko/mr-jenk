@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import sn.dev.product_service.web.dto.ProductUpdateDTO;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class ProductControllerImpl implements ProductController {
 
     private final ProductService productService;
@@ -74,7 +76,7 @@ public class ProductControllerImpl implements ProductController {
                         mediaServiceClient.getByProductId(product.getId()).getBody()
                     ).orElseGet(List::of);
                 } catch (Exception e) {
-                    System.err.println("Error fetching media for product " + product.getId() + ": " + e.getMessage());
+                    log.error("Error fetching media for product {}: {}", product.getId(), e.getMessage());
                 }
                 return new ProductResponseDTO(product, medias);
             })
