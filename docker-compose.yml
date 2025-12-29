@@ -10,7 +10,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:9761/actuator/health"]
       interval: 10s
       retries: 5
-      start_period: 5s
+      start_period: 20s
 
   config-service:
     image: config-service
@@ -28,7 +28,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:9888/actuator/health"]
       interval: 10s
       retries: 5
-      start_period: 5s
+      start_period: 20s
 
     depends_on:
        eureka-server:
@@ -48,7 +48,7 @@ services:
       test: ["CMD", "curl", "-k", "-f", "https://localhost:8090/actuator/health"]
       interval: 10s
       retries: 5
-      start_period: 5s
+      start_period: 20s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -70,7 +70,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:9082/actuator/health"]
       interval: 10s
       retries: 5
-      start_period: 5s
+      start_period: 20s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -95,7 +95,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:9081/actuator/health"]
       interval: 10s
       retries: 5
-      start_period: 5s
+      start_period: 20s
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -143,7 +143,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:9084/actuator/health"]
       interval: 10s
       retries: 5
-      start_period: 5s
+      start_period: 20s
     depends_on:
       eureka-server:
         condition: service_healthy

@@ -68,9 +68,14 @@ public class ProductControllerImpl implements ProductController {
         List<ProductResponseDTO> responseList = products
             .stream()
             .map(product -> {
-                List<Media> medias = Optional.ofNullable(
-                    mediaServiceClient.getByProductId(product.getId()).getBody()
-                ).orElseGet(List::of);
+                List<Media> medias = List.of();
+                try {
+                    medias = Optional.ofNullable(
+                        mediaServiceClient.getByProductId(product.getId()).getBody()
+                    ).orElseGet(List::of);
+                } catch (Exception e) {
+                    System.err.println("Error fetching media for product " + product.getId() + ": " + e.getMessage());
+                }
                 return new ProductResponseDTO(product, medias);
             })
             .toList();
