@@ -42,6 +42,7 @@ services:
     ports:
       - "8090:8090"
     environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:9761/eureka
       - EUREKA_URL=http://eureka-server:9761/eureka
       - DOCKER_CONFIG_SERVICE_URL=http://config-service:9888
     healthcheck:
