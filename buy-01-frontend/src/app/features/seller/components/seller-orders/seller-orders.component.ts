@@ -23,8 +23,8 @@ export class SellerOrdersComponent implements OnInit {
   readonly orderStatuses = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
   constructor(
-    private orderService: OrderService,
-    private toastService: ToastService
+    private readonly orderService: OrderService,
+    private readonly toastService: ToastService
   ) { }
 
   ngOnInit(): void {
