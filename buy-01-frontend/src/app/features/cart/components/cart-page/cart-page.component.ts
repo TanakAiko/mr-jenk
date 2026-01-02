@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { OrderService } from '../../../orders/services/order.service';
+import { ToastService } from '../../../../shared/services/toast.service';
 import { CartItemModel } from '../../models/cart-item.model';
 import { Observable } from 'rxjs';
 import { LucideAngularModule, Trash2, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-angular';
@@ -17,6 +18,7 @@ import { LucideAngularModule, Trash2, Minus, Plus, ShoppingBag, ArrowRight } fro
 export class CartPageComponent {
   private cartService = inject(CartService);
   private orderService = inject(OrderService);
+  private toastService = inject(ToastService);
   private router = inject(Router);
   
   cartItems$: Observable<CartItemModel[]> = this.cartService.cartItems$;
@@ -61,7 +63,7 @@ export class CartPageComponent {
       },
       error: (err) => {
         console.error('Checkout failed', err);
-        alert('Checkout failed. Please try again.');
+        this.toastService.error('Checkout Failed', 'Please try again.');
       }
     });
   }

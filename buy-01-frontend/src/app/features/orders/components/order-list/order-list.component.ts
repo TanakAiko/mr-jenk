@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OrderService } from '../../services/order.service';
+import { ToastService } from '../../../../shared/services/toast.service';
 import { Order } from '../../models/order.model';
 import { Observable, Subject } from 'rxjs';
 import { Router } from '@angular/router';
@@ -16,6 +17,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 })
 export class OrderListComponent implements OnInit {
   private orderService = inject(OrderService);
+  private toastService = inject(ToastService);
   private router = inject(Router);
   orders$: Observable<Order[]> | undefined;
   searchTerm: string = '';
@@ -73,10 +75,11 @@ export class OrderListComponent implements OnInit {
         next: () => {
           // Refresh orders
           this.orders$ = this.orderService.getOrders();
+          this.toastService.success('Order Cancelled', 'Your order has been cancelled successfully.');
         },
         error: (err) => {
           console.error('Error cancelling order', err);
-          alert('Failed to cancel order');
+          this.toastService.error('Cancellation Failed', 'Failed to cancel order. Please try again.');
         }
       });
     }
@@ -87,10 +90,11 @@ export class OrderListComponent implements OnInit {
       this.orderService.reorder(orderId).subscribe({
         next: () => {
           this.router.navigate(['/cart']);
+          this.toastService.success('Items Added', 'Items have been added to your cart.');
         },
         error: (err) => {
           console.error('Error reordering', err);
-          alert('Failed to reorder items');
+          this.toastService.error('Reorder Failed', 'Failed to reorder items. Please try again.');
         }
       });
     }
