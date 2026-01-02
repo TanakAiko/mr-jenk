@@ -16,9 +16,9 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   styleUrl: './order-list.component.css'
 })
 export class OrderListComponent implements OnInit {
-  private orderService = inject(OrderService);
-  private toastService = inject(ToastService);
-  private router = inject(Router);
+  private readonly orderService = inject(OrderService);
+  private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
   orders$: Observable<Order[]> | undefined;
   searchTerm: string = '';
   private searchSubject = new Subject<string>();

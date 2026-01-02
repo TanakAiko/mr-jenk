@@ -26,12 +26,12 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   errorType: "not-found" | "server-error" | "network-error" = "server-error";
   private routeSubscription: Subscription | null = null;
 
-  private productService = inject(ProductService);
-  private activatedRoute = inject(ActivatedRoute);
-  private authService = inject(AuthService);
-  private location = inject(Location);
-  private cartService = inject(CartService);
-  private toastService = inject(ToastService);
+  private readonly productService = inject(ProductService);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly authService = inject(AuthService);
+  private readonly location = inject(Location);
+  private readonly cartService = inject(CartService);
+  private readonly toastService = inject(ToastService);
 
   ngOnInit(): void {
     // Subscribe to route parameter changes

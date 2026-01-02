@@ -16,10 +16,10 @@ import { LucideAngularModule, Trash2, Minus, Plus, ShoppingBag, ArrowRight } fro
   styleUrl: './cart-page.component.css'
 })
 export class CartPageComponent {
-  private cartService = inject(CartService);
-  private orderService = inject(OrderService);
-  private toastService = inject(ToastService);
-  private router = inject(Router);
+  private readonly cartService = inject(CartService);
+  private readonly orderService = inject(OrderService);
+  private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
   
   cartItems$: Observable<CartItemModel[]> = this.cartService.cartItems$;
   
