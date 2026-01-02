@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrderService } from '../../../orders/services/order.service';
+import { ToastService } from '../../../../shared/services/toast.service';
 import { Order, OrderItem } from '../../../orders/models/order.model';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
@@ -21,7 +22,10 @@ export class SellerOrdersComponent implements OnInit {
   
   readonly orderStatuses = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
-  constructor(private orderService: OrderService) {}
+  constructor(
+    private orderService: OrderService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.loadOrders();
@@ -86,10 +90,11 @@ export class SellerOrdersComponent implements OnInit {
         if (index !== -1) {
           this.orders[index] = updatedOrder;
         }
+        this.toastService.success('Status Updated', `Order item status updated to ${newStatus}`);
       },
       error: (err) => {
         console.error('Error updating status', err);
-        alert('Failed to update status');
+        this.toastService.error('Update Failed', 'Failed to update status. Please try again.');
         // Revert the status in UI if needed, but since we bind to the item.status, 
         // and we only update on success or if we used two-way binding we might need to reset.
         // For now, we'll just reload orders to be safe or handle it better.

@@ -5,6 +5,7 @@ import { ProductService } from "../../services/product.service";
 import { ProductModels } from "../../models/product.models";
 import { AuthService } from "../../../../auth/services/auth.service";
 import { CartService } from "../../../cart/services/cart.service";
+import { ToastService } from "../../../../shared/services/toast.service";
 import { Subscription } from "rxjs";
 
 @Component({
@@ -30,6 +31,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private location = inject(Location);
   private cartService = inject(CartService);
+  private toastService = inject(ToastService);
 
   ngOnInit(): void {
     // Subscribe to route parameter changes
@@ -216,8 +218,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   }
 
   private showSuccessMessage(message: string): void {
-    // Simple alert for now - you can replace with a toast notification
-    alert(message);
+    this.toastService.success('Success', message);
   }
 
   private handleError(error: any): void {
