@@ -19,13 +19,13 @@ export class SellerOrdersComponent implements OnInit {
   error: string | null = null;
   searchTerm: string = '';
   private searchSubject = new Subject<string>();
-  
+
   readonly orderStatuses = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
   constructor(
     private orderService: OrderService,
     private toastService: ToastService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadOrders();
@@ -98,7 +98,7 @@ export class SellerOrdersComponent implements OnInit {
         // Revert the status in UI if needed, but since we bind to the item.status, 
         // and we only update on success or if we used two-way binding we might need to reset.
         // For now, we'll just reload orders to be safe or handle it better.
-        this.loadOrders(); 
+        this.loadOrders();
       }
     });
   }
