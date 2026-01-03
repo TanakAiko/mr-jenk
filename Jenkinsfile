@@ -18,8 +18,10 @@ pipeline {
         CONFIG_REPO_URI = 'https://github.com/TanakAiko/config-buy-01.git'
         ROLLBACK_FILE = '.last_successful_build' // File to persist last successful build info
         CHROME_BIN = '/usr/bin/google-chrome'
+        DOCKER_REGISTRY = 'vps-77043236.vps.ovh.ca:8089'
+        NEXUS_CREDS_ID = 'nexus-creds'
     }
-
+ 
     stages {
         // Stage 0: Load Last Successful Build Info
         stage('Load Rollback Info') {

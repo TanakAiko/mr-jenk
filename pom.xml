@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>sn.dev</groupId>
+    <artifactId>buy02-master-parent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>api-gateway</module>
+        <module>config-service</module>
+        <module>discovery-service</module>
+        <module>media-service</module>
+        <module>order-service</module>
+        <module>product-service</module>
+        <module>user-service</module>
+    </modules>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <url>http://vps-77043236.vps.ovh.ca:7071/repository/buy02-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>http://vps-77043236.vps.ovh.ca:7071/repository/buy02-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>nexus</id>
+            <name>Nexus Group Repository</name>
+            <url>http://vps-77043236.vps.ovh.ca:7071/repository/buy02-group/</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>nexus</id>
+            <name>Nexus Group Repository</name>
+            <url>http://vps-77043236.vps.ovh.ca:7071/repository/buy02-group/</url>
+        </pluginRepository>
+    </pluginRepositories>
+</project>
