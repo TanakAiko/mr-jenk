@@ -110,7 +110,7 @@ This project implements a microservices architecture with the following componen
 - **MongoDB Atlas** - Database for all services
 - **Supabase** - Media file storage
 - **Docker** - Containerization
-- **Jenkins** - CI/CD pipeline
+- **Jenkins** - CI/CD pipeline (Integrated with Nexus Repository)
 
 ## 🚀 Features
 
@@ -374,7 +374,7 @@ The project includes a comprehensive Jenkins pipeline with automatic rollback an
 3. **SonarQube Analysis** - Code quality and security scanning
 4. **Quality Gate Check** - Verify code meets quality standards
 5. **Build Docker Images** - Build all microservices and frontend
-6. **Push** images to Docker Hub with version tags
+6. **Push** images to Nexus Repository with version tags
 7. **Deploy** the complete stack using Docker Compose
 8. **Save Build Reference** - Store successful build tag for rollback
 9. **Automatic Rollback** - Roll back to last successful version on failure
@@ -386,7 +386,7 @@ The project includes a comprehensive Jenkins pipeline with automatic rollback an
 - **Stage 2**: SonarQube code quality analysis
 - **Stage 2a**: Quality gate validation
 - **Stage 3**: Docker image building
-- **Stage 4**: Image pushing to Docker Hub
+- **Stage 4**: Image pushing to Nexus Repository
 - **Stage 5**: Application deployment
 - **Stage 6**: Save build reference for future rollback
 

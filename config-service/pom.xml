@@ -9,8 +9,8 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>sn.dev</groupId>
-	<artifactId>config-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+		<artifactId>config-service</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
 	<name>config-service</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>

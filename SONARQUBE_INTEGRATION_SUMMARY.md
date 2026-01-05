@@ -93,7 +93,7 @@ SonarQube has been successfully integrated into your Jenkins CI/CD pipeline for 
                       ↓
 ┌─────────────────────────────────────────────────┐
 │ Stage 4: Push Docker Images                    │
-│ └─ Push to Docker Hub with version tag         │
+│ └─ Push to Nexus Repository with version tag   │
 └─────────────────────────────────────────────────┘
                       ↓
 ┌─────────────────────────────────────────────────┐

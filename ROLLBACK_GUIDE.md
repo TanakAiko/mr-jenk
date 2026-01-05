@@ -56,7 +56,7 @@ Test → Build → Push → Deploy
 ```
 ❌ If any stage fails:
    1. Read LAST_SUCCESSFUL_TAG
-   2. Pull all images with that tag from Docker Hub
+   2. Pull all images with that tag from Nexus Repository
    3. Re-tag as latest
    4. Stop current deployment
    5. Deploy previous version
@@ -98,7 +98,7 @@ Build #44 (commit: def5678)
 ├─ Stages 1-3: Test → Build → Push
 │  └─ ✅ Successful
 ├─ Stage 4: Deploy
-│  └─ ❌ FAILED! (e.g., Docker Hub 500 error)
+│  └─ ❌ FAILED! (e.g., Nexus 500 error)
 └─ Post: Failure Block
    ├─ Detect LAST_SUCCESSFUL_TAG exists
    ├─ Pull images tagged "build-43-abc1234"
@@ -157,17 +157,11 @@ docker ps --format "table {{.Names}}\t{{.Image}}"
 docker inspect config-service | grep -oP '(?<=tanakaiko/config-service:)[^"]+' | head -1
 ```
 
-### Via Docker Hub
+### Via Nexus Repository
 
 ```bash
 # List all available tags
-curl -s "https://hub.docker.com/v2/repositories/tanakaiko/config-service/tags" | jq -r '.results[].name'
-
-# Output:
-# build-44-def5678
-# build-43-abc1234
-# build-42-54818bf
-# latest
+curl -u admin:password -s "http://vps-77043236.vps.ovh.ca:7071/v2/buy02-docker/tags/list"
 ```
 
 ---
@@ -191,14 +185,14 @@ If you need to manually rollback to a specific version:
 # 1. Set the target build tag
 TARGET_BUILD="build-42-54818bf"
 
-# 2. Login to Docker Hub
-echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+# 2. Login to Nexus
+echo $NEXUS_PASSWORD | docker login -u $NEXUS_USERNAME --password-stdin vps-77043236.vps.ovh.ca:7071
 
 # 3. Pull all service images with that tag
 for service in api-gateway config-service discovery-service media-service product-service user-service buy-01-frontend; do
     echo "Pulling $service:$TARGET_BUILD"
-    docker pull tanakaiko/$service:$TARGET_BUILD
-    docker tag tanakaiko/$service:$TARGET_BUILD $service:latest
+    docker pull vps-77043236.vps.ovh.ca:7071/$service:$TARGET_BUILD
+    docker tag vps-77043236.vps.ovh.ca:7071/$service:$TARGET_BUILD vps-77043236.vps.ovh.ca:7071/$service:latest
 done
 
 # 4. Redeploy
@@ -251,13 +245,12 @@ cat .last_successful_build
 git log --oneline -5
 ```
 
-### 2. **Tag Management in Docker Hub**
+### 2. **Tag Management in Nexus**
 ```bash
 # Keep at least the last 10 successful builds
 # Delete old tags periodically to save space
 
-# List all tags older than 30 days (manual cleanup)
-# Use Docker Hub UI or API to manage tags
+# Use Nexus UI or API to manage tags
 ```
 
 ### 3. **Testing Rollback**
@@ -301,17 +294,12 @@ echo "build-42-54818bf" > .last_successful_build
 
 ### Problem: Rollback fails - images not found
 
-**Cause:** Docker Hub images were deleted or never pushed
+**Cause:** Nexus images were deleted or never pushed
 
 **Solution:**
 ```bash
-# Check Docker Hub for available tags
-docker search tanakaiko/config-service
-
+# Check Nexus for available tags
 # Manually push a known good version
-docker pull config-service:latest  # if you have it locally
-docker tag config-service:latest tanakaiko/config-service:build-42-54818bf
-docker push tanakaiko/config-service:build-42-54818bf
 ```
 
 ### Problem: Rollback file corrupted
@@ -436,7 +424,7 @@ docker compose logs --tail=50
 ### Manual Rollback
 ```bash
 TARGET="build-42-54818bf"
-docker pull tanakaiko/config-service:$TARGET
+docker pull vps-77043236.vps.ovh.ca:7071/config-service:$TARGET
 docker compose down && docker compose up -d
 ```
 
@@ -447,7 +435,7 @@ docker compose down
 
 ### View All Available Versions
 ```bash
-docker images | grep tanakaiko
+docker images | grep vps-77043236.vps.ovh.ca:7071
 ```
 
 ---

@@ -83,6 +83,7 @@ pipeline {
             parallel {
                 stage('Test Frontend (Angular)') {
                     steps { dir('buy-01-frontend') { 
+                        sh 'npm config set registry http://vps-77043236.vps.ovh.ca:7071/repository/buy02-group/'
                         sh 'npm install'
                         sh 'npm run test:ci' 
                     } }
@@ -189,9 +190,9 @@ pipeline {
         stage('Push Docker Images') {
             steps {
                 echo '================================================'
-                echo '📤 STAGE 4: PUSHING DOCKER IMAGES TO DOCKER HUB'
+                echo '📤 STAGE 4: PUSHING DOCKER IMAGES TO NEXUS REPOSITORY'
                 echo '================================================'
-                echo 'Pushing Docker images to Docker Hub...'
+                echo 'Pushing Docker images to Nexus Repository...'
                 script {
                     def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'order-service', 'buy-01-frontend']
 
@@ -236,7 +237,7 @@ pipeline {
                 echo '================================================'
                 echo '🚀 STAGE 5: DEPLOYING APPLICATION'
                 echo '================================================'
-                echo 'Deploying the application stack from Docker Hub images...'
+                echo 'Deploying the application stack from Nexus Repository images...'
                 script {
                     def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'order-service', 'buy-01-frontend']
 
@@ -246,7 +247,7 @@ pipeline {
                     ]) {
                         sh "echo $NEXUS_PASSWORD | docker login -u $NEXUS_USERNAME --password-stdin ${DOCKER_REGISTRY}"
 
-                        // Pull all the images from Docker Hub using CURRENT_BUILD_TAG
+                        // Pull all the images from Nexus Repository using CURRENT_BUILD_TAG
                         echo 'Pulling Docker images from Nexus...'
                         services.each { service ->
                             def imageTag = "${DOCKER_REGISTRY}/${service}:${CURRENT_BUILD_TAG}"
