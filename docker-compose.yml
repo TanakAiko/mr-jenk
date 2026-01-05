@@ -1,6 +1,6 @@
 services:
   eureka-server:
-    image: discovery-service
+    image: ${DOCKER_REGISTRY}/discovery-service:latest
     build:
       context: ./discovery-service
       dockerfile: Dockerfile
@@ -13,7 +13,7 @@ services:
       start_period: 20s
 
   config-service:
-    image: config-service
+    image: ${DOCKER_REGISTRY}/config-service:latest
     build:
       context: ./config-service
       dockerfile: Dockerfile
@@ -35,7 +35,7 @@ services:
         condition: service_healthy
 
   api-gateway:
-    image: api-gateway
+    image: ${DOCKER_REGISTRY}/api-gateway:latest
     build:
       context: ./api-gateway
       dockerfile: Dockerfile
@@ -57,7 +57,7 @@ services:
         condition: service_healthy
 
   product-service:
-    image: product-service
+    image: ${DOCKER_REGISTRY}/product-service:latest
     build:
       context: ./product-service
       dockerfile: Dockerfile
@@ -83,7 +83,7 @@ services:
         condition: service_healthy
 
   user-service:
-    image: user-service
+    image: ${DOCKER_REGISTRY}/user-service:latest
     build:
       context: ./user-service
       dockerfile: Dockerfile
@@ -108,7 +108,7 @@ services:
         condition: service_healthy
 
   media-service:
-    image: media-service
+    image: ${DOCKER_REGISTRY}/media-service:latest
     build:
       context: ./media-service
       dockerfile: Dockerfile
@@ -129,7 +129,7 @@ services:
         condition: service_healthy
 
   order-service:
-    image: order-service
+    image: ${DOCKER_REGISTRY}/order-service:latest
     build:
       context: ./order-service
       dockerfile: Dockerfile
@@ -158,7 +158,7 @@ services:
         condition: service_healthy
 
   frontend:
-    image: buy-01-frontend
+    image: ${DOCKER_REGISTRY}/buy-01-frontend:latest
     build:
       context: ./buy-01-frontend
       dockerfile: Dockerfile
