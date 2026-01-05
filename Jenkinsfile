@@ -241,10 +241,10 @@ pipeline {
                     def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'order-service', 'buy-01-frontend']
 
                     withCredentials([
-                        usernamePassword(credentialsId: '${NEXUS_CREDS_ID}', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD'),
+                        usernamePassword(credentialsId: env.NEXUS_CREDS_ID, usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD'),
                         usernamePassword(credentialsId: 'github', usernameVariable: 'CONFIG_REPO_USERNAME', passwordVariable: 'CONFIG_REPO_PASSWORD')
                     ]) {
-                        sh "echo $NEXUS_PASSWORD | docker login -u $NEXUS_USERNAME --password-stdin"
+                        sh "echo $NEXUS_PASSWORD | docker login -u $NEXUS_USERNAME --password-stdin ${DOCKER_REGISTRY}"
 
                         // Pull all the images from Docker Hub using CURRENT_BUILD_TAG
                         echo 'Pulling Docker images from Nexus...'
@@ -461,19 +461,19 @@ pipeline {
                         def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'order-service', 'buy-01-frontend']
                         
                         withCredentials([
-                            usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD'),
+                            usernamePassword(credentialsId: env.NEXUS_CREDS_ID, usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD'),
                             usernamePassword(credentialsId: 'github', usernameVariable: 'CONFIG_REPO_USERNAME', passwordVariable: 'CONFIG_REPO_PASSWORD')
                         ]) {
-                            echo "🔐 Logging into Docker Hub..."
-                            sh "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin"
-                            
+                            echo "🔐 Logging into Nexus..."
+                            sh "echo $NEXUS_PASSWORD | docker login -u $NEXUS_USERNAME --password-stdin ${DOCKER_REGISTRY}"
+
                             echo '================================================'
                             echo "📥 PULLING LAST SUCCESSFUL IMAGES"
                             echo "   Tag: ${LAST_SUCCESSFUL_TAG}"
                             echo '================================================'
                             
                             services.each { service ->
-                                def imageTag = "${DOCKERHUB_USERNAME}/${service}:${LAST_SUCCESSFUL_TAG}"
+                                def imageTag = "${DOCKER_REGISTRY}/${service}:${LAST_SUCCESSFUL_TAG}"
                                 echo "📦 Pulling: ${imageTag}"
                                 sh "docker pull ${imageTag} || true"
                                 sh "docker tag ${imageTag} ${service}:latest || true"
@@ -486,7 +486,8 @@ pipeline {
                             withEnv([
                                 "CONFIG_REPO_URI=${env.CONFIG_REPO_URI}",
                                 "CONFIG_REPO_USERNAME=${CONFIG_REPO_USERNAME}",
-                                "CONFIG_REPO_PASSWORD=${CONFIG_REPO_PASSWORD}"
+                                "CONFIG_REPO_PASSWORD=${CONFIG_REPO_PASSWORD}",
+                                "DOCKER_REGISTRY=${DOCKER_REGISTRY}"
                             ]) {
                                 sh 'docker compose up -d --no-build --force-recreate --remove-orphans || true'
                             }
