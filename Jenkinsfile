@@ -120,7 +120,11 @@ pipeline {
                 }
 
                 stage('Test Order Service') {
-                    steps { dir('order-service') { sh 'mvn -B clean verify -U' } }
+                    steps { dir('order-service') { 
+                            configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
+                                sh "mvn -B clean verify -U -s $MAVEN_SETTINGS"
+                            }
+                        } }
                 }
             }
         }
