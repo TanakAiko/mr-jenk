@@ -12,7 +12,7 @@ pipeline {
         jdk 'Java 21'
     }
 
-    // Best practice: Define environment variables for the pipeline
+        // Best practice: Define environment variables for the pipeline
     // Jenkins can inject credentials securely into these variables
     environment {
         CONFIG_REPO_URI = 'https://github.com/TanakAiko/config-buy-01.git'
