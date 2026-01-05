@@ -90,31 +90,31 @@ pipeline {
                 }
 
                 stage('Test API Gateway') {
-                    steps { dir('api-gateway') { sh 'mvn -B clean verify' } }
+                    steps { dir('api-gateway') { sh 'mvn -B clean verify -U' } }
                 }
 
                 stage('Test Config Service') {
-                    steps { dir('config-service') { sh 'mvn -B clean verify' } }
+                    steps { dir('config-service') { sh 'mvn -B clean verify -U' } }
                 }
 
                 stage('Test Discovery Service') {
-                    steps { dir('discovery-service') { sh 'mvn -B clean verify' } }
+                    steps { dir('discovery-service') { sh 'mvn -B clean verify -U' } }
                 }
 
                 stage('Test Media Service') {
-                    steps { dir('media-service') { sh 'mvn -B clean verify' } }
+                    steps { dir('media-service') { sh 'mvn -B clean verify -U' } }
                 }
 
                 stage('Test Product Service') {
-                    steps { dir('product-service') { sh 'mvn -B clean verify' } }
+                    steps { dir('product-service') { sh 'mvn -B clean verify -U' } }
                 }
 
                 stage('Test User Service') {
-                    steps { dir('user-service') { sh 'mvn -B clean verify' } }
+                    steps { dir('user-service') { sh 'mvn -B clean verify -U' } }
                 }
 
                 stage('Test Order Service') {
-                    steps { dir('order-service') { sh 'mvn -B clean verify' } }
+                    steps { dir('order-service') { sh 'mvn -B clean verify -U' } }
                 }
             }
         }
