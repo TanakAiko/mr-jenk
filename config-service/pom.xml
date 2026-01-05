@@ -30,6 +30,14 @@
 		<java.version>21</java.version>
 		<spring-cloud.version>2025.0.0</spring-cloud.version>
 	</properties>
+	<repositories>
+		<repository>
+			<id>nexus</id>
+			<url>http://vps-77043236.vps.ovh.ca:7071/repository/buy02-group/</url>
+			<releases><enabled>true</enabled></releases>
+			<snapshots><enabled>true</enabled></snapshots>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -71,4 +79,14 @@
 		</plugins>
 	</build>
 
+	<distributionManagement>
+		<repository>
+			<id>nexus-releases</id>
+			<url>http://vps-77043236.vps.ovh.ca:7071/repository/buy02-releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus-snapshots</id>
+			<url>http://vps-77043236.vps.ovh.ca:7071/repository/buy02-snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 </project>

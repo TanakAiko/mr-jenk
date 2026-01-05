@@ -18,8 +18,10 @@ pipeline {
         CONFIG_REPO_URI = 'https://github.com/TanakAiko/config-buy-01.git'
         ROLLBACK_FILE = '.last_successful_build' // File to persist last successful build info
         CHROME_BIN = '/usr/bin/google-chrome'
+        DOCKER_REGISTRY = 'vps-77043236.vps.ovh.ca:8089'
+        NEXUS_CREDS_ID = 'nexus-creds'
     }
-
+ 
     stages {
         // Stage 0: Load Last Successful Build Info
         stage('Load Rollback Info') {
@@ -193,25 +195,33 @@ pipeline {
                 script {
                     def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'order-service', 'buy-01-frontend']
 
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                        sh "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin"
+                    // withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                    //     sh "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin"
 
-                        services.each { service ->
-                            def imageTag = "${DOCKERHUB_USERNAME}/${service}:${CURRENT_BUILD_TAG}"
-                            sh "docker tag ${service}:latest ${imageTag}"
+                    //     services.each { service ->
+                    //         def imageTag = "${DOCKERHUB_USERNAME}/${service}:${CURRENT_BUILD_TAG}"
+                    //         sh "docker tag ${service}:latest ${imageTag}"
                             
-                            // Retry push up to 3 times with exponential backoff
-                            retry(3) {
-                                try {
-                                    echo "Pushing ${imageTag}..."
-                                    sh "docker push ${imageTag}"
-                                    echo "✅ Successfully pushed ${imageTag}"
-                                } catch (Exception e) {
-                                    echo "⚠️ Failed to push ${imageTag}. Retrying..."
-                                    sleep(time: 10, unit: 'SECONDS')
-                                    throw e
-                                }
-                            }
+                    //         // Retry push up to 3 times with exponential backoff
+                    //         retry(3) {
+                    //             try {
+                    //                 echo "Pushing ${imageTag}..."
+                    //                 sh "docker push ${imageTag}"
+                    //                 echo "✅ Successfully pushed ${imageTag}"
+                    //             } catch (Exception e) {
+                    //                 echo "⚠️ Failed to push ${imageTag}. Retrying..."
+                    //                 sleep(time: 10, unit: 'SECONDS')
+                    //                 throw e
+                    //             }
+                    //         }
+                    //     }
+                    // }
+
+                    docker.withRegistry("http://${DOCKER_REGISTRY}", "${NEXUS_CREDS_ID}") {
+                        services.each { service ->
+                            def image = docker.build("${DOCKER_REGISTRY}/${service}:${CURRENT_BUILD_TAG}", "./${service}")
+                            image.push()
+                            image.push('latest')
                         }
                     }
                 }
@@ -231,18 +241,18 @@ pipeline {
                     def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'order-service', 'buy-01-frontend']
 
                     withCredentials([
-                        usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD'),
+                        usernamePassword(credentialsId: '${NEXUS_CREDS_ID}', usernameVariable: 'NEXUS_USERNAME', passwordVariable: 'NEXUS_PASSWORD'),
                         usernamePassword(credentialsId: 'github', usernameVariable: 'CONFIG_REPO_USERNAME', passwordVariable: 'CONFIG_REPO_PASSWORD')
                     ]) {
-                        sh "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin"
+                        sh "echo $NEXUS_PASSWORD | docker login -u $NEXUS_USERNAME --password-stdin"
 
                         // Pull all the images from Docker Hub using CURRENT_BUILD_TAG
-                        echo 'Pulling Docker images from Docker Hub...'
+                        echo 'Pulling Docker images from Nexus...'
                         services.each { service ->
-                            def imageTag = "${DOCKERHUB_USERNAME}/${service}:${CURRENT_BUILD_TAG}"
+                            def imageTag = "${DOCKER_REGISTRY}/${service}:${CURRENT_BUILD_TAG}"
                             sh "docker pull ${imageTag}"
                             // Re-tag the pulled image as latest for docker compose to use
-                            sh "docker tag ${imageTag} ${service}:latest"
+                            sh "docker tag ${imageTag} ${DOCKER_REGISTRY}/${service}:latest"
                         }
 
                         // Deploy using docker compose
@@ -257,7 +267,8 @@ pipeline {
                         withEnv([
                             "CONFIG_REPO_URI=${env.CONFIG_REPO_URI}",
                             "CONFIG_REPO_USERNAME=${CONFIG_REPO_USERNAME}",
-                            "CONFIG_REPO_PASSWORD=${CONFIG_REPO_PASSWORD}"
+                            "CONFIG_REPO_PASSWORD=${CONFIG_REPO_PASSWORD}",
+                            "DOCKER_REGISTRY=${DOCKER_REGISTRY}"
                         ]) {
                             sh '''
                                 # Bring up the services in detached mode.
