@@ -110,7 +110,11 @@ pipeline {
                 }
 
                 stage('Test User Service') {
-                    steps { dir('user-service') { sh 'mvn -B clean verify -U' } }
+                    steps { dir('user-service') { 
+                            // 1. Delete a specific common library from the local cache
+                            sh 'rm -rf ~/.m2/repository/org/springframework/boot/spring-boot-starter-data-mongodb'
+                            sh 'mvn -B clean verify -U' 
+                        } }
                 }
 
                 stage('Test Order Service') {
