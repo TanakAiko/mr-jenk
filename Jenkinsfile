@@ -90,23 +90,43 @@ pipeline {
                 }
 
                 stage('Test API Gateway') {
-                    steps { dir('api-gateway') { sh 'mvn -B clean verify -U' } }
+                    steps { dir('api-gateway') {
+                            configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
+                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
+                            }
+                        } }
                 }
 
                 stage('Test Config Service') {
-                    steps { dir('config-service') { sh 'mvn -B clean verify -U' } }
+                    steps { dir('config-service') {
+                            configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
+                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
+                            }
+                        } }
                 }
 
                 stage('Test Discovery Service') {
-                    steps { dir('discovery-service') { sh 'mvn -B clean verify -U' } }
+                    steps { dir('discovery-service') {
+                            configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
+                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
+                            }
+                        } }
                 }
 
                 stage('Test Media Service') {
-                    steps { dir('media-service') { sh 'mvn -B clean verify -U' } }
+                    steps { dir('media-service') {
+                            configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
+                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
+                            }
+                        } }
                 }
 
                 stage('Test Product Service') {
-                    steps { dir('product-service') { sh 'mvn -B clean verify -U' } }
+                    steps { dir('product-service') {
+                            configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
+                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
+                            }
+                        } }
                 }
 
                 stage('Test User Service') {
@@ -114,7 +134,7 @@ pipeline {
                             // 1. Delete a specific common library from the local cache
                             sh 'rm -rf ~/.m2/repository/org/springframework/boot/spring-boot-starter-data-mongodb'
                             configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
-                                sh "mvn -B clean verify -U -s $MAVEN_SETTINGS"
+                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
                             }
                         } }
                 }
@@ -122,7 +142,7 @@ pipeline {
                 stage('Test Order Service') {
                     steps { dir('order-service') { 
                             configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
-                                sh "mvn -B clean verify -U -s $MAVEN_SETTINGS"
+                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
                             }
                         } }
                 }
@@ -205,29 +225,6 @@ pipeline {
                 echo 'Pushing Docker images to Nexus Repository...'
                 script {
                     def services = ['api-gateway', 'config-service', 'discovery-service', 'media-service', 'product-service', 'user-service', 'order-service', 'buy-01-frontend']
-
-                    // withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                    //     sh "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin"
-
-                    //     services.each { service ->
-                    //         def imageTag = "${DOCKERHUB_USERNAME}/${service}:${CURRENT_BUILD_TAG}"
-                    //         sh "docker tag ${service}:latest ${imageTag}"
-                            
-                    //         // Retry push up to 3 times with exponential backoff
-                    //         retry(3) {
-                    //             try {
-                    //                 echo "Pushing ${imageTag}..."
-                    //                 sh "docker push ${imageTag}"
-                    //                 echo "✅ Successfully pushed ${imageTag}"
-                    //             } catch (Exception e) {
-                    //                 echo "⚠️ Failed to push ${imageTag}. Retrying..."
-                    //                 sleep(time: 10, unit: 'SECONDS')
-                    //                 throw e
-                    //             }
-                    //         }
-                    //     }
-                    // }
-
                     docker.withRegistry("http://${DOCKER_REGISTRY}", "${NEXUS_CREDS_ID}") {
                         services.each { service ->
                             def image = docker.build("${DOCKER_REGISTRY}/${service}:${CURRENT_BUILD_TAG}", "./${service}")
