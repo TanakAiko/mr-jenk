@@ -236,8 +236,6 @@ pipeline {
             }
         }
 
-        
-
         // Stage 5: Deploy the entire application using Docker Compose 🚀
         stage('Deploy Application') {
             steps {
