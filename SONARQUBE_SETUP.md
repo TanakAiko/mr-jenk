@@ -2,7 +2,9 @@
 
 ## 📋 Overview
 
-This guide will help you set up SonarQube code quality analysis for the Buy-01 E-Commerce Platform Jenkins pipeline.
+This guide details the setup for SonarQube code quality analysis in the Buy-01 E-Commerce Platform Jenkins pipeline. The pipeline currently executes a SonarQube scan for the entire monorepo using `sonar-scanner`.
+
+**Note:** The previous `sonar-project.properties` file has been removed. All SonarQube properties are now defined dynamically within the `Jenkinsfile` for better maintainability and centralization.
 
 ## 🐳 Running SonarQube with Docker
 
@@ -51,7 +53,7 @@ docker ps | grep sonarqube
 2. Scroll down to **SonarQube servers** section
 3. Click **Add SonarQube**
 4. Configure:
-   - **Name**: `SonarQube` (must match the name in Jenkinsfile)
+   - **Name**: `q1` (must match the name in Jenkinsfile)
    - **Server URL**: `http://localhost:9000` (or your SonarQube server URL)
    - **Server authentication token**: Add credentials (see Step 3)
 5. Click **Save**
@@ -84,38 +86,59 @@ docker ps | grep sonarqube
 ### Step 5: Update Jenkins SonarQube Configuration
 
 1. Go back to **Manage Jenkins** → **Configure System**
-2. In the **SonarQube servers** section
-3. Under **Server authentication token**, select the credential you just created (`sonarqube-token`)
+2. In the **SonarQube servers** section:
+   - Check usage of **Environment variables**.
+   - Ensure the server name matches what is used in the `Jenkinsfile` (currently configured as `'q1'`, update this in Jenkins or the Jenkinsfile if they differ. The guide assumes `SonarQube` or `q1`).
+3. Under **Server authentication token**, select the credential you just created (`sonarqube-token`).
 4. Click **Save**
 
-## 🔍 Install SonarQube Scanner (Optional - Auto-installed by Pipeline)
+## 🔍 Install SonarQube Scanner Tool
 
-The Jenkins pipeline automatically installs the SonarQube Scanner, but you can install it manually on the Jenkins server:
+The Jenkins pipeline uses the `SonarScanner` tool. This must be configured in Jenkins Global Tool Configuration.
 
-```bash
-# Download SonarQube Scanner
-cd /opt
-wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+1. Go to **Manage Jenkins** → **Tools**
+2. Scroll to "SonarQube Scanner"
+3. Name: `SonarScanner` (This exact name is referenced in the `Jenkinsfile`: `tool 'SonarScanner'`)
+4. Install automatically: Checked (from Maven Central or official site)
+5. Save.
 
-# Extract
-unzip sonar-scanner-cli-5.0.1.3006-linux.zip
+## 📊 Pipeline Configuration
 
-# Create symbolic link
-ln -s /opt/sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner /usr/local/bin/sonar-scanner
+The pipeline script (`Jenkinsfile`) manages the analysis. Here is how it is currently configured:
 
-# Verify installation
-sonar-scanner --version
+- **Monorepo Scan:** A single scan covers all microservices and the frontend.
+- **Properties:** Defined via command-line arguments in the `Jenkinsfile`.
+  - `sonar.projectKey=buy-01`
+  - `sonar.projectName=buy-01`
+  - `sonar.sources=api-gateway/src,user-service/src,...` (all service src folders)
+  - `sonar.java.binaries=...` (points to compiled classes in target/classes)
+  - `sonar.exclusions`: Filters out `node_modules`, `target` folders, and test specs.
+
+### Jenkinsfile Snippet
+
+```groovy
+stage('SonarQube Analysis') {
+    environment {
+        SCANNER_HOME = tool 'SonarScanner'
+    }
+    steps {
+        script {
+            withSonarQubeEnv('q1') { // Ensure your Jenkins server name is 'q1' or update this line
+                 sh """
+                    ${SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=buy-01 \
+                        -Dsonar.projectName=buy-01 \
+                        -Dsonar.projectBaseDir=. \
+                        -Dsonar.sources=api-gateway/src,user-service/src, ... \
+                        -Dsonar.java.binaries=... \
+                        -Dsonar.exclusions=node_modules/**,target/**,**/*Test.java
+                """
+            }
+            // Quality Gate check follows...
+        }
+    }
+}
 ```
-
-## 📊 Configure SonarQube Analysis
-
-The pipeline is already configured with `sonar-project.properties` which includes:
-
-- **Project Key**: `buy-01-ecommerce`
-- **Project Name**: Buy-01 E-Commerce Platform
-- **Source Directories**: All microservices and frontend
-- **Java Version**: 21
-- **Exclusions**: node_modules, target directories, test files
 
 ## 🚦 Quality Gate Configuration
 
@@ -145,16 +168,18 @@ SonarQube comes with a default quality gate called **"Sonar way"**. You can cust
 
 The Jenkins pipeline now includes:
 
-### Stage 2: SonarQube Analysis
-- Automatically installs SonarQube Scanner if not available
-- Runs code analysis on all services
-- Sends results to SonarQube server
+### Stage 2: SonarQube Analysis & Quality Gate
+This stage performs two key actions sequentially:
 
-### Stage 2a: Quality Gate Check
-- Waits for SonarQube to process the analysis
-- Checks if quality gate passed
-- Currently configured to **warn but continue** on failure
-- Can be configured to **fail the build** (see Jenkinsfile comments)
+1. **Analysis Scan**: 
+   - Uses the `SonarScanner` tool.
+   - Scans the entire codebase as a single project.
+   - Excludes test files and build artifacts.
+
+2. **Quality Gate Check**:
+   - Waits for SonarQube to process the analysis report.
+   - Checks if the project meets quality standards (the "Quality Gate").
+   - **Current Behavior**: The pipeline will **fail** if the Quality Gate fails (see `Jenkinsfile` logic).
 
 ## 🎯 Viewing Analysis Results
 
@@ -261,7 +286,7 @@ Add SonarQube badges to your README:
 **Solution**: 
 - Verify SonarQube is running: `docker ps | grep sonarqube`
 - Check Jenkins configuration has correct server URL
-- Ensure server name matches Jenkinsfile (`SonarQube`)
+- Ensure server name matches Jenkinsfile (Currently `'q1'` in Jenkinsfile).
 
 ### Issue: "Authentication failed"
 **Solution**:

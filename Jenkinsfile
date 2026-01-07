@@ -131,8 +131,6 @@ pipeline {
 
                 stage('Test User Service') {
                     steps { dir('user-service') { 
-                            // 1. Delete a specific common library from the local cache
-                            sh 'rm -rf ~/.m2/repository/org/springframework/boot/spring-boot-starter-data-mongodb'
                             configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
                                 sh "mvn -B clean deploy -s $MAVEN_SETTINGS"
                             }

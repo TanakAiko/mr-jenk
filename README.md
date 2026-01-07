@@ -5,12 +5,16 @@
   <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" />
   <img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
   <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=jenkins&logoColor=white" alt="Jenkins" />
+  <img src="https://img.shields.io/badge/Nexus-1B1C30?style=for-the-badge&logo=sonatype&logoColor=white" alt="Nexus" />
+  <img src="https://img.shields.io/badge/SonarQube-4E9BCD?style=for-the-badge&logo=sonarqube&logoColor=white" alt="SonarQube" />
+  <img src="https://img.shields.io/badge/Supabase-181818?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Java-21-orange?style=flat-square&logo=openjdk" alt="Java 21" />
   <img src="https://img.shields.io/badge/Spring_Boot-3.5.6-green?style=flat-square&logo=spring-boot" alt="Spring Boot 3.5.6" />
-  <img src="https://img.shields.io/badge/Angular-18+-red?style=flat-square&logo=angular" alt="Angular 18+" />
+  <img src="https://img.shields.io/badge/Angular-20+-red?style=flat-square&logo=angular" alt="Angular 20+" />
   <img src="https://img.shields.io/badge/SonarQube-Integrated-4E9BCD?style=flat-square&logo=sonarqube" alt="SonarQube" />
 </p>
 
@@ -26,31 +30,31 @@ A modern, full-stack e-commerce application built with **Spring Boot** microserv
 
 ```mermaid
 flowchart TB
-    subgraph Client["🖥️ Client Layer"]
+    subgraph Client ["🖥️ Client Layer"]
         WEB["🌐 Angular Frontend<br/>Port 4400/80/443"]
         MOBILE["📱 Mobile Apps<br/>(Future)"]
     end
     
-    subgraph Gateway["🚪 API Gateway Layer"]
+    subgraph Gateway ["🚪 API Gateway Layer"]
         APIGATE["API Gateway<br/>Port 8090<br/>Spring Cloud Gateway"]
     end
     
-    subgraph Discovery["🔍 Service Discovery"]
+    subgraph Discovery ["🔍 Service Discovery"]
         EUREKA["Eureka Server<br/>Port 9761<br/>Netflix Eureka"]
     end
     
-    subgraph Config["⚙️ Configuration"]
+    subgraph Config ["⚙️ Configuration"]
         CONFIGSVC["Config Service<br/>Port 9888<br/>Spring Cloud Config"]
     end
     
-    subgraph Services["🔧 Microservices"]
+    subgraph Services ["🔧 Microservices"]
         USER["👤 User Service<br/>Port 9081<br/>Authentication & Users"]
         PRODUCT["📦 Product Service<br/>Port 9082<br/>Product Catalog"]
         MEDIA["🖼️ Media Service<br/>Port 9083<br/>File Upload & Storage"]
         ORDER["🛒 Order Service<br/>Port 9084<br/>Order Management"]
     end
     
-    subgraph Data["💾 Data Layer"]
+    subgraph Data ["💾 Data Layer"]
         MONGO[("🍃 MongoDB Atlas<br/>Database")]
         SUPABASE[("☁️ Supabase<br/>File Storage")]
     end
@@ -79,11 +83,11 @@ flowchart TB
     ORDER --> MONGO
     MEDIA --> SUPABASE
     
-    classDef clientStyle fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef gatewayStyle fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef serviceStyle fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
-    classDef dataStyle fill:#e0f2f1,stroke:#004d40,stroke-width:2px
-    classDef configStyle fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef clientStyle fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:black
+    classDef gatewayStyle fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:black
+    classDef serviceStyle fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px,color:black
+    classDef dataStyle fill:#e0f2f1,stroke:#004d40,stroke-width:2px,color:black
+    classDef configStyle fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:black
     
     class WEB,MOBILE clientStyle
     class APIGATE gatewayStyle
@@ -232,15 +236,14 @@ You can store this URL in product or user documents (via product-service or user
 <p align="left">
   <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" />
   <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white" alt="Bootstrap" />
   <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3" />
   <img src="https://img.shields.io/badge/RxJS-B7178C?style=for-the-badge&logo=reactivex&logoColor=white" alt="RxJS" />
   <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5" />
 </p>
 
-- **Angular 18+** - Frontend framework
+- **Angular 20+** - Frontend framework
 - **TypeScript** - Programming language
-- **Bootstrap/CSS3** - Styling
+- **CSS3 (Custom Design System)** - Styling
 - **RxJS** - Reactive programming
 
 ### DevOps & Infrastructure
@@ -383,8 +386,7 @@ The project includes a comprehensive Jenkins pipeline with automatic rollback an
 ### Pipeline Stages
 - **Stage 0**: Load rollback information
 - **Stage 1**: Parallel testing (Maven + npm)
-- **Stage 2**: SonarQube code quality analysis
-- **Stage 2a**: Quality gate validation
+- **Stage 2**: SonarQube analysis & Quality Gate validation
 - **Stage 3**: Docker image building
 - **Stage 4**: Image pushing to Nexus Repository
 - **Stage 5**: Application deployment
@@ -408,6 +410,13 @@ The pipeline features automatic rollback on deployment failure:
 - 📝 **Detailed Logging**: Complete audit trail of all deployments
 
 **Rollback Guide**: See [ROLLBACK_GUIDE.md](./ROLLBACK_GUIDE.md) for rollback documentation.
+
+### Artifact Management (Nexus)
+The project relies on **Nexus Repository Manager** for secure artifact storage and dependency proxying:
+- 📦 **Docker Registry**: Private registry for all microservice images.
+- ☕ **Maven Proxy**: Caches and serves Java dependencies.
+
+**Setup Guide**: See [NEXUS_SETUP.md](./NEXUS_SETUP.md) for repository configuration and local setup.
 
 ### Email Notifications
 The pipeline automatically sends professional HTML email notifications:
@@ -449,7 +458,7 @@ The pipeline automatically sends professional HTML email notifications:
 | product-service | 9082 | `/actuator/health` |
 | media-service | 9083 | `/actuator/health` |
 | order-service | 9084 | `/actuator/health` |
-| frontend | 80, 443 | - |
+| frontend | 4400, 8444 | - |
 
 ## 🔍 Monitoring & Health Checks
 
