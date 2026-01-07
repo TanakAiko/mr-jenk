@@ -92,7 +92,7 @@ pipeline {
                 stage('Test API Gateway') {
                     steps { dir('api-gateway') {
                             configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
-                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
+                                sh "mvn -B clean deploy -s $MAVEN_SETTINGS"
                             }
                         } }
                 }
@@ -100,7 +100,7 @@ pipeline {
                 stage('Test Config Service') {
                     steps { dir('config-service') {
                             configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
-                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
+                                sh "mvn -B clean deploy -s $MAVEN_SETTINGS"
                             }
                         } }
                 }
@@ -108,7 +108,7 @@ pipeline {
                 stage('Test Discovery Service') {
                     steps { dir('discovery-service') {
                             configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
-                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
+                                sh "mvn -B clean deploy -s $MAVEN_SETTINGS"
                             }
                         } }
                 }
@@ -116,7 +116,7 @@ pipeline {
                 stage('Test Media Service') {
                     steps { dir('media-service') {
                             configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
-                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
+                                sh "mvn -B clean deploy -s $MAVEN_SETTINGS"
                             }
                         } }
                 }
@@ -124,7 +124,7 @@ pipeline {
                 stage('Test Product Service') {
                     steps { dir('product-service') {
                             configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
-                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
+                                sh "mvn -B clean deploy -s $MAVEN_SETTINGS"
                             }
                         } }
                 }
@@ -134,7 +134,7 @@ pipeline {
                             // 1. Delete a specific common library from the local cache
                             sh 'rm -rf ~/.m2/repository/org/springframework/boot/spring-boot-starter-data-mongodb'
                             configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
-                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
+                                sh "mvn -B clean deploy -s $MAVEN_SETTINGS"
                             }
                         } }
                 }
@@ -142,7 +142,7 @@ pipeline {
                 stage('Test Order Service') {
                     steps { dir('order-service') { 
                             configFileProvider([configFile(fileId: 'd21ef11b-084a-4cbc-893f-9ef091f90623', variable: 'MAVEN_SETTINGS')]) {
-                                sh "mvn -B clean verify -s $MAVEN_SETTINGS"
+                                sh "mvn -B clean deploy -s $MAVEN_SETTINGS"
                             }
                         } }
                 }
